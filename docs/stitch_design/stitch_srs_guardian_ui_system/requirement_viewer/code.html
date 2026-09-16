@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:18px;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "primary-fixed": "#d8e3fb",
+        "inverse-surface": "#213145",
+        "tertiary-container": "#35260c",
+        "tertiary": "#1e1200",
+        "surface-container-high": "#dce9ff",
+        "on-secondary": "#ffffff",
+        "on-secondary-fixed": "#0f0069",
+        "primary-container": "#1e293b",
+        "background": "#f8f9ff",
+        "on-secondary-fixed-variant": "#3323cc",
+        "surface-container-low": "#eff4ff",
+        "on-surface-variant": "#45474c",
+        "tertiary-fixed": "#fadfb8",
+        "outline-variant": "#c5c6cd",
+        "on-tertiary-container": "#a38c6a",
+        "surface-container-highest": "#d3e4fe",
+        "surface-dim": "#cbdbf5",
+        "on-primary-fixed-variant": "#3c475a",
+        "surface-container-lowest": "#ffffff",
+        "surface": "#f8f9ff",
+        "tertiary-fixed-dim": "#ddc39d",
+        "primary-fixed-dim": "#bcc7de",
+        "on-surface": "#0b1c30",
+        "on-error-container": "#93000a",
+        "secondary": "#4b41e1",
+        "on-error": "#ffffff",
+        "inverse-on-surface": "#eaf1ff",
+        "secondary-fixed": "#e2dfff",
+        "on-primary": "#ffffff",
+        "error": "#ba1a1a",
+        "surface-container": "#e5eeff",
+        "on-secondary-container": "#fffbff",
+        "surface-bright": "#f8f9ff",
+        "on-primary-fixed": "#111c2d",
+        "secondary-container": "#645efb",
+        "on-background": "#0b1c30",
+        "primary": "#091426",
+        "outline": "#75777d",
+        "secondary-fixed-dim": "#c3c0ff",
+        "surface-tint": "#545f73",
+        "on-primary-container": "#8590a6",
+        "inverse-primary": "#bcc7de",
+        "surface-variant": "#d3e4fe",
+        "on-tertiary-fixed": "#271902",
+        "on-tertiary-fixed-variant": "#564427",
+        "on-tertiary": "#ffffff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin": "1.5rem",
+        "space-xl": "2rem",
+        "space-xs": "0.25rem",
+        "space-md": "0.75rem",
+        "space-sm": "0.5rem",
+        "space-lg": "1.25rem",
+        "gutter": "1rem"
+      },
+      "fontFamily": {
+        "metric-display": ["Inter"],
+        "label-text": ["Inter"],
+        "body-compact": ["Inter"],
+        "headline-sm": ["Inter"],
+        "body-base": ["Inter"],
+        "code-base": ["JetBrains Mono"],
+        "label-caption": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "code-compact": ["JetBrains Mono"]
+      },
+      "fontSize": {
+        "metric-display": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "label-text": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "body-compact": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "body-base": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "code-base": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "label-caption": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+        "headline-lg": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "code-compact": ["11px", {"lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+      }
+    }
+  }
+}</script></head><body class="bg-surface font-body-base text-body-base text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-md border-b border-outline-variant/40 flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm overflow-hidden"><img alt="SRS Guardian Shield Logo" class="h-6 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><span class="font-headline-sm text-headline-sm text-on-surface truncate">SRS Guardian</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/60">v1.4</span></div><div class="p-space-sm border-b border-outline-variant/40"><div class="px-2 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:bg-surface-container"><div class="flex items-center gap-space-sm overflow-hidden"><span class="material-symbols-outlined text-outline text-[16px]">corporate_fare</span><div class="truncate"><p class="font-label-caption text-label-caption text-outline leading-none uppercase">Workspace</p><p class="font-label-text text-label-text text-on-surface truncate leading-tight mt-0.5">Acme Avionics / FlightControl-SRS</p></div></div><span class="material-symbols-outlined text-outline text-[16px]">unfold_more</span></div></div><nav class="flex flex-col gap-0.5 p-space-sm" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r"><a aria-current="page" class="flex items-center justify-between px-space-sm py-1.5 rounded-lg transition-colors bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r" data-path="dashboard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">dashboard</span><span class="font-body-compact text-body-compact">Dashboard</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documents" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">description</span><span class="font-body-compact text-body-compact">Documents</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/40">14</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="requirement-viewer" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">view_list</span><span class="font-body-compact text-body-compact">Requirement Viewer</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="analysis" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">rule</span><span class="font-body-compact text-body-compact">Analysis</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container border border-error/20">38</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ai-suggestions" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">smart_toy</span><span class="font-body-compact text-body-compact">AI Suggestions</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed border border-secondary/20">12</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="version-comparison" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">compare_arrows</span><span class="font-body-compact text-body-compact">Version Comparison</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reports" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">summarize</span><span class="font-body-compact text-body-compact">Reports</span></div></a></nav></div><div class="flex flex-col border-t border-outline-variant/40 p-space-sm gap-space-xs"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-compact text-body-compact">Settings</span></a><div class="flex items-center justify-between px-space-sm py-1 text-on-surface-variant"><a class="flex items-center gap-space-xs hover:text-on-surface text-label-caption font-label-caption" data-path="documentation" href="#"><span class="material-symbols-outlined text-[14px]">help</span><span>Docs &amp; Standards</span></a><span class="font-code-compact text-code-compact text-outline">⌘K</span></div><div class="mt-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between"><div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-secondary"></div><span class="font-code-compact text-code-compact text-on-surface-variant">ISO 29148 Engine</span></div><span class="font-code-compact text-code-compact text-outline">Online</span></div></div></aside><div class="pl-60"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest border-b border-outline-variant/40 z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-sm"><img alt="SRS Guardian Shield Logo" class="h-5 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><div class="flex items-center gap-1.5 text-label-text font-label-text text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">SRS Guardian</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Projects</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Avionics Suite</span><span class="text-outline">/</span><span class="text-on-surface font-headline-sm">Workspace</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm w-72 h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/60 focus-within:border-secondary transition-all"><span class="material-symbols-outlined text-outline text-[16px]">search</span><input class="w-full bg-transparent border-none outline-none text-body-compact font-body-compact text-on-surface placeholder:text-outline" placeholder="Search rules, requirements..." type="text"/><span class="font-code-compact text-code-compact px-1 py-0.5 rounded bg-surface-container-lowest text-outline border border-outline-variant/60">⌘K</span></div><div class="h-4 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-low text-label-caption font-label-caption text-on-surface-variant border border-outline-variant/40"><div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div><span>Sync idle</span></div><button aria-label="Notifications" class="relative p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-1.5 h-1.5 bg-secondary rounded-full"></span></button><button aria-label="Theme Switcher" class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">light_mode</span></button><div class="flex items-center gap-space-sm pl-1"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-text text-label-text text-on-surface leading-tight">Alex Chen</span><span class="font-label-caption text-label-caption text-outline leading-tight">Lead Architect</span></div></div></div></header><main class="w-full pt-12 min-h-screen bg-surface px-space-lg py-space-lg"><div class="flex flex-col w-full font-body-base text-on-surface">
+<!-- TOP HEADER / CONTROL STRIP (Integrated Document Breadcrumb + Search + Filters) -->
+<header class="w-full bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm mb-space-md">
+<!-- Top Row: Document Context & Global Search -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm px-space-md py-space-sm border-b border-outline-variant/30">
+<div class="flex items-center gap-space-md min-w-0">
+<!-- Document Picker Pill -->
+<div class="flex items-center gap-2 px-2.5 py-1 bg-surface-container-low rounded border border-outline-variant/50 hover:bg-surface-container cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-outline text-[16px]">description</span>
+<span class="font-code-base text-code-base font-semibold text-on-surface truncate max-w-xs">FMS-Core-System-v2.4.pdf</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-highest text-on-surface-variant font-medium">System SRS</span>
+<span class="material-symbols-outlined text-outline text-[15px]">expand_more</span>
+</div>
+<div class="hidden md:flex items-center gap-2 text-label-caption text-outline">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span>412 requirements</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-code-compact tabular-nums text-on-surface font-medium">Avg Score: 82/100</span>
+</div>
+</div>
+<!-- Search in Document -->
+<div class="flex items-center gap-space-sm flex-1 max-w-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[16px]">search</span>
+<input class="w-full h-8 pl-8 pr-12 text-body-compact bg-surface-container-low rounded border border-outline-variant/50 text-on-surface placeholder:text-outline focus:outline-none focus:border-secondary transition-colors" placeholder="Search in document (ID, text, ISO clauses)..." type="text"/>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 font-code-compact text-code-compact px-1 py-0.5 rounded bg-surface-container-lowest text-outline border border-outline-variant/60">⌘F</span>
+</div>
+<span class="font-code-compact text-code-compact text-outline whitespace-nowrap hidden lg:inline">1–8 of 412</span>
+</div>
+</div>
+<!-- Filter Bar Row: Criteria Selectors + Active Removable Chips -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs px-space-md py-space-xs bg-surface-container-lowest/70 text-body-compact">
+<div class="flex flex-wrap items-center gap-1.5">
+<!-- Filter Dropdown 1: Type -->
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="text-outline">Type:</span>
+<span class="font-semibold">Functional</span>
+<span class="material-symbols-outlined text-[14px] text-outline">arrow_drop_down</span>
+</button>
+<!-- Filter Dropdown 2: Score -->
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="text-outline">Score:</span>
+<span class="font-semibold">&lt; 80</span>
+<span class="material-symbols-outlined text-[14px] text-outline">arrow_drop_down</span>
+</button>
+<!-- Filter Dropdown 3: Issue Type -->
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="text-outline">Issue:</span>
+<span>All</span>
+<span class="material-symbols-outlined text-[14px] text-outline">arrow_drop_down</span>
+</button>
+<!-- Filter Dropdown 4: Review Status -->
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="text-outline">Status:</span>
+<span>Unreviewed (14)</span>
+<span class="material-symbols-outlined text-[14px] text-outline">arrow_drop_down</span>
+</button>
+<!-- Separator -->
+<div class="h-4 w-px bg-outline-variant/40 mx-1"></div>
+<!-- Active Filter Chips -->
+<span class="inline-flex items-center gap-1 h-6 px-2 rounded bg-surface-container text-label-caption font-label-caption text-on-surface border border-outline-variant/50">
+          Type: Functional
+          <button class="hover:text-error transition-colors text-outline">✕</button>
+</span>
+<span class="inline-flex items-center gap-1 h-6 px-2 rounded bg-error-container/30 text-label-caption font-label-caption text-on-error-container border border-error/20">
+          Score: &lt;80
+          <button class="hover:text-error transition-colors text-outline">✕</button>
+</span>
+<span class="inline-flex items-center gap-1 h-6 px-2 rounded bg-surface-container text-label-caption font-label-caption text-on-surface border border-outline-variant/50">
+          Has Issues: Yes
+          <button class="hover:text-error transition-colors text-outline">✕</button>
+</span>
+<button class="text-label-caption font-label-caption text-secondary hover:underline ml-1">Clear all</button>
+</div>
+<!-- Quick Triage Metric -->
+<div class="flex items-center gap-space-sm text-label-caption text-outline font-label-caption">
+<span>Sort:</span>
+<span class="text-on-surface font-medium">Score (Ascending)</span>
+<span class="material-symbols-outlined text-[14px] text-outline">sort</span>
+</div>
+</div>
+</header>
+<!-- SPLIT VIEW WORKSPACE (55% Left, 45% Right) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-start w-full">
+<!-- ========================================================= -->
+<!-- LEFT PANEL: REQUIREMENT LIST (~55% width -> 7 cols on XL) -->
+<!-- ========================================================= -->
+<div class="xl:col-span-7 flex flex-col bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm overflow-hidden">
+<!-- List Sticky Subheader / Column Descriptors -->
+<div class="grid grid-cols-12 items-center px-space-md py-2 bg-surface-container-low/70 border-b border-outline-variant/40 text-label-caption font-label-caption text-outline uppercase tracking-wider select-none sticky top-0 z-10">
+<div class="col-span-3 flex items-center gap-1 cursor-pointer hover:text-on-surface">
+<span>Requirement ID</span>
+<span class="material-symbols-outlined text-[13px]">swap_vert</span>
+</div>
+<div class="col-span-6">Statement &amp; Classification</div>
+<div class="col-span-3 text-right flex items-center justify-end gap-1 cursor-pointer hover:text-on-surface">
+<span>Score / Triage</span>
+<span class="material-symbols-outlined text-[13px] text-secondary">arrow_upward</span>
+</div>
+</div>
+<!-- Requirement Rows Container -->
+<div class="divide-y divide-outline-variant/30 flex flex-col">
+<!-- ROW 1 (SELECTED ITEM) -->
+<article class="grid grid-cols-12 p-space-md bg-surface-container-low/50 hover:bg-surface-container-low transition-colors cursor-pointer relative before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-secondary">
+<div class="col-span-3 flex flex-col items-start gap-1 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-code-compact text-code-compact font-semibold text-secondary tracking-tight">REQ-FMS-014</span>
+<span class="w-1.5 h-1.5 rounded-full bg-error" title="Critical Issues Present"></span>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-medium border border-outline-variant/50">Functional</span>
+<span class="font-code-compact text-[10px] text-outline">v2.4 • §5.2</span>
+</div>
+<div class="col-span-6 pr-3">
+<p class="font-body-compact text-body-compact text-on-surface line-clamp-2 leading-snug">
+              The autopilot shall <span class="bg-tertiary-fixed text-on-tertiary-fixed px-0.5 rounded font-medium">quickly</span> disengage <span class="bg-error-container text-on-error-container px-0.5 rounded font-medium">whenever unusual aircraft attitude rates</span> or excessive deflection occur.
+            </p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-error font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> 2 critical
+              </span>
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-on-tertiary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span> 1 medium
+              </span>
+<span class="font-label-caption text-[11px] text-outline">• ISO §5.2.4</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col items-end justify-between pl-1">
+<div class="flex items-center gap-1.5">
+<span class="font-code-base text-code-base font-semibold text-error tabular-nums">32<span class="text-outline text-label-caption font-normal">/100</span></span>
+</div>
+<!-- Score Meter -->
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden mt-1 max-w-[80px]">
+<div class="bg-error h-full rounded-full" style="width: 32%;"></div>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 mt-1.5 rounded bg-error-container/40 text-on-error-container border border-error/20 font-medium">Needs Review</span>
+</div>
+</article>
+<!-- ROW 2: REQ-FMS-015 -->
+<article class="grid grid-cols-12 p-space-md hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="col-span-3 flex flex-col items-start gap-1 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface tracking-tight">REQ-FMS-015</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary" title="Valid"></span>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">Functional</span>
+<span class="font-code-compact text-[10px] text-outline">v2.4 • §5.3</span>
+</div>
+<div class="col-span-6 pr-3">
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-2 leading-snug">
+              The flight management system shall compute estimated time of arrival (ETA) at all active waypoints using real-time atmospheric wind models.
+            </p>
+<div class="flex items-center gap-2 mt-1.5 text-label-caption text-outline">
+<span class="text-on-secondary-container bg-primary-container px-1 rounded font-code-compact text-[10px]">0 issues</span>
+<span>• Complete syntax</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col items-end justify-between pl-1">
+<div class="flex items-center gap-1.5">
+<span class="font-code-base text-code-base font-semibold text-on-surface tabular-nums">94<span class="text-outline text-label-caption font-normal">/100</span></span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden mt-1 max-w-[80px]">
+<div class="bg-secondary h-full rounded-full" style="width: 94%;"></div>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 mt-1.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">Reviewed</span>
+</div>
+</article>
+<!-- ROW 3: REQ-NAV-089 -->
+<article class="grid grid-cols-12 p-space-md hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="col-span-3 flex flex-col items-start gap-1 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface tracking-tight">REQ-NAV-089</span>
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">Non-Func</span>
+<span class="font-code-compact text-[10px] text-outline">v2.1 • §8.1</span>
+</div>
+<div class="col-span-6 pr-3">
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-2 leading-snug">
+              Navigation database update must complete in a <span class="bg-tertiary-fixed text-on-tertiary-fixed px-0.5 rounded">reasonable timeframe</span> without interruption of existing primary guidance display outputs.
+            </p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-error font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> 1 critical
+              </span>
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-on-tertiary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span> 2 medium
+              </span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col items-end justify-between pl-1">
+<div class="flex items-center gap-1.5">
+<span class="font-code-base text-code-base font-semibold text-error tabular-nums">38<span class="text-outline text-label-caption font-normal">/100</span></span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden mt-1 max-w-[80px]">
+<div class="bg-error h-full rounded-full" style="width: 38%;"></div>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 mt-1.5 rounded bg-error-container/40 text-on-error-container border border-error/20 font-medium">Needs Review</span>
+</div>
+</article>
+<!-- ROW 4: REQ-COMM-102 -->
+<article class="grid grid-cols-12 p-space-md hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="col-span-3 flex flex-col items-start gap-1 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface tracking-tight">REQ-COMM-102</span>
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">Functional</span>
+<span class="font-code-compact text-[10px] text-outline">v2.3 • §3.4</span>
+</div>
+<div class="col-span-6 pr-3">
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-2 leading-snug">
+              System <span class="bg-tertiary-fixed text-on-tertiary-fixed px-0.5 rounded">should ideally</span> support simultaneous dual link telemetry transmission across VHF and satcom with minimal latency degradation.
+            </p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-on-tertiary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span> 2 medium
+              </span>
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-outline">
+                1 low
+              </span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col items-end justify-between pl-1">
+<div class="flex items-center gap-1.5">
+<span class="font-code-base text-code-base font-semibold text-on-tertiary-container tabular-nums">44<span class="text-outline text-label-caption font-normal">/100</span></span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden mt-1 max-w-[80px]">
+<div class="bg-tertiary h-full rounded-full" style="width: 44%;"></div>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 mt-1.5 rounded bg-error-container/40 text-on-error-container border border-error/20 font-medium">Needs Review</span>
+</div>
+</article>
+<!-- ROW 5: REQ-SEC-031 -->
+<article class="grid grid-cols-12 p-space-md hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="col-span-3 flex flex-col items-start gap-1 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface tracking-tight">REQ-SEC-031</span>
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">Non-Func</span>
+<span class="font-code-compact text-[10px] text-outline">v1.9 • §12.2</span>
+</div>
+<div class="col-span-6 pr-3">
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-2 leading-snug">
+              Password length must be <span class="bg-error-container text-on-error-container px-0.5 rounded">at least 8 characters</span> and <span class="bg-error-container text-on-error-container px-0.5 rounded">exactly 6 numeric digits</span> for maintenance terminal authentication.
+            </p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-error font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> Contradiction defect
+              </span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col items-end justify-between pl-1">
+<div class="flex items-center gap-1.5">
+<span class="font-code-base text-code-base font-semibold text-error tabular-nums">46<span class="text-outline text-label-caption font-normal">/100</span></span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden mt-1 max-w-[80px]">
+<div class="bg-error h-full rounded-full" style="width: 46%;"></div>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 mt-1.5 rounded bg-error-container/40 text-on-error-container border border-error/20 font-medium">Needs Review</span>
+</div>
+</article>
+<!-- ROW 6: REQ-FMS-077 -->
+<article class="grid grid-cols-12 p-space-md hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="col-span-3 flex flex-col items-start gap-1 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface tracking-tight">REQ-FMS-077</span>
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">Functional</span>
+<span class="font-code-compact text-[10px] text-outline">v2.0 • §4.1</span>
+</div>
+<div class="col-span-6 pr-3">
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-2 leading-snug">
+              User interface shall be <span class="bg-tertiary-fixed text-on-tertiary-fixed px-0.5 rounded">user-friendly</span> and <span class="bg-tertiary-fixed text-on-tertiary-fixed px-0.5 rounded">responsive</span> under high workload crew operations.
+            </p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="inline-flex items-center gap-1 font-label-caption text-[11px] text-on-tertiary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span> 2 subjective adverbs
+              </span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col items-end justify-between pl-1">
+<div class="flex items-center gap-1.5">
+<span class="font-code-base text-code-base font-semibold text-on-tertiary-container tabular-nums">49<span class="text-outline text-label-caption font-normal">/100</span></span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden mt-1 max-w-[80px]">
+<div class="bg-tertiary h-full rounded-full" style="width: 49%;"></div>
+</div>
+<span class="font-code-compact text-[10px] px-1.5 py-0.5 mt-1.5 rounded bg-error-container/40 text-on-error-container border border-error/20 font-medium">Needs Review</span>
+</div>
+</article>
+</div>
+<!-- Pagination / List Footer -->
+<div class="flex items-center justify-between px-space-md py-2.5 bg-surface-container-low border-t border-outline-variant/40 text-label-caption font-label-caption text-outline">
+<span>Showing <strong class="text-on-surface font-semibold">6</strong> of <strong class="text-on-surface font-semibold">14</strong> filtered requirements • Page 1 of 3</span>
+<div class="flex items-center gap-1">
+<button class="h-6 w-6 flex items-center justify-center rounded border border-outline-variant/40 bg-surface-container-lowest text-outline opacity-50 cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[14px]">chevron_left</span>
+</button>
+<button class="h-6 w-6 flex items-center justify-center rounded border border-outline-variant/40 bg-surface-container-lowest text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ========================================================= -->
+<!-- RIGHT PANEL: DENSE INSPECTION WORKSPACE (~45% width -> 5 cols) -->
+<!-- ========================================================= -->
+<div class="xl:col-span-5 flex flex-col bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm p-space-md gap-space-md">
+<!-- SECTION 1: HEADER & QUALITY SCORE GAUGE -->
+<section class="flex flex-col gap-space-sm border-b border-outline-variant/30 pb-space-md">
+<div class="flex items-start justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-code-base text-code-base font-bold text-on-surface tracking-tight">REQ-FMS-014</h2>
+<button class="p-1 text-outline hover:text-on-surface rounded hover:bg-surface-container transition-colors" title="Copy Requirement ID">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+<div class="flex flex-wrap items-center gap-1.5 mt-1">
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container text-on-surface font-medium border border-outline-variant/40">Functional</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/40">ISO 29148: §5.2.4</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container/40 text-on-error-container border border-error/20">Unreviewed</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-1.5">
+<button class="h-8 px-2.5 rounded bg-primary text-on-primary font-label-text text-label-text hover:bg-primary-container border border-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span>
+<span>Mark Reviewed</span>
+</button>
+<button class="h-8 px-2 rounded bg-surface-container-lowest text-on-surface font-label-text text-label-text hover:bg-surface-container border border-outline-variant/60 transition-colors">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+</button>
+</div>
+</div>
+<!-- Overall Score Display Gauge -->
+<div class="flex items-center justify-between p-2.5 rounded bg-surface-container-low border border-outline-variant/40 mt-1">
+<div class="flex items-center gap-space-md">
+<div class="relative flex items-center justify-center w-12 h-12 bg-surface-container-lowest rounded border border-outline-variant/40">
+<span class="font-metric-display text-[20px] font-bold text-error tabular-nums leading-none">32</span>
+</div>
+<div>
+<p class="font-headline-sm text-headline-sm text-on-surface leading-tight">Poor Quality Specification</p>
+<p class="font-label-caption text-label-caption text-error font-medium">3 critical defects violate standard ISO 29148</p>
+</div>
+</div>
+<div class="flex flex-col items-end text-label-caption text-outline">
+<span>Threshold: ≥80/100</span>
+<span class="text-error font-code-compact tabular-nums">-48 delta</span>
+</div>
+</div>
+</section>
+<!-- SECTION 2: FULL TEXT WITH INLINE SPAN HIGHLIGHTS & SIMULATED POPOVER -->
+<section class="flex flex-col gap-1.5 relative">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Requirement Statement</span>
+<div class="relative p-space-md rounded bg-surface-container-low/40 border border-outline-variant/50 leading-relaxed font-body-base text-on-surface">
+          The autopilot shall 
+          
+          <!-- Term 'quickly' with tooltip attached -->
+<span class="relative inline-block">
+<mark class="bg-tertiary-fixed text-on-tertiary-fixed px-1 py-0.5 rounded border-b-2 border-tertiary font-medium cursor-help">quickly</mark>
+<!-- Active Popover Simulation -->
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-2.5 bg-surface-container-lowest rounded shadow-md border border-outline-variant/60 text-left z-20 pointer-events-none">
+<div class="flex items-center gap-1.5 text-tertiary font-headline-sm text-[12px] mb-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span>Subjective Adverb</span>
+</div>
+<p class="font-body-compact text-[11px] text-on-surface-variant leading-snug">
+                Violates <strong>ISO 29148 Testability</strong>. Term "quickly" is unverifiable without quantitative temporal latency bound.
+              </p>
+<p class="font-code-compact text-[11px] text-secondary mt-1.5 pt-1 border-t border-outline-variant/40">
+                Fix: Replace with ≤ 50 ms
+              </p>
+<!-- Popover stem/caret -->
+<div class="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-2 h-2 bg-surface-container-lowest border-r border-b border-outline-variant/60 rotate-45"></div>
+</div>
+</span> 
+          
+          disengage 
+          
+          <mark class="bg-error-container text-on-error-container px-1 py-0.5 rounded border-b-2 border-error font-medium cursor-help" title="Ambiguous condition: lacks angular rate parameters">
+            whenever unusual aircraft attitude rates
+          </mark> 
+          
+          or 
+          
+          <mark class="bg-tertiary-fixed text-on-tertiary-fixed px-1 py-0.5 rounded border-b-2 border-tertiary font-medium cursor-help" title="Unbounded threshold: deflection angle not specified">
+            excessive control surface deflection rates
+          </mark> 
+          
+          are detected by the primary AHRS.
+        </div>
+</section>
+<!-- SECTION 3: SHAP FEATURE ATTRIBUTION -->
+<section class="flex flex-col gap-2 border-t border-outline-variant/30 pt-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">account_tree</span>
+<span class="font-headline-sm text-[13px] text-on-surface">Classification Attribution (SHAP)</span>
+</div>
+<span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-medium">94.8% Functional</span>
+</div>
+<!-- Word Token Strip -->
+<div class="flex flex-wrap gap-1 p-2 rounded bg-surface-container-low border border-outline-variant/40 font-code-compact text-[11px]">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface">autopilot <strong class="text-secondary">+0.32</strong></span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface">disengage <strong class="text-secondary">+0.41</strong></span>
+<span class="px-1.5 py-0.5 rounded bg-error-container/60 text-on-error-container">quickly <strong>-0.19</strong></span>
+<span class="px-1.5 py-0.5 rounded bg-error-container/60 text-on-error-container">whenever <strong>-0.15</strong></span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface">control surface <strong class="text-secondary">+0.28</strong></span>
+</div>
+<!-- Diverging Bar Chart Minimal Graphic -->
+<div class="flex flex-col gap-1 text-[11px] font-code-compact pt-1">
+<!-- Item 1: Positive -->
+<div class="grid grid-cols-12 items-center gap-1">
+<span class="col-span-3 text-right text-outline truncate">disengage</span>
+<div class="col-span-9 flex items-center h-4 relative bg-surface-container-low rounded">
+<div class="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant"></div>
+<!-- Right bar -->
+<div class="h-3 bg-secondary/80 rounded-r absolute left-1/2" style="width: 41%;"></div>
+<span class="absolute left-[54%] text-[10px] text-on-surface font-semibold">+0.41</span>
+</div>
+</div>
+<!-- Item 2: Positive -->
+<div class="grid grid-cols-12 items-center gap-1">
+<span class="col-span-3 text-right text-outline truncate">autopilot</span>
+<div class="col-span-9 flex items-center h-4 relative bg-surface-container-low rounded">
+<div class="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant"></div>
+<div class="h-3 bg-secondary/70 rounded-r absolute left-1/2" style="width: 32%;"></div>
+<span class="absolute left-[45%] text-[10px] text-on-surface font-semibold">+0.32</span>
+</div>
+</div>
+<!-- Item 3: Negative -->
+<div class="grid grid-cols-12 items-center gap-1">
+<span class="col-span-3 text-right text-outline truncate">quickly</span>
+<div class="col-span-9 flex items-center h-4 relative bg-surface-container-low rounded">
+<div class="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant"></div>
+<!-- Left bar -->
+<div class="h-3 bg-error/70 rounded-l absolute right-1/2" style="width: 19%;"></div>
+<span class="absolute right-[53%] text-[10px] text-error font-semibold">-0.19</span>
+</div>
+</div>
+<!-- Item 4: Negative -->
+<div class="grid grid-cols-12 items-center gap-1">
+<span class="col-span-3 text-right text-outline truncate">unusual</span>
+<div class="col-span-9 flex items-center h-4 relative bg-surface-container-low rounded">
+<div class="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant"></div>
+<div class="h-3 bg-error/60 rounded-l absolute right-1/2" style="width: 14%;"></div>
+<span class="absolute right-[48%] text-[10px] text-error font-semibold">-0.14</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: WATERFALL DEDUCTION & SUB-SCORES -->
+<section class="flex flex-col gap-2 border-t border-outline-variant/30 pt-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-[13px] text-on-surface">Score Deductions (Waterfall)</span>
+<span class="font-code-compact text-code-compact text-outline">Base: 100 pts</span>
+</div>
+<!-- Linear Waterfall Trace -->
+<div class="p-2 rounded bg-surface-container-low border border-outline-variant/40 flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-[11px] font-code-compact">
+<span class="text-outline">Base Standard Score</span>
+<span class="font-bold text-on-surface tabular-nums">100</span>
+</div>
+<div class="flex items-center justify-between text-[11px] font-code-compact text-error">
+<span>↳ Subjective term ('quickly')</span>
+<span class="font-semibold tabular-nums">-25</span>
+</div>
+<div class="flex items-center justify-between text-[11px] font-code-compact text-error">
+<span>↳ Ambiguous condition ('unusual rates')</span>
+<span class="font-semibold tabular-nums">-20</span>
+</div>
+<div class="flex items-center justify-between text-[11px] font-code-compact text-tertiary">
+<span>↳ Unquantified threshold ('excessive')</span>
+<span class="font-semibold tabular-nums">-15</span>
+</div>
+<div class="flex items-center justify-between text-[11px] font-code-compact text-on-surface-variant">
+<span>↳ Passive / unverifiable trigger link</span>
+<span class="font-semibold tabular-nums">-8</span>
+</div>
+<div class="flex items-center justify-between text-[11px] font-code-compact pt-1 border-t border-outline-variant/40 font-bold text-on-surface">
+<span>Final Quality Score</span>
+<span class="text-error tabular-nums">32 / 100</span>
+</div>
+</div>
+<!-- 6 Sub-Scores Grid -->
+<div class="grid grid-cols-2 gap-x-4 gap-y-2 pt-1">
+<!-- Sub-score 1 -->
+<div class="flex flex-col gap-0.5">
+<div class="flex justify-between text-label-caption text-[11px]">
+<span class="text-outline">Clarity</span>
+<span class="font-code-compact tabular-nums font-semibold text-on-surface">42/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full" style="width: 42%;"></div>
+</div>
+</div>
+<!-- Sub-score 2 -->
+<div class="flex flex-col gap-0.5">
+<div class="flex justify-between text-label-caption text-[11px]">
+<span class="text-outline">Ambiguity</span>
+<span class="font-code-compact tabular-nums font-semibold text-error">20/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 20%;"></div>
+</div>
+</div>
+<!-- Sub-score 3 -->
+<div class="flex flex-col gap-0.5">
+<div class="flex justify-between text-label-caption text-[11px]">
+<span class="text-outline">Testability</span>
+<span class="font-code-compact tabular-nums font-semibold text-error">25/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 25%;"></div>
+</div>
+</div>
+<!-- Sub-score 4 -->
+<div class="flex flex-col gap-0.5">
+<div class="flex justify-between text-label-caption text-[11px]">
+<span class="text-outline">Readability</span>
+<span class="font-code-compact tabular-nums font-semibold text-on-surface">68/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 68%;"></div>
+</div>
+</div>
+<!-- Sub-score 5 -->
+<div class="flex flex-col gap-0.5">
+<div class="flex justify-between text-label-caption text-[11px]">
+<span class="text-outline">Structure</span>
+<span class="font-code-compact tabular-nums font-semibold text-on-surface">55/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full" style="width: 55%;"></div>
+</div>
+</div>
+<!-- Sub-score 6 -->
+<div class="flex justify-between text-label-caption text-[11px]">
+<span class="text-outline">Consistency</span>
+<span class="font-code-compact tabular-nums font-semibold text-on-surface">72/100</span>
+</div>
+</div>
+</section>
+<!-- SECTION 5: FINDINGS & ACTIONABLE REMEDIATION CARDS -->
+<section class="flex flex-col gap-space-sm border-t border-outline-variant/30 pt-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-[13px] text-on-surface">Defects &amp; Suggested Fixes</span>
+<span class="font-code-compact text-[11px] text-error font-semibold">3 Detected</span>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Issue Card 1 -->
+<div class="p-2.5 rounded bg-surface-container-lowest border border-error/30 shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-headline-sm text-[12px] text-on-surface">Ambiguity / Untestable Latency</span>
+</div>
+<span class="font-code-compact text-[10px] px-1 py-0.5 rounded bg-error-container text-on-error-container font-semibold">CRITICAL</span>
+</div>
+<p class="font-body-compact text-[12px] text-on-surface-variant">
+              Target: <code class="font-code-compact text-error bg-error-container/30 px-1 rounded">'quickly'</code>
+<br/>
+              Vague temporal adverb. Verification test suites cannot execute without deterministic millisecond threshold.
+            </p>
+<div class="p-2 rounded bg-surface-container-low border border-outline-variant/40 flex flex-col gap-1">
+<span class="font-label-caption text-[10px] text-outline uppercase tracking-wider">Suggested Replacement</span>
+<span class="font-code-compact text-[11px] text-on-surface font-medium text-secondary">
+                "disengage within 50 milliseconds of detection"
+              </span>
+</div>
+<div class="flex items-center gap-1.5 pt-0.5">
+<button class="h-7 px-2 text-label-caption font-label-caption rounded bg-primary text-on-primary hover:bg-primary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+<span>Accept Suggestion</span>
+</button>
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors">
+                Reject
+              </button>
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors ml-auto">
+                Edit
+              </button>
+</div>
+</div>
+<!-- Issue Card 2 -->
+<div class="p-2.5 rounded bg-surface-container-lowest border border-error/30 shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-headline-sm text-[12px] text-on-surface">Vague Trigger Envelope</span>
+</div>
+<span class="font-code-compact text-[10px] px-1 py-0.5 rounded bg-error-container text-on-error-container font-semibold">CRITICAL</span>
+</div>
+<p class="font-body-compact text-[12px] text-on-surface-variant">
+              Target: <code class="font-code-compact text-error bg-error-container/30 px-1 rounded">'unusual aircraft attitude rates'</code>
+<br/>
+              Condition lacks quantitative boundary definition for pitch/roll rate envelope.
+            </p>
+<div class="p-2 rounded bg-surface-container-low border border-outline-variant/40 flex flex-col gap-1">
+<span class="font-label-caption text-[10px] text-outline uppercase tracking-wider">Suggested Replacement</span>
+<span class="font-code-compact text-[11px] text-on-surface font-medium text-secondary">
+                "pitch rate &gt; 15 deg/s or roll rate &gt; 30 deg/s"
+              </span>
+</div>
+<div class="flex items-center gap-1.5 pt-0.5">
+<button class="h-7 px-2 text-label-caption font-label-caption rounded bg-primary text-on-primary hover:bg-primary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+<span>Accept Suggestion</span>
+</button>
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors">
+                Reject
+              </button>
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors ml-auto">
+                Edit
+              </button>
+</div>
+</div>
+<!-- Issue Card 3 -->
+<div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant/50 shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-headline-sm text-[12px] text-on-surface">Unbounded Control Deflection</span>
+</div>
+<span class="font-code-compact text-[10px] px-1 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-semibold">MEDIUM</span>
+</div>
+<p class="font-body-compact text-[12px] text-on-surface-variant">
+              Target: <code class="font-code-compact text-tertiary bg-tertiary-fixed/40 px-1 rounded">'excessive control surface deflection'</code>
+<br/>
+              Threshold undefined in engineering units or percentage of full travel.
+            </p>
+<div class="p-2 rounded bg-surface-container-low border border-outline-variant/40 flex flex-col gap-1">
+<span class="font-label-caption text-[10px] text-outline uppercase tracking-wider">Suggested Replacement</span>
+<span class="font-code-compact text-[11px] text-on-surface font-medium text-secondary">
+                "deflection exceeding 85% of full range for &gt; 200 ms"
+              </span>
+</div>
+<div class="flex items-center gap-1.5 pt-0.5">
+<button class="h-7 px-2 text-label-caption font-label-caption rounded bg-primary text-on-primary hover:bg-primary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+<span>Accept Suggestion</span>
+</button>
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors">
+                Reject
+              </button>
+<button class="h-7 px-2 text-label-caption font-label-caption rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors ml-auto">
+                Edit
+              </button>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: PERSISTENT FOOTER IN PANEL (NAV & SHORTCUTS) -->
+<footer class="flex flex-wrap items-center justify-between gap-space-sm pt-space-sm border-t border-outline-variant/30 text-label-caption font-label-caption text-outline">
+<div class="flex items-center gap-2">
+<button class="h-7 px-2 rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">arrow_back</span>
+<span>Prev (J)</span>
+</button>
+<button class="h-7 px-2 rounded border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span>Next (K)</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+<div class="flex items-center gap-1.5 font-code-compact text-[10px]">
+<span class="text-outline">Jump:</span>
+<input class="w-20 h-6 px-1.5 bg-surface-container-low rounded border border-outline-variant/50 text-on-surface text-[10px] focus:outline-none focus:border-secondary" placeholder="REQ-___" type="text"/>
+</div>
+</footer>
+<!-- Keyboard shortcuts helper note -->
+<div class="text-center text-[10px] font-code-compact text-outline/80">
+        Navigate with <kbd class="px-1 py-0.2 bg-surface-container-low border border-outline-variant/50 rounded">J</kbd> / <kbd class="px-1 py-0.2 bg-surface-container-low border border-outline-variant/50 rounded">K</kbd> • Accept with <kbd class="px-1 py-0.2 bg-surface-container-low border border-outline-variant/50 rounded">⌘⏎</kbd> • Esc to dismiss
+      </div>
+</div>
+</div>
+</div></main></div></body></html>

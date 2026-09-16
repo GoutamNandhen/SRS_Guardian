@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:18px;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "primary-fixed": "#d8e3fb",
+        "inverse-surface": "#213145",
+        "tertiary-container": "#35260c",
+        "tertiary": "#1e1200",
+        "surface-container-high": "#dce9ff",
+        "on-secondary": "#ffffff",
+        "on-secondary-fixed": "#0f0069",
+        "primary-container": "#1e293b",
+        "background": "#f8f9ff",
+        "on-secondary-fixed-variant": "#3323cc",
+        "surface-container-low": "#eff4ff",
+        "on-surface-variant": "#45474c",
+        "tertiary-fixed": "#fadfb8",
+        "outline-variant": "#c5c6cd",
+        "on-tertiary-container": "#a38c6a",
+        "surface-container-highest": "#d3e4fe",
+        "surface-dim": "#cbdbf5",
+        "on-primary-fixed-variant": "#3c475a",
+        "surface-container-lowest": "#ffffff",
+        "surface": "#f8f9ff",
+        "tertiary-fixed-dim": "#ddc39d",
+        "primary-fixed-dim": "#bcc7de",
+        "on-surface": "#0b1c30",
+        "on-error-container": "#93000a",
+        "secondary": "#4b41e1",
+        "on-error": "#ffffff",
+        "inverse-on-surface": "#eaf1ff",
+        "secondary-fixed": "#e2dfff",
+        "on-primary": "#ffffff",
+        "error": "#ba1a1a",
+        "surface-container": "#e5eeff",
+        "on-secondary-container": "#fffbff",
+        "surface-bright": "#f8f9ff",
+        "on-primary-fixed": "#111c2d",
+        "secondary-container": "#645efb",
+        "on-background": "#0b1c30",
+        "primary": "#091426",
+        "outline": "#75777d",
+        "secondary-fixed-dim": "#c3c0ff",
+        "surface-tint": "#545f73",
+        "on-primary-container": "#8590a6",
+        "inverse-primary": "#bcc7de",
+        "surface-variant": "#d3e4fe",
+        "on-tertiary-fixed": "#271902",
+        "on-tertiary-fixed-variant": "#564427",
+        "on-tertiary": "#ffffff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin": "1.5rem",
+        "space-xl": "2rem",
+        "space-xs": "0.25rem",
+        "space-md": "0.75rem",
+        "space-sm": "0.5rem",
+        "space-lg": "1.25rem",
+        "gutter": "1rem"
+      },
+      "fontFamily": {
+        "metric-display": ["Inter"],
+        "label-text": ["Inter"],
+        "body-compact": ["Inter"],
+        "headline-sm": ["Inter"],
+        "body-base": ["Inter"],
+        "code-base": ["JetBrains Mono"],
+        "label-caption": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "code-compact": ["JetBrains Mono"]
+      },
+      "fontSize": {
+        "metric-display": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "label-text": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "body-compact": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "body-base": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "code-base": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "label-caption": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+        "headline-lg": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "code-compact": ["11px", {"lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+      }
+    }
+  }
+}</script></head><body class="bg-surface font-body-base text-body-base text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-md border-b border-outline-variant/40 flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm overflow-hidden"><img alt="SRS Guardian Shield Logo" class="h-6 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><span class="font-headline-sm text-headline-sm text-on-surface truncate">SRS Guardian</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/60">v1.4</span></div><div class="p-space-sm border-b border-outline-variant/40"><div class="px-2 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:bg-surface-container"><div class="flex items-center gap-space-sm overflow-hidden"><span class="material-symbols-outlined text-outline text-[16px]">corporate_fare</span><div class="truncate"><p class="font-label-caption text-label-caption text-outline leading-none uppercase">Workspace</p><p class="font-label-text text-label-text text-on-surface truncate leading-tight mt-0.5">Acme Avionics / FlightControl-SRS</p></div></div><span class="material-symbols-outlined text-outline text-[16px]">unfold_more</span></div></div><nav class="flex flex-col gap-0.5 p-space-sm" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r"><a aria-current="page" class="flex items-center justify-between px-space-sm py-1.5 rounded-lg transition-colors bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r" data-path="dashboard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">dashboard</span><span class="font-body-compact text-body-compact">Dashboard</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documents" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">description</span><span class="font-body-compact text-body-compact">Documents</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/40">14</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="requirement-viewer" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">view_list</span><span class="font-body-compact text-body-compact">Requirement Viewer</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="analysis" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">rule</span><span class="font-body-compact text-body-compact">Analysis</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container border border-error/20">38</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ai-suggestions" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">smart_toy</span><span class="font-body-compact text-body-compact">AI Suggestions</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed border border-secondary/20">12</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="version-comparison" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">compare_arrows</span><span class="font-body-compact text-body-compact">Version Comparison</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reports" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">summarize</span><span class="font-body-compact text-body-compact">Reports</span></div></a></nav></div><div class="flex flex-col border-t border-outline-variant/40 p-space-sm gap-space-xs"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-compact text-body-compact">Settings</span></a><div class="flex items-center justify-between px-space-sm py-1 text-on-surface-variant"><a class="flex items-center gap-space-xs hover:text-on-surface text-label-caption font-label-caption" data-path="documentation" href="#"><span class="material-symbols-outlined text-[14px]">help</span><span>Docs &amp; Standards</span></a><span class="font-code-compact text-code-compact text-outline">⌘K</span></div><div class="mt-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between"><div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-secondary"></div><span class="font-code-compact text-code-compact text-on-surface-variant">ISO 29148 Engine</span></div><span class="font-code-compact text-code-compact text-outline">Online</span></div></div></aside><div class="pl-60"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest border-b border-outline-variant/40 z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-sm"><img alt="SRS Guardian Shield Logo" class="h-5 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><div class="flex items-center gap-1.5 text-label-text font-label-text text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">SRS Guardian</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Projects</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Avionics Suite</span><span class="text-outline">/</span><span class="text-on-surface font-headline-sm">Workspace</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm w-72 h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/60 focus-within:border-secondary transition-all"><span class="material-symbols-outlined text-outline text-[16px]">search</span><input class="w-full bg-transparent border-none outline-none text-body-compact font-body-compact text-on-surface placeholder:text-outline" placeholder="Search rules, requirements..." type="text"/><span class="font-code-compact text-code-compact px-1 py-0.5 rounded bg-surface-container-lowest text-outline border border-outline-variant/60">⌘K</span></div><div class="h-4 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-low text-label-caption font-label-caption text-on-surface-variant border border-outline-variant/40"><div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div><span>Sync idle</span></div><button aria-label="Notifications" class="relative p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-1.5 h-1.5 bg-secondary rounded-full"></span></button><button aria-label="Theme Switcher" class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">light_mode</span></button><div class="flex items-center gap-space-sm pl-1"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-text text-label-text text-on-surface leading-tight">Alex Chen</span><span class="font-label-caption text-label-caption text-outline leading-tight">Lead Architect</span></div></div></div></header><main class="w-full pt-12 min-h-screen bg-surface px-space-lg py-space-lg"><div class="flex flex-col w-full gap-space-lg">
+<!-- Top Header Section -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Dashboard</h1>
+<p class="font-body-compact text-body-compact text-outline flex items-center gap-1.5 mt-0.5">
+<span>Project: Flight Management System SRS (rev 2.4)</span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Last analyzed 14m ago
+        </span>
+</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="h-8 px-3 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-label-text text-label-text flex items-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px] text-outline">file_download</span>
+<span>Export Summary</span>
+</button>
+<button class="h-8 px-3 rounded bg-primary text-on-primary hover:bg-primary-container transition-colors font-label-text text-label-text flex items-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px] text-on-primary">upload_file</span>
+<span>Upload SRS</span>
+</button>
+</div>
+</div>
+<!-- Row of 4 Compact Metric Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Documents Analysed</span>
+<span class="material-symbols-outlined text-outline text-[16px]">folder</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-metric-display text-metric-display text-on-surface tabular-nums">18</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant">
+          +2 this week
+        </span>
+</div>
+<span class="font-label-caption text-label-caption text-on-surface-variant mt-1 truncate">In Flight Control Workspace</span>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Total Requirements</span>
+<span class="material-symbols-outlined text-outline text-[16px]">list_alt</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-metric-display text-metric-display text-on-surface tabular-nums">1,428</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface">
+          100% parsed
+        </span>
+</div>
+<span class="font-label-caption text-label-caption text-on-surface-variant mt-1 truncate">Across 5 active specifications</span>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Open Issues</span>
+<span class="material-symbols-outlined text-outline text-[16px]">bug_report</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-metric-display text-metric-display text-on-surface tabular-nums">84</span>
+<div class="flex items-center gap-1.5 font-code-compact text-code-compact">
+<span class="flex items-center gap-1 text-on-error-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>12
+          </span>
+<span class="flex items-center gap-1 text-tertiary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>41
+          </span>
+<span class="flex items-center gap-1 text-secondary font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>31
+          </span>
+</div>
+</div>
+<span class="font-label-caption text-label-caption text-on-surface-variant mt-1 truncate">12 critical / blocking items</span>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Average Quality Score</span>
+<span class="material-symbols-outlined text-outline text-[16px]">verified</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-display text-metric-display text-on-surface tabular-nums">78.4</span>
+<span class="font-label-caption text-label-caption text-outline">/100</span>
+</div>
+<span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">trending_up</span>
+          +4.2 vs rev 2.3
+        </span>
+</div>
+<span class="font-label-caption text-label-caption text-on-surface-variant mt-1 truncate">Target: ≥ 85.0 for release audit</span>
+</div>
+</div>
+<!-- Two-Column Main Analytics Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left Column (approx 60% / 7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Card 1: Quality Score Distribution -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col">
+<div class="flex items-center justify-between pb-space-sm">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Quality Score Distribution</h2>
+<p class="font-label-caption text-label-caption text-outline">Parsed requirements stratified across 5 rating intervals</p>
+</div>
+<span class="font-code-compact text-code-compact px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant">
+            ISO 29148 Standard
+          </span>
+</div>
+<!-- SVG Histogram Chart -->
+<div class="w-full pt-4 pb-1">
+<div class="relative h-44 w-full flex items-end justify-between gap-3 px-2">
+<!-- Grid Lines Background -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+<div class="w-full h-px bg-outline"></div>
+<div class="w-full h-px bg-outline"></div>
+<div class="w-full h-px bg-outline"></div>
+<div class="w-full h-px bg-outline"></div>
+</div>
+<!-- Bar 0-20 -->
+<div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
+<span class="font-code-compact text-code-compact text-on-error-container tabular-nums mb-1">8</span>
+<div class="w-full bg-error-container rounded-t transition-all hover:opacity-90" style="height: 6%;"></div>
+<span class="font-label-caption text-label-caption text-outline mt-2 whitespace-nowrap">0-20</span>
+</div>
+<!-- Bar 21-40 -->
+<div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
+<span class="font-code-compact text-code-compact text-error tabular-nums mb-1">24</span>
+<div class="w-full bg-surface-container-highest rounded-t transition-all hover:opacity-90" style="height: 14%;"></div>
+<span class="font-label-caption text-label-caption text-outline mt-2 whitespace-nowrap">21-40</span>
+</div>
+<!-- Bar 41-60 -->
+<div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
+<span class="font-code-compact text-code-compact text-on-surface-variant tabular-nums mb-1">112</span>
+<div class="w-full bg-surface-container-high rounded-t transition-all hover:opacity-90" style="height: 32%;"></div>
+<span class="font-label-caption text-label-caption text-outline mt-2 whitespace-nowrap">41-60</span>
+</div>
+<!-- Bar 61-80 -->
+<div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
+<span class="font-code-compact text-code-compact text-on-surface tabular-nums mb-1">580</span>
+<div class="w-full bg-primary-fixed-dim rounded-t transition-all hover:opacity-90" style="height: 74%;"></div>
+<span class="font-label-caption text-label-caption text-outline mt-2 whitespace-nowrap">61-80</span>
+</div>
+<!-- Bar 81-100 -->
+<div class="relative z-10 flex-1 flex flex-col items-center h-full justify-end group">
+<span class="font-code-compact text-code-compact text-on-surface font-semibold tabular-nums mb-1">704</span>
+<div class="w-full bg-primary rounded-t transition-all hover:opacity-90" style="height: 88%;"></div>
+<span class="font-label-caption text-label-caption text-outline mt-2 whitespace-nowrap">81-100</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-3 mt-2 text-label-caption font-label-caption text-on-surface-variant">
+<span>Benchmark baseline: 72% within 80+ tier</span>
+<span class="font-code-compact text-code-compact text-secondary font-medium">90.0% Passing Threshold</span>
+</div>
+</div>
+<!-- Card 2: Issues by Type -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col">
+<div class="flex items-center justify-between pb-space-sm">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Issues by Type</h2>
+<p class="font-label-caption text-label-caption text-outline">Syntactic, structural, and semantic defect clusters</p>
+</div>
+<span class="font-code-compact text-code-compact text-outline tabular-nums">84 Total Defects</span>
+</div>
+<div class="flex flex-col gap-3.5 pt-2">
+<!-- Item 1: Ambiguity -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-body-compact font-body-compact">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+                Ambiguity &amp; Subjective terms
+              </span>
+<div class="flex items-center gap-2 font-code-compact text-code-compact">
+<span class="text-on-surface tabular-nums">34 issues</span>
+<span class="text-outline">40.5%</span>
+</div>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-low overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim rounded-full" style="width: 40.5%"></div>
+</div>
+</div>
+<!-- Item 2: Duplicates -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-body-compact font-body-compact">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span>
+                Duplicates &amp; Redundancy
+              </span>
+<div class="flex items-center gap-2 font-code-compact text-code-compact">
+<span class="text-on-surface tabular-nums">18 issues</span>
+<span class="text-outline">21.4%</span>
+</div>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-low overflow-hidden">
+<div class="h-full bg-surface-tint rounded-full" style="width: 21.4%"></div>
+</div>
+</div>
+<!-- Item 3: Readability -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-body-compact font-body-compact">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+                Readability &amp; Passive Voice
+              </span>
+<div class="flex items-center gap-2 font-code-compact text-code-compact">
+<span class="text-on-surface tabular-nums">15 issues</span>
+<span class="text-outline">17.9%</span>
+</div>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-low overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 17.9%"></div>
+</div>
+</div>
+<!-- Item 4: Contradictions -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-body-compact font-body-compact">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                Contradictions &amp; Logic Conflicts
+              </span>
+<div class="flex items-center gap-2 font-code-compact text-code-compact">
+<span class="text-on-surface tabular-nums">9 issues</span>
+<span class="text-outline">10.7%</span>
+</div>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-low overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 10.7%"></div>
+</div>
+</div>
+<!-- Item 5: Structure -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-body-compact font-body-compact">
+<span class="text-on-surface font-medium flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                Structure &amp; Untestable format
+              </span>
+<div class="flex items-center gap-2 font-code-compact text-code-compact">
+<span class="text-on-surface tabular-nums">8 issues</span>
+<span class="text-outline">9.5%</span>
+</div>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-low overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full" style="width: 9.5%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (approx 40% / 5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Card 3: Requirement Types (Donut) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col">
+<div class="flex items-center justify-between pb-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Requirement Types</h2>
+<span class="font-label-caption text-label-caption text-outline">Functional Breakdown</span>
+</div>
+<div class="flex items-center justify-center py-4 relative">
+<!-- Flat SVG Donut -->
+<svg class="w-36 h-36 -rotate-90" viewbox="0 0 160 160">
+<!-- Background circle (Non-Functional: 24% = 75.4 of 314.15) -->
+<circle class="text-surface-container-high" cx="80" cy="80" fill="transparent" r="50" stroke="currentColor" stroke-dasharray="314.15" stroke-dashoffset="0" stroke-width="18"></circle>
+<!-- Functional overlay (76% = 238.75 of 314.15) -->
+<circle class="text-primary" cx="80" cy="80" fill="transparent" r="50" stroke="currentColor" stroke-dasharray="238.75 314.15" stroke-dashoffset="0" stroke-width="18"></circle>
+</svg>
+<!-- Donut center label -->
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+<span class="font-metric-display text-headline-lg text-on-surface leading-none tabular-nums">1,428</span>
+<span class="font-label-caption text-label-caption text-outline uppercase tracking-wider mt-0.5">Total</span>
+</div>
+</div>
+<!-- Legend and Percent Breakdown -->
+<div class="grid grid-cols-2 gap-2 pt-2 text-center">
+<div class="p-2 rounded bg-surface-container-low flex flex-col items-center">
+<div class="flex items-center gap-1.5 font-label-text text-label-text text-on-surface mb-0.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Functional</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface tabular-nums">1,084</span>
+<span class="font-code-compact text-code-compact text-outline">75.9%</span>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex flex-col items-center">
+<div class="flex items-center gap-1.5 font-label-text text-label-text text-on-surface mb-0.5">
+<span class="w-2 h-2 rounded-full bg-surface-container-high"></span>
+<span>Non-Functional</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface tabular-nums">344</span>
+<span class="font-code-compact text-code-compact text-outline">24.1%</span>
+</div>
+</div>
+</div>
+<!-- Card 4: Lowest Scoring Requirements -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col flex-1">
+<div class="flex items-center justify-between pb-2">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Lowest Scoring Requirements</h2>
+<p class="font-label-caption text-label-caption text-outline">Requires immediate analyst remediation</p>
+</div>
+<span class="font-code-compact text-code-compact text-on-error-container">Top 5 Action Items</span>
+</div>
+<div class="flex flex-col divide-y divide-surface-container">
+<!-- Item 1 -->
+<div class="py-2.5 flex flex-col gap-1 group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface">REQ-FMS-014</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-medium tabular-nums">
+                  32/100
+                </span>
+</div>
+<a class="font-label-caption text-label-caption text-secondary hover:text-on-secondary-fixed-variant flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity" href="#">
+                Inspect <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-1">
+              "The autopilot shall quickly disengage whenever unusual attitudes occur..."
+            </p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Ambiguity</span>
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Subjective term</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="py-2.5 flex flex-col gap-1 group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface">REQ-NAV-089</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-medium tabular-nums">
+                  38/100
+                </span>
+</div>
+<a class="font-label-caption text-label-caption text-secondary hover:text-on-secondary-fixed-variant flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity" href="#">
+                Inspect <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-1">
+              "Database update must complete in a reasonable timeframe without error..."
+            </p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Untestable</span>
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Vague timeframe</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="py-2.5 flex flex-col gap-1 group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface">REQ-COMM-102</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant font-medium tabular-nums">
+                  44/100
+                </span>
+</div>
+<a class="font-label-caption text-label-caption text-secondary hover:text-on-secondary-fixed-variant flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity" href="#">
+                Inspect <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-1">
+              "System should ideally support simultaneous dual link transmission..."
+            </p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Passive voice</span>
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Ambiguity</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="py-2.5 flex flex-col gap-1 group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface">REQ-SEC-031</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant font-medium tabular-nums">
+                  46/100
+                </span>
+</div>
+<a class="font-label-caption text-label-caption text-secondary hover:text-on-secondary-fixed-variant flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity" href="#">
+                Inspect <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-1">
+              "Password length must be at least 8 characters and exactly 6 digits..."
+            </p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Contradiction</span>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="py-2.5 flex flex-col gap-1 group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-semibold text-on-surface">REQ-FMS-077</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant font-medium tabular-nums">
+                  49/100
+                </span>
+</div>
+<a class="font-label-caption text-label-caption text-secondary hover:text-on-secondary-fixed-variant flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity" href="#">
+                Inspect <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant line-clamp-1">
+              "User interface shall be user-friendly and responsive under all conditions..."
+            </p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-code-compact text-[10px] px-1.5 py-0.2 rounded bg-surface-container-low text-outline">Subjective term</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Full-Width Section: Recent Documents Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col overflow-hidden">
+<!-- Table Header Toolbar -->
+<div class="px-space-md py-space-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Recent Documents</h2>
+<span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container-low text-outline">
+          Showing 5 of 18 documents
+        </span>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-low w-48 sm:w-56">
+<span class="material-symbols-outlined text-outline text-[16px]">filter_list</span>
+<input class="bg-transparent border-none outline-none font-body-compact text-body-compact text-on-surface placeholder:text-outline w-full" placeholder="Filter documents..." type="text"/>
+</div>
+<a class="font-label-text text-label-text text-secondary hover:text-on-secondary-fixed-variant whitespace-nowrap" href="#">
+          View all
+        </a>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-outline font-label-caption text-label-caption uppercase tracking-wider">
+<th class="py-2 px-space-md font-medium">Document Name</th>
+<th class="py-2 px-space-md font-medium">Type</th>
+<th class="py-2 px-space-md font-medium text-right">Reqs</th>
+<th class="py-2 px-space-md font-medium">Issues Detected</th>
+<th class="py-2 px-space-md font-medium">Avg Score</th>
+<th class="py-2 px-space-md font-medium">Status</th>
+<th class="py-2 px-space-md font-medium">Uploaded</th>
+<th class="py-2 px-space-md font-medium text-center">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container text-body-compact font-body-compact">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[18px]">picture_as_pdf</span>
+<span class="font-code-base text-code-base font-medium text-on-surface">FMS-Core-System-v2.4.pdf</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">System SRS</td>
+<td class="py-2.5 px-space-md text-right font-code-compact text-code-compact tabular-nums text-on-surface">412</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-1.5 font-code-compact text-code-compact">
+<span class="tabular-nums font-medium text-on-surface mr-1">14 issues:</span>
+<span class="flex items-center text-error"><span class="w-1.5 h-1.5 rounded-full bg-error mr-0.5"></span>2</span>
+<span class="flex items-center text-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim mr-0.5"></span>8</span>
+<span class="flex items-center text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim mr-0.5"></span>4</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 82%"></div>
+</div>
+<span class="font-code-compact text-code-compact text-on-surface tabular-nums">82</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="font-code-compact text-code-compact px-2 py-0.5 rounded bg-surface-container text-on-surface font-medium flex items-center gap-1 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface"></span>
+                Analysed
+              </span>
+</td>
+<td class="py-2.5 px-space-md text-outline font-label-caption text-label-caption whitespace-nowrap">14m ago</td>
+<td class="py-2.5 px-space-md text-center">
+<button aria-label="More options" class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">description</span>
+<span class="font-code-base text-code-base font-medium text-on-surface">Navigation-Display-Spec-v1.1.docx</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Subsystem</td>
+<td class="py-2.5 px-space-md text-right font-code-compact text-code-compact tabular-nums text-on-surface">198</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-1.5 font-code-compact text-code-compact">
+<span class="tabular-nums font-medium text-on-surface mr-1">21 issues:</span>
+<span class="flex items-center text-error"><span class="w-1.5 h-1.5 rounded-full bg-error mr-0.5"></span>4</span>
+<span class="flex items-center text-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim mr-0.5"></span>11</span>
+<span class="flex items-center text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim mr-0.5"></span>6</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary-fixed-dim rounded-full" style="width: 74%"></div>
+</div>
+<span class="font-code-compact text-code-compact text-on-surface tabular-nums">74</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="font-code-compact text-code-compact px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-medium flex items-center gap-1 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                Processing
+              </span>
+</td>
+<td class="py-2.5 px-space-md text-outline font-label-caption text-label-caption whitespace-nowrap">2h ago</td>
+<td class="py-2.5 px-space-md text-center">
+<button aria-label="More options" class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[18px]">picture_as_pdf</span>
+<span class="font-code-base text-code-base font-medium text-on-surface">Engine-Control-SRS-Draft.pdf</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Interface Control</td>
+<td class="py-2.5 px-space-md text-right font-code-compact text-code-compact tabular-nums text-on-surface">320</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-1.5 font-code-compact text-code-compact">
+<span class="tabular-nums font-medium text-on-surface mr-1">6 issues:</span>
+<span class="flex items-center text-error"><span class="w-1.5 h-1.5 rounded-full bg-error mr-0.5"></span>0</span>
+<span class="flex items-center text-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim mr-0.5"></span>2</span>
+<span class="flex items-center text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim mr-0.5"></span>4</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 91%"></div>
+</div>
+<span class="font-code-compact text-code-compact text-on-surface tabular-nums">91</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="font-code-compact text-code-compact px-2 py-0.5 rounded bg-surface-container text-on-surface font-medium flex items-center gap-1 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface"></span>
+                Analysed
+              </span>
+</td>
+<td class="py-2.5 px-space-md text-outline font-label-caption text-label-caption whitespace-nowrap">Yesterday</td>
+<td class="py-2.5 px-space-md text-center">
+<button aria-label="More options" class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">article</span>
+<span class="font-code-base text-code-base font-medium text-on-surface">Telemetry-Interface-v3.0.txt</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Interface Control</td>
+<td class="py-2.5 px-space-md text-right font-code-compact text-code-compact tabular-nums text-on-surface">142</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-1.5 font-code-compact text-code-compact">
+<span class="tabular-nums font-medium text-on-surface mr-1">19 issues:</span>
+<span class="flex items-center text-error"><span class="w-1.5 h-1.5 rounded-full bg-error mr-0.5"></span>3</span>
+<span class="flex items-center text-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim mr-0.5"></span>9</span>
+<span class="flex items-center text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim mr-0.5"></span>7</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-surface-tint rounded-full" style="width: 64%"></div>
+</div>
+<span class="font-code-compact text-code-compact text-on-surface tabular-nums">64</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="font-code-compact text-code-compact px-2 py-0.5 rounded bg-surface-container text-on-surface font-medium flex items-center gap-1 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface"></span>
+                Analysed
+              </span>
+</td>
+<td class="py-2.5 px-space-md text-outline font-label-caption text-label-caption whitespace-nowrap">3d ago</td>
+<td class="py-2.5 px-space-md text-center">
+<button aria-label="More options" class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">description</span>
+<span class="font-code-base text-code-base font-medium text-on-surface">Flight-Safety-Requirements-v0.9.docx</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Safety SRS</td>
+<td class="py-2.5 px-space-md text-right font-code-compact text-code-compact tabular-nums text-on-surface">356</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-1.5 font-code-compact text-code-compact">
+<span class="tabular-nums font-medium text-on-surface mr-1">24 issues:</span>
+<span class="flex items-center text-error"><span class="w-1.5 h-1.5 rounded-full bg-error mr-0.5"></span>3</span>
+<span class="flex items-center text-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim mr-0.5"></span>11</span>
+<span class="flex items-center text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim mr-0.5"></span>10</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 48%"></div>
+</div>
+<span class="font-code-compact text-code-compact text-on-surface tabular-nums">48</span>
+</div>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="font-code-compact text-code-compact px-2 py-0.5 rounded bg-error-container text-on-error-container font-medium flex items-center gap-1 w-max">
+<span class="material-symbols-outlined text-[12px]">warning</span>
+                Parse error
+              </span>
+</td>
+<td class="py-2.5 px-space-md text-outline font-label-caption text-label-caption whitespace-nowrap">Oct 24</td>
+<td class="py-2.5 px-space-md text-center">
+<button aria-label="More options" class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></main></div></body></html>

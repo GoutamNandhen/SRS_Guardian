@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 230 100% 98%;
+    --foreground: 222 60% 12%;
+    --surface: 230 100% 98%;
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-low: 220 100% 97%;
+    --surface-container: 220 100% 95%;
+    --surface-container-high: 220 100% 93%;
+    --outline: 223 3% 47%;
+    --outline-variant: 230 8% 79%;
+    --primary: 220 60% 9%;
+    --secondary: 244 74% 57%;
+    --error: 0 75% 42%;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --surface: 222 47% 7%;
+    --surface-container-lowest: 222 47% 11%;
+    --surface-container-low: 222 47% 13%;
+    --surface-container: 222 47% 15%;
+    --surface-container-high: 222 47% 18%;
+    --outline: 215 20% 65%;
+    --outline-variant: 217 33% 25%;
+    --primary: 210 40% 98%;
+    --secondary: 244 74% 67%;
+    --error: 0 84% 60%;
+  }
+
+  body {
+    background-color: #f8f9ff;
+    color: #0b1c30;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

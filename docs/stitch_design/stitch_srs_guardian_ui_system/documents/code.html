@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:18px;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "primary-fixed": "#d8e3fb",
+        "inverse-surface": "#213145",
+        "tertiary-container": "#35260c",
+        "tertiary": "#1e1200",
+        "surface-container-high": "#dce9ff",
+        "on-secondary": "#ffffff",
+        "on-secondary-fixed": "#0f0069",
+        "primary-container": "#1e293b",
+        "background": "#f8f9ff",
+        "on-secondary-fixed-variant": "#3323cc",
+        "surface-container-low": "#eff4ff",
+        "on-surface-variant": "#45474c",
+        "tertiary-fixed": "#fadfb8",
+        "outline-variant": "#c5c6cd",
+        "on-tertiary-container": "#a38c6a",
+        "surface-container-highest": "#d3e4fe",
+        "surface-dim": "#cbdbf5",
+        "on-primary-fixed-variant": "#3c475a",
+        "surface-container-lowest": "#ffffff",
+        "surface": "#f8f9ff",
+        "tertiary-fixed-dim": "#ddc39d",
+        "primary-fixed-dim": "#bcc7de",
+        "on-surface": "#0b1c30",
+        "on-error-container": "#93000a",
+        "secondary": "#4b41e1",
+        "on-error": "#ffffff",
+        "inverse-on-surface": "#eaf1ff",
+        "secondary-fixed": "#e2dfff",
+        "on-primary": "#ffffff",
+        "error": "#ba1a1a",
+        "surface-container": "#e5eeff",
+        "on-secondary-container": "#fffbff",
+        "surface-bright": "#f8f9ff",
+        "on-primary-fixed": "#111c2d",
+        "secondary-container": "#645efb",
+        "on-background": "#0b1c30",
+        "primary": "#091426",
+        "outline": "#75777d",
+        "secondary-fixed-dim": "#c3c0ff",
+        "surface-tint": "#545f73",
+        "on-primary-container": "#8590a6",
+        "inverse-primary": "#bcc7de",
+        "surface-variant": "#d3e4fe",
+        "on-tertiary-fixed": "#271902",
+        "on-tertiary-fixed-variant": "#564427",
+        "on-tertiary": "#ffffff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin": "1.5rem",
+        "space-xl": "2rem",
+        "space-xs": "0.25rem",
+        "space-md": "0.75rem",
+        "space-sm": "0.5rem",
+        "space-lg": "1.25rem",
+        "gutter": "1rem"
+      },
+      "fontFamily": {
+        "metric-display": ["Inter"],
+        "label-text": ["Inter"],
+        "body-compact": ["Inter"],
+        "headline-sm": ["Inter"],
+        "body-base": ["Inter"],
+        "code-base": ["JetBrains Mono"],
+        "label-caption": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "code-compact": ["JetBrains Mono"]
+      },
+      "fontSize": {
+        "metric-display": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "label-text": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "body-compact": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "body-base": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "code-base": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "label-caption": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+        "headline-lg": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "code-compact": ["11px", {"lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+      }
+    }
+  }
+}</script></head><body class="bg-surface font-body-base text-body-base text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-md border-b border-outline-variant/40 flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm overflow-hidden"><img alt="SRS Guardian Shield Logo" class="h-6 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><span class="font-headline-sm text-headline-sm text-on-surface truncate">SRS Guardian</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/60">v1.4</span></div><div class="p-space-sm border-b border-outline-variant/40"><div class="px-2 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:bg-surface-container"><div class="flex items-center gap-space-sm overflow-hidden"><span class="material-symbols-outlined text-outline text-[16px]">corporate_fare</span><div class="truncate"><p class="font-label-caption text-label-caption text-outline leading-none uppercase">Workspace</p><p class="font-label-text text-label-text text-on-surface truncate leading-tight mt-0.5">Acme Avionics / FlightControl-SRS</p></div></div><span class="material-symbols-outlined text-outline text-[16px]">unfold_more</span></div></div><nav class="flex flex-col gap-0.5 p-space-sm" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r"><a aria-current="page" class="flex items-center justify-between px-space-sm py-1.5 rounded-lg transition-colors bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r" data-path="dashboard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">dashboard</span><span class="font-body-compact text-body-compact">Dashboard</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documents" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">description</span><span class="font-body-compact text-body-compact">Documents</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/40">14</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="requirement-viewer" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">view_list</span><span class="font-body-compact text-body-compact">Requirement Viewer</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="analysis" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">rule</span><span class="font-body-compact text-body-compact">Analysis</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container border border-error/20">38</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ai-suggestions" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">smart_toy</span><span class="font-body-compact text-body-compact">AI Suggestions</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed border border-secondary/20">12</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="version-comparison" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">compare_arrows</span><span class="font-body-compact text-body-compact">Version Comparison</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reports" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">summarize</span><span class="font-body-compact text-body-compact">Reports</span></div></a></nav></div><div class="flex flex-col border-t border-outline-variant/40 p-space-sm gap-space-xs"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-compact text-body-compact">Settings</span></a><div class="flex items-center justify-between px-space-sm py-1 text-on-surface-variant"><a class="flex items-center gap-space-xs hover:text-on-surface text-label-caption font-label-caption" data-path="documentation" href="#"><span class="material-symbols-outlined text-[14px]">help</span><span>Docs &amp; Standards</span></a><span class="font-code-compact text-code-compact text-outline">⌘K</span></div><div class="mt-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between"><div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-secondary"></div><span class="font-code-compact text-code-compact text-on-surface-variant">ISO 29148 Engine</span></div><span class="font-code-compact text-code-compact text-outline">Online</span></div></div></aside><div class="pl-60"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest border-b border-outline-variant/40 z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-sm"><img alt="SRS Guardian Shield Logo" class="h-5 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><div class="flex items-center gap-1.5 text-label-text font-label-text text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">SRS Guardian</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Projects</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Avionics Suite</span><span class="text-outline">/</span><span class="text-on-surface font-headline-sm">Workspace</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm w-72 h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/60 focus-within:border-secondary transition-all"><span class="material-symbols-outlined text-outline text-[16px]">search</span><input class="w-full bg-transparent border-none outline-none text-body-compact font-body-compact text-on-surface placeholder:text-outline" placeholder="Search rules, requirements..." type="text"/><span class="font-code-compact text-code-compact px-1 py-0.5 rounded bg-surface-container-lowest text-outline border border-outline-variant/60">⌘K</span></div><div class="h-4 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-low text-label-caption font-label-caption text-on-surface-variant border border-outline-variant/40"><div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div><span>Sync idle</span></div><button aria-label="Notifications" class="relative p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-1.5 h-1.5 bg-secondary rounded-full"></span></button><button aria-label="Theme Switcher" class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">light_mode</span></button><div class="flex items-center gap-space-sm pl-1"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-text text-label-text text-on-surface leading-tight">Alex Chen</span><span class="font-label-caption text-label-caption text-outline leading-tight">Lead Architect</span></div></div></div></header><main class="w-full pt-12 min-h-screen bg-surface px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Page Header Zone -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-md">
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Documents</h1>
+<span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">18 files</span>
+</div>
+<p class="font-label-text text-label-text text-outline">
+        Avionics Suite / FlightControl-Rev2.4 <span class="mx-1">•</span> ISO 29148 Standard Active
+      </p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<!-- Search Input -->
+<div class="relative flex items-center w-64 h-8 px-2.5 rounded bg-surface-container-lowest border border-outline-variant/60 focus-within:border-secondary transition-all">
+<span class="material-symbols-outlined text-outline text-[16px] mr-1.5">search</span>
+<input class="w-full bg-transparent border-none outline-none text-body-compact font-body-compact text-on-surface placeholder:text-outline" placeholder="Search documents, types, tags..." type="text"/>
+<span class="font-code-compact text-code-compact px-1 py-0.2 rounded bg-surface-container-low text-outline">⌘F</span>
+</div>
+<!-- Filter Dropdown -->
+<div class="relative">
+<button class="h-8 px-2.5 rounded bg-surface-container-lowest border border-outline-variant/60 hover:bg-surface-container-low text-on-surface font-label-text text-label-text flex items-center gap-1.5 transition-colors" id="filter-trigger" type="button">
+<span class="material-symbols-outlined text-outline text-[16px]">filter_list</span>
+<span>Status: All (18)</span>
+<span class="material-symbols-outlined text-outline text-[14px]">expand_more</span>
+</button>
+</div>
+<!-- Upload SRS Primary Action Button -->
+<button class="h-8 px-3 rounded bg-primary text-on-primary hover:bg-primary-container font-label-text text-label-text flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">upload_file</span>
+<span>Upload SRS</span>
+</button>
+</div>
+</div>
+<!-- Compact Upload Dropzone Zone -->
+<div class="mt-space-xs mb-space-md p-space-sm rounded bg-surface-container-lowest border border-dashed border-outline-variant/80 hover:border-secondary transition-colors">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded bg-surface-container-low flex items-center justify-center flex-shrink-0 text-outline">
+<span class="material-symbols-outlined text-[20px]">drive_folder_upload</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Drag and drop an SRS file, or browse to upload</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface-variant">MAX 20MB</span>
+</div>
+<span class="font-label-caption text-label-caption text-outline">
+            Supported: PDF, DOCX, TXT, MD <span class="mx-1">•</span> Automated ISO 29148 syntax validation &amp; semantic decomposition
+          </span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto justify-end">
+<label class="cursor-pointer h-7 px-2.5 rounded bg-surface-container-low border border-outline-variant/60 hover:bg-surface-container text-on-surface font-label-text text-label-text flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[15px]">folder_open</span>
+<span>Browse files</span>
+<input accept=".pdf,.docx,.txt,.md" class="hidden" type="file"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Status Bar Summary Chips -->
+<div class="flex items-center justify-between pb-space-sm pt-space-xs text-label-caption font-label-caption">
+<div class="flex items-center gap-space-sm">
+<button class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-headline-sm flex items-center gap-1.5">
+<span>All</span>
+<span class="font-code-compact text-code-compact text-outline">18</span>
+</button>
+<button class="px-2 py-0.5 rounded hover:bg-surface-container text-on-surface-variant flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Analysed</span>
+<span class="font-code-compact text-code-compact text-outline">14</span>
+</button>
+<button class="px-2 py-0.5 rounded hover:bg-surface-container text-on-surface-variant flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container animate-pulse"></span>
+<span>Processing</span>
+<span class="font-code-compact text-code-compact text-outline">2</span>
+</button>
+<button class="px-2 py-0.5 rounded hover:bg-surface-container text-on-surface-variant flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span>Failed</span>
+<span class="font-code-compact text-code-compact text-outline">2</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm text-outline">
+<span>Auto-sync: Active</span>
+<span>•</span>
+<button class="hover:text-on-surface flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+<span>Refresh</span>
+</button>
+</div>
+</div>
+<!-- Documents Data Table Container -->
+<div class="w-full bg-surface-container-lowest rounded border border-outline-variant/60 overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<!-- Sticky Minimal Header -->
+<thead>
+<tr class="h-8 bg-surface-container-low border-b border-outline-variant/60 text-outline font-label-caption text-label-caption uppercase tracking-wider select-none">
+<th class="w-8 px-space-sm font-medium text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</th>
+<th class="px-space-sm font-medium">Document Name</th>
+<th class="px-space-sm font-medium">Type</th>
+<th class="px-space-sm font-medium">Size</th>
+<th class="px-space-sm font-medium">Pages</th>
+<th class="px-space-sm font-medium">Reqs</th>
+<th class="px-space-sm font-medium">Issues Detected</th>
+<th class="px-space-sm font-medium">Avg Score</th>
+<th class="px-space-sm font-medium">Status</th>
+<th class="px-space-sm font-medium">Uploaded</th>
+<th class="w-10 px-space-sm font-medium text-right pr-space-md">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-body-compact font-body-compact text-on-surface">
+<!-- ROW 1: FMS-Core-System-v2.4.pdf -->
+<tr class="h-10 hover:bg-surface-container-low/60 transition-colors group">
+<td class="px-space-sm text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-error-container/40 text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">picture_as_pdf</span>
+</div>
+<div class="flex flex-col">
+<a class="font-headline-sm text-headline-sm text-on-surface hover:text-secondary truncate" href="#">
+                    FMS-Core-System-v2.4.pdf
+                  </a>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">System SRS</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">4.8 MB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">112 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">412</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-1 font-code-compact text-code-compact">
+<span class="px-1 rounded bg-error-container/70 text-on-error-container font-medium" title="2 Critical Issues">•2</span>
+<span class="px-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-medium" title="8 Medium Issues">•8</span>
+<span class="px-1 rounded bg-surface-container text-on-surface-variant font-medium" title="4 Low Issues">•4</span>
+<span class="text-outline text-[10px] ml-1">(14)</span>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-medium text-on-surface w-7">82%</span>
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary" style="width: 82%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low text-on-surface font-label-caption text-label-caption border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Analysed</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">14m ago</td>
+<td class="px-space-sm text-right pr-space-md relative">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[16px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- ROW 2: Navigation-Display-Spec-v1.1.docx (MID-PROCESSING) -->
+<tr class="h-10 bg-surface-container-low/40 hover:bg-surface-container-low transition-colors group">
+<td class="px-space-sm text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">description</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">
+                    Navigation-Display-Spec-v1.1.docx
+                  </span>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Subsystem</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">2.1 MB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">45 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">198</td>
+<td class="px-space-sm">
+<span class="font-code-compact text-code-compact text-outline">—</span>
+</td>
+<td class="px-space-sm" colspan="1">
+<div class="flex flex-col gap-1 w-32">
+<div class="flex items-center justify-between text-[10px] font-code-compact text-outline">
+<span>Decomposing</span>
+<span class="text-on-surface font-medium">64%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary animate-pulse" style="width: 64%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-tertiary-fixed/50 text-on-tertiary-fixed-variant font-label-caption text-label-caption border border-tertiary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>
+<span>Processing</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">2h ago</td>
+<td class="px-space-sm text-right pr-space-md">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Cancel operation" type="button">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+</button>
+</td>
+</tr>
+<!-- ROW 3: Engine-Control-SRS-Draft.pdf WITH CONTEXTUAL FLYOUT / DROPDOWN DEMO -->
+<tr class="h-10 bg-surface-container-high/30 hover:bg-surface-container-high/50 transition-colors group relative">
+<td class="px-space-sm text-center">
+<input checked="" class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-error-container/40 text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">picture_as_pdf</span>
+</div>
+<div class="flex flex-col">
+<a class="font-headline-sm text-headline-sm text-on-surface hover:text-secondary truncate" href="#">
+                    Engine-Control-SRS-Draft.pdf
+                  </a>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Interface Control</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">3.4 MB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">84 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">320</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-1 font-code-compact text-code-compact">
+<span class="px-1 rounded bg-surface-container text-outline font-medium" title="0 Critical">•0</span>
+<span class="px-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-medium" title="2 Medium Issues">•2</span>
+<span class="px-1 rounded bg-surface-container text-on-surface-variant font-medium" title="4 Low Issues">•4</span>
+<span class="text-outline text-[10px] ml-1">(6)</span>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-medium text-on-surface w-7">91%</span>
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary" style="width: 91%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low text-on-surface font-label-caption text-label-caption border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Analysed</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">Yesterday</td>
+<td class="px-space-sm text-right pr-space-md relative">
+<button class="p-1 rounded bg-surface-container text-on-surface font-medium hover:bg-surface-container-high transition-colors" title="More options" type="button">
+<span class="material-symbols-outlined text-[16px]">more_horiz</span>
+</button>
+<!-- Mock Active Contextual Dropdown Menu -->
+<div class="absolute right-space-md top-9 w-48 bg-surface-container-lowest border border-outline-variant/60 rounded shadow-md z-30 py-1 text-left flex flex-col">
+<button class="px-space-sm py-1.5 text-body-compact font-body-compact hover:bg-surface-container-low text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">rule</span>
+<span>Analyse</span>
+</button>
+<button class="px-space-sm py-1.5 text-body-compact font-body-compact hover:bg-surface-container-low text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">view_list</span>
+<span>View requirements</span>
+</button>
+<button class="px-space-sm py-1.5 text-body-compact font-body-compact hover:bg-surface-container-low text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">compare_arrows</span>
+<span>Compare versions</span>
+</button>
+<button class="px-space-sm py-1.5 text-body-compact font-body-compact hover:bg-surface-container-low text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">download</span>
+<span>Download report</span>
+</button>
+<div class="h-px bg-outline-variant/40 my-1"></div>
+<button class="px-space-sm py-1.5 text-body-compact font-body-compact hover:bg-error-container/40 text-error flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+<span>Delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: Telemetry-Interface-v3.0.txt -->
+<tr class="h-10 hover:bg-surface-container-low/60 transition-colors group">
+<td class="px-space-sm text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-surface-container-low text-outline flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">article</span>
+</div>
+<div class="flex flex-col">
+<a class="font-headline-sm text-headline-sm text-on-surface hover:text-secondary truncate" href="#">
+                    Telemetry-Interface-v3.0.txt
+                  </a>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Interface Control</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">640 KB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">28 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">142</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-1 font-code-compact text-code-compact">
+<span class="px-1 rounded bg-error-container/70 text-on-error-container font-medium" title="3 Critical">•3</span>
+<span class="px-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-medium" title="9 Medium">•9</span>
+<span class="px-1 rounded bg-surface-container text-on-surface-variant font-medium" title="7 Low">•7</span>
+<span class="text-outline text-[10px] ml-1">(19)</span>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-medium text-on-surface w-7">64%</span>
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-tertiary-container" style="width: 64%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low text-on-surface font-label-caption text-label-caption border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Analysed</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">3d ago</td>
+<td class="px-space-sm text-right pr-space-md">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[16px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- ROW 5: Flight-Safety-Requirements-v0.9.docx (FAILED / PARSE ERROR) -->
+<tr class="h-10 bg-error-container/10 hover:bg-error-container/20 transition-colors group">
+<td class="px-space-sm text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">description</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">
+                    Flight-Safety-Requirements-v0.9.docx
+                  </span>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Safety SRS</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">5.1 MB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">130 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">356</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-1 font-code-compact text-code-compact">
+<span class="px-1 rounded bg-error-container text-on-error-container font-medium" title="3 Critical">•3</span>
+<span class="px-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-medium" title="11 Medium">•11</span>
+<span class="px-1 rounded bg-surface-container text-on-surface-variant font-medium" title="10 Low">•10</span>
+<span class="text-outline text-[10px] ml-1">(24)</span>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-medium text-error w-7">48%</span>
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-error" style="width: 48%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-caption text-label-caption border border-error/30" title="Corrupt section headers on page 84">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+<span>Parse error</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">Oct 24</td>
+<td class="px-space-sm text-right pr-space-md">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Retry parse" type="button">
+<span class="material-symbols-outlined text-[16px]">replay</span>
+</button>
+</td>
+</tr>
+<!-- ROW 6: Autopilot-Pitch-Roll-Spec.pdf -->
+<tr class="h-10 hover:bg-surface-container-low/60 transition-colors group">
+<td class="px-space-sm text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-error-container/40 text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">picture_as_pdf</span>
+</div>
+<div class="flex flex-col">
+<a class="font-headline-sm text-headline-sm text-on-surface hover:text-secondary truncate" href="#">
+                    Autopilot-Pitch-Roll-Spec.pdf
+                  </a>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Subsystem</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">1.9 MB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">36 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">164</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-1 font-code-compact text-code-compact">
+<span class="px-1 rounded bg-error-container/70 text-on-error-container font-medium" title="1 Critical">•1</span>
+<span class="px-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-medium" title="4 Medium">•4</span>
+<span class="px-1 rounded bg-surface-container text-on-surface-variant font-medium" title="3 Low">•3</span>
+<span class="text-outline text-[10px] ml-1">(8)</span>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-medium text-on-surface w-7">86%</span>
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary" style="width: 86%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low text-on-surface font-label-caption text-label-caption border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Analysed</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">Oct 22</td>
+<td class="px-space-sm text-right pr-space-md">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[16px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- ROW 7: Comm-Datalink-Security-v1.0.md -->
+<tr class="h-10 hover:bg-surface-container-low/60 transition-colors group">
+<td class="px-space-sm text-center">
+<input class="rounded border-outline-variant/60 text-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded bg-surface-container-low text-outline flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]">code</span>
+</div>
+<div class="flex flex-col">
+<a class="font-headline-sm text-headline-sm text-on-surface hover:text-secondary truncate" href="#">
+                    Comm-Datalink-Security-v1.0.md
+                  </a>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<span class="font-label-caption text-label-caption px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Security SRS</span>
+</td>
+<td class="px-space-sm font-code-compact text-code-compact text-on-surface-variant">890 KB</td>
+<td class="px-space-sm font-code-compact text-code-compact text-outline">19 pp</td>
+<td class="px-space-sm font-code-compact text-code-compact font-medium text-on-surface">96</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-1 font-code-compact text-code-compact">
+<span class="px-1 rounded bg-error-container/70 text-on-error-container font-medium" title="5 Critical">•5</span>
+<span class="px-1 rounded bg-tertiary-fixed text-on-tertiary-fixed font-medium" title="6 Medium">•6</span>
+<span class="px-1 rounded bg-surface-container text-on-surface-variant font-medium" title="2 Low">•2</span>
+<span class="text-outline text-[10px] ml-1">(13)</span>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact font-medium text-on-surface w-7">71%</span>
+<div class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary" style="width: 71%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-sm">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low text-on-surface font-label-caption text-label-caption border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Analysed</span>
+</div>
+</td>
+<td class="px-space-sm font-label-caption text-label-caption text-outline">Oct 19</td>
+<td class="px-space-sm text-right pr-space-md">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[16px]">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Data Table Pagination / Metadata Footer -->
+<div class="h-10 px-space-md border-t border-outline-variant/60 bg-surface-container-lowest flex items-center justify-between text-label-caption font-label-caption text-outline">
+<div class="flex items-center gap-space-sm">
+<span>Showing 1–7 of 18 documents</span>
+<span>•</span>
+<span class="text-on-surface font-code-compact text-code-compact">1 selected</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2 py-1 rounded hover:bg-surface-container text-on-surface-variant disabled:opacity-40" disabled="">
+          Previous
+        </button>
+<span class="px-2 py-1 font-code-compact text-code-compact text-on-surface font-medium">1 / 3</span>
+<button class="px-2 py-1 rounded hover:bg-surface-container text-on-surface hover:text-secondary">
+          Next
+        </button>
+</div>
+</div>
+</div>
+<!-- Empty State Preview Collapsible Drawer (Specification Component) -->
+<div class="mt-space-lg flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">
+        Workspace Preset &amp; Component Verification
+      </span>
+<button class="text-label-caption font-label-caption text-secondary hover:underline" id="toggle-empty-state" type="button">
+        Toggle Empty State View
+      </button>
+</div>
+<!-- The requested clean minimal empty state card -->
+<div class="p-8 rounded bg-surface-container-lowest border border-outline-variant/60 flex flex-col items-center justify-center text-center" id="empty-state-card">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-outline mb-space-sm">
+<span class="material-symbols-outlined text-[20px]">folder_off</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface mb-1">No documents in this workspace</p>
+<p class="font-label-text text-label-text text-outline max-w-sm mb-space-md">
+        Upload an existing SRS document in standard format to trigger automated ISO 29148 conformance checks.
+      </p>
+<button class="h-8 px-3 rounded bg-primary text-on-primary hover:bg-primary-container font-label-text text-label-text flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Upload your first SRS</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  // Ensure Sidebar reflects Documents view active status
+  (function initDocumentView() {
+    const navLinks = document.querySelectorAll('aside nav a');
+    navLinks.forEach(link => {
+      if (link.getAttribute('data-path') === 'documents') {
+        link.className = "flex items-center justify-between px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r";
+      } else {
+        link.className = "flex items-center justify-between px-3 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors";
+      }
+    });
+
+    // Toggle Empty State Card display demo
+    const toggleBtn = document.getElementById('toggle-empty-state');
+    const emptyCard = document.getElementById('empty-state-card');
+    if (toggleBtn && emptyCard) {
+      toggleBtn.addEventListener('click', () => {
+        emptyCard.classList.toggle('hidden');
+      });
+    }
+  })();
+</script></main></div></body></html>

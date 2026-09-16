@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:18px;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "primary-fixed": "#d8e3fb",
+        "inverse-surface": "#213145",
+        "tertiary-container": "#35260c",
+        "tertiary": "#1e1200",
+        "surface-container-high": "#dce9ff",
+        "on-secondary": "#ffffff",
+        "on-secondary-fixed": "#0f0069",
+        "primary-container": "#1e293b",
+        "background": "#f8f9ff",
+        "on-secondary-fixed-variant": "#3323cc",
+        "surface-container-low": "#eff4ff",
+        "on-surface-variant": "#45474c",
+        "tertiary-fixed": "#fadfb8",
+        "outline-variant": "#c5c6cd",
+        "on-tertiary-container": "#a38c6a",
+        "surface-container-highest": "#d3e4fe",
+        "surface-dim": "#cbdbf5",
+        "on-primary-fixed-variant": "#3c475a",
+        "surface-container-lowest": "#ffffff",
+        "surface": "#f8f9ff",
+        "tertiary-fixed-dim": "#ddc39d",
+        "primary-fixed-dim": "#bcc7de",
+        "on-surface": "#0b1c30",
+        "on-error-container": "#93000a",
+        "secondary": "#4b41e1",
+        "on-error": "#ffffff",
+        "inverse-on-surface": "#eaf1ff",
+        "secondary-fixed": "#e2dfff",
+        "on-primary": "#ffffff",
+        "error": "#ba1a1a",
+        "surface-container": "#e5eeff",
+        "on-secondary-container": "#fffbff",
+        "surface-bright": "#f8f9ff",
+        "on-primary-fixed": "#111c2d",
+        "secondary-container": "#645efb",
+        "on-background": "#0b1c30",
+        "primary": "#091426",
+        "outline": "#75777d",
+        "secondary-fixed-dim": "#c3c0ff",
+        "surface-tint": "#545f73",
+        "on-primary-container": "#8590a6",
+        "inverse-primary": "#bcc7de",
+        "surface-variant": "#d3e4fe",
+        "on-tertiary-fixed": "#271902",
+        "on-tertiary-fixed-variant": "#564427",
+        "on-tertiary": "#ffffff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin": "1.5rem",
+        "space-xl": "2rem",
+        "space-xs": "0.25rem",
+        "space-md": "0.75rem",
+        "space-sm": "0.5rem",
+        "space-lg": "1.25rem",
+        "gutter": "1rem"
+      },
+      "fontFamily": {
+        "metric-display": ["Inter"],
+        "label-text": ["Inter"],
+        "body-compact": ["Inter"],
+        "headline-sm": ["Inter"],
+        "body-base": ["Inter"],
+        "code-base": ["JetBrains Mono"],
+        "label-caption": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "code-compact": ["JetBrains Mono"]
+      },
+      "fontSize": {
+        "metric-display": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "label-text": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "body-compact": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "body-base": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "code-base": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "label-caption": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+        "headline-lg": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "code-compact": ["11px", {"lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+      }
+    }
+  }
+}</script></head><body class="bg-surface font-body-base text-body-base text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-md border-b border-outline-variant/40 flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm overflow-hidden"><img alt="SRS Guardian Shield Logo" class="h-6 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><span class="font-headline-sm text-headline-sm text-on-surface truncate">SRS Guardian</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/60">v1.4</span></div><div class="p-space-sm border-b border-outline-variant/40"><div class="px-2 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:bg-surface-container"><div class="flex items-center gap-space-sm overflow-hidden"><span class="material-symbols-outlined text-outline text-[16px]">corporate_fare</span><div class="truncate"><p class="font-label-caption text-label-caption text-outline leading-none uppercase">Workspace</p><p class="font-label-text text-label-text text-on-surface truncate leading-tight mt-0.5">Acme Avionics / FlightControl-SRS</p></div></div><span class="material-symbols-outlined text-outline text-[16px]">unfold_more</span></div></div><nav class="flex flex-col gap-0.5 p-space-sm" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r"><a aria-current="page" class="flex items-center justify-between px-space-sm py-1.5 rounded-lg transition-colors bg-surface-container-high text-on-surface font-headline-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-secondary before:rounded-r" data-path="dashboard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">dashboard</span><span class="font-body-compact text-body-compact">Dashboard</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documents" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">description</span><span class="font-body-compact text-body-compact">Documents</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/40">14</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="requirement-viewer" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">view_list</span><span class="font-body-compact text-body-compact">Requirement Viewer</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="analysis" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">rule</span><span class="font-body-compact text-body-compact">Analysis</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container border border-error/20">38</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ai-suggestions" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">smart_toy</span><span class="font-body-compact text-body-compact">AI Suggestions</span></div><span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed border border-secondary/20">12</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="version-comparison" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">compare_arrows</span><span class="font-body-compact text-body-compact">Version Comparison</span></div></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reports" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined">summarize</span><span class="font-body-compact text-body-compact">Reports</span></div></a></nav></div><div class="flex flex-col border-t border-outline-variant/40 p-space-sm gap-space-xs"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-compact text-body-compact">Settings</span></a><div class="flex items-center justify-between px-space-sm py-1 text-on-surface-variant"><a class="flex items-center gap-space-xs hover:text-on-surface text-label-caption font-label-caption" data-path="documentation" href="#"><span class="material-symbols-outlined text-[14px]">help</span><span>Docs &amp; Standards</span></a><span class="font-code-compact text-code-compact text-outline">⌘K</span></div><div class="mt-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between"><div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-secondary"></div><span class="font-code-compact text-code-compact text-on-surface-variant">ISO 29148 Engine</span></div><span class="font-code-compact text-code-compact text-outline">Online</span></div></div></aside><div class="pl-60"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest border-b border-outline-variant/40 z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-sm"><img alt="SRS Guardian Shield Logo" class="h-5 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WR_SaRJcoRRQIyiV8KqQ-Hmg5tKxA46-ddwzPDsJc6inyk96uZ2VQ3KdsCEmLtF8dKSHRTOi7nCekDpraaD2-vsTAcNNfScB0FCGREGU2WzaqwY9luAdt8Pm0dr3N64lH8FsNzhaFs20lLk1QA17b65XMXN_Mgi0CmHjpXJ1shHF10Vy8Nbcl7jKxdNnYW8PFnZN_-3a1coMSsi7xCz1qLyfnbjawiSFFNKXq0n2aI5cwD1IypkX2YtYs"/><div class="flex items-center gap-1.5 text-label-text font-label-text text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">SRS Guardian</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Projects</span><span class="text-outline">/</span><span class="hover:text-on-surface cursor-pointer">Avionics Suite</span><span class="text-outline">/</span><span class="text-on-surface font-headline-sm">Workspace</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm w-72 h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/60 focus-within:border-secondary transition-all"><span class="material-symbols-outlined text-outline text-[16px]">search</span><input class="w-full bg-transparent border-none outline-none text-body-compact font-body-compact text-on-surface placeholder:text-outline" placeholder="Search rules, requirements..." type="text"/><span class="font-code-compact text-code-compact px-1 py-0.5 rounded bg-surface-container-lowest text-outline border border-outline-variant/60">⌘K</span></div><div class="h-4 w-px bg-outline-variant/50"></div><div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-low text-label-caption font-label-caption text-on-surface-variant border border-outline-variant/40"><div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div><span>Sync idle</span></div><button aria-label="Notifications" class="relative p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-1.5 h-1.5 bg-secondary rounded-full"></span></button><button aria-label="Theme Switcher" class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors" type="button"><span class="material-symbols-outlined">light_mode</span></button><div class="flex items-center gap-space-sm pl-1"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-text text-label-text text-on-surface leading-tight">Alex Chen</span><span class="font-label-caption text-label-caption text-outline leading-tight">Lead Architect</span></div></div></div></header><main class="w-full pt-12 min-h-screen bg-surface px-space-lg py-space-lg"><div class="flex flex-col w-full gap-space-md">
+<!-- TOP CONTEXT & KPI BAR (Level 1 Surface) -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-space-md flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<!-- Left: Document Context & Standard -->
+<div class="flex flex-wrap items-center gap-space-md min-w-0">
+<div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface cursor-pointer">
+<span class="material-symbols-outlined text-secondary text-[18px]">menu_book</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-xs sm:max-w-md">FMS-Core-System-v2.4.pdf</span>
+<span class="font-code-compact text-code-compact text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">412 reqs</span>
+<span class="material-symbols-outlined text-outline text-[16px]">expand_more</span>
+</div>
+<div class="h-4 w-px bg-outline-variant/50 hidden sm:block"></div>
+<div class="flex items-center gap-1.5 text-label-caption font-label-caption text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-outline">history</span>
+<span>Analysed: <strong class="font-semibold text-on-surface">Today, 14:32 UTC</strong></span>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed font-code-compact text-code-compact">
+<span class="material-symbols-outlined text-[13px]">verified</span>
+<span>ISO/IEC/IEEE 29148:2018</span>
+</div>
+</div>
+<!-- Right: KPI Severity Strip + Actions -->
+<div class="flex flex-wrap items-center gap-space-md">
+<!-- Severity Badges Strip -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-1.5 pr-2 mr-1">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Issues</span>
+<span class="font-code-compact text-code-compact font-bold text-on-surface">84</span>
+</div>
+<div class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-code-compact text-code-compact">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span>Crit: 12</span>
+</div>
+<div class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-code-compact text-code-compact">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
+<span>Med: 41</span>
+</div>
+<div class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-code-compact text-code-compact">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span>Low: 31</span>
+</div>
+</div>
+<!-- Search and Generate Report -->
+<div class="flex items-center gap-space-xs">
+<div class="flex items-center gap-1.5 h-8 px-2 rounded-lg bg-surface-container-low text-body-compact">
+<span class="material-symbols-outlined text-outline text-[16px]">filter_list</span>
+<input class="w-36 bg-transparent outline-none text-on-surface placeholder:text-outline font-body-compact text-body-compact" placeholder="Filter findings..." type="text"/>
+</div>
+<button class="h-8 px-3 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-text text-label-text flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span>Generate Report</span>
+</button>
+</div>
+</div>
+</div>
+<!-- VERIFICATION WORKSPACE TABS -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-1 flex items-center justify-between gap-2 overflow-x-auto select-none">
+<div class="flex items-center gap-1" id="analysis-tabs">
+<button class="analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors bg-surface-container text-on-surface font-semibold" onclick="switchAnalysisTab('ambiguity', this)" type="button">
+<span class="material-symbols-outlined text-[16px]">help_outline</span>
+<span>Ambiguity</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-lowest text-on-surface-variant">34</span>
+</button>
+<button class="analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface" onclick="switchAnalysisTab('duplicates', this)" type="button">
+<span class="material-symbols-outlined text-[16px]">copy_all</span>
+<span>Duplicates &amp; Redundancy</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant">18</span>
+</button>
+<button class="analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface" onclick="switchAnalysisTab('contradictions', this)" type="button">
+<span class="material-symbols-outlined text-[16px]">sync_problem</span>
+<span>Contradictions</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-error-container text-on-error-container">9</span>
+</button>
+<button class="analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface" onclick="switchAnalysisTab('readability', this)" type="button">
+<span class="material-symbols-outlined text-[16px]">format_align_left</span>
+<span>Readability &amp; Voice</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant">15</span>
+</button>
+<button class="analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface" onclick="switchAnalysisTab('structure', this)" type="button">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+<span>Structural Gaps</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-surface-container-low text-on-surface-variant">8</span>
+</button>
+</div>
+<!-- Active view meta indicator -->
+<div class="hidden lg:flex items-center gap-2 px-3 text-label-caption font-label-caption text-outline">
+<span>Rule Engine: <strong>AST v4.2.1-strict</strong></span>
+<span>•</span>
+<span>False Positive Rate: <strong>1.4%</strong></span>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- TAB VIEW 1: AMBIGUITY (Default Visible)                   -->
+<!-- ======================================================== -->
+<div class="flex flex-col gap-space-md" id="tab-pane-ambiguity">
+<!-- Sub-header / Filter Toolbar -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-lowest p-space-sm px-space-md rounded-lg">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-label-caption text-label-caption text-outline uppercase tracking-wider">Filters:</span>
+<div class="flex items-center gap-1 px-2 py-1 rounded bg-surface-container text-on-surface font-label-caption text-label-caption cursor-pointer hover:bg-surface-container-high">
+<span>Severity: All (12 Crit, 18 Med, 4 Low)</span>
+<span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+</div>
+<div class="flex items-center gap-1 px-2 py-1 rounded bg-surface-container-low text-on-surface-variant font-label-caption text-label-caption cursor-pointer hover:bg-surface-container">
+<span>Category: Vague Quantifier &amp; Adverb</span>
+<span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+</div>
+<div class="flex items-center gap-1 px-2 py-1 rounded bg-surface-container-low text-on-surface-variant font-label-caption text-label-caption cursor-pointer hover:bg-surface-container">
+<span>Status: Unresolved Only</span>
+<span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="h-7 px-2.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface font-label-caption text-label-caption flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+<span>Mark Visible Verified</span>
+</button>
+</div>
+</div>
+<!-- Issue Cards Container -->
+<div class="flex flex-col gap-space-sm">
+<!-- CARD 1: AMBIGUITY - EXPANDED STATE (CRITICAL) -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-space-md flex flex-col gap-space-md transition-all">
+<!-- Card Header -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-error flex-shrink-0" title="Critical Severity"></span>
+<span class="font-code-base text-code-base font-semibold text-on-surface bg-surface-container-low px-2 py-0.5 rounded">REQ-FMS-014</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-error-container text-on-error-container">Subjective Adverb</span>
+<span class="font-code-compact text-code-compact text-outline">Confidence: 98%</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed font-medium">AI Detected</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caption text-label-caption text-outline">Section 2.4.1 Autopilot Disconnect Rules</span>
+<button class="p-1 text-outline hover:text-on-surface rounded transition-colors" title="Collapse issue card" type="button">
+<span class="material-symbols-outlined text-[18px]">expand_less</span>
+</button>
+</div>
+</div>
+<!-- Raw Text Box with Problematic Term Highlighted -->
+<div class="p-space-md rounded bg-surface-container-low font-body-base text-body-base leading-relaxed text-on-surface">
+          "The autopilot shall disengage <span class="bg-error-container text-on-error-container px-1 py-0.5 rounded font-semibold inline-flex items-center gap-0.5">quickly<span class="material-symbols-outlined text-[12px]">warning</span></span> whenever pitch rate exceeds 15 deg/s or roll rate exceeds 30 deg/s to prevent structural overstress."
+        </div>
+<!-- Diagnostic & Remediation Panel -->
+<div class="bg-surface rounded-lg p-space-md flex flex-col gap-space-sm">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div>
+<p class="font-label-caption text-label-caption text-outline uppercase tracking-wider mb-1">Standard Rule Triggered</p>
+<p class="font-code-compact text-code-compact font-semibold text-on-surface">ISO-29148-R14: Unverifiable Latency Specifier</p>
+<p class="font-body-compact text-body-compact text-on-surface-variant mt-1 leading-snug">
+                Subjective adverb <span class="font-code-compact text-code-compact font-semibold text-error">"quickly"</span> prevents deterministic test bench synthesis and upper-bound timing verification under DO-178C Level A.
+              </p>
+</div>
+<div>
+<p class="font-label-caption text-label-caption text-outline uppercase tracking-wider mb-1">Recommended Formal Rewrite</p>
+<div class="p-2.5 rounded bg-surface-container-lowest font-body-compact text-body-compact text-on-surface leading-snug">
+                "The autopilot shall disengage <span class="font-semibold text-on-surface bg-surface-container-high px-1 py-0.5 rounded">within 50 ms</span> whenever pitch rate exceeds 15 deg/s or roll rate exceeds 30 deg/s."
+              </div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs mt- space-xs">
+<div class="flex items-center gap-2">
+<button class="h-7 px-3 rounded bg-primary text-on-primary hover:bg-primary-container font-label-caption text-label-caption font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">check</span>
+<span>Accept Rewrite</span>
+</button>
+<button class="h-7 px-3 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-caption text-label-caption flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+<span>Custom Edit</span>
+</button>
+<button class="h-7 px-3 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-caption text-label-caption flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">close</span>
+<span>Reject Suggestion</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact text-outline">Telemetry: Latency upper bound extracted from ICD-NAV-04</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD 2: AMBIGUITY - COLLAPSED STATE (MEDIUM) -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex flex-wrap items-center gap-space-sm min-w-0">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-container flex-shrink-0" title="Medium Severity"></span>
+<span class="font-code-base text-code-base font-semibold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-NAV-089</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed">Vague Timeframe</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed">AI</span>
+<span class="font-body-compact text-body-compact text-on-surface-variant truncate max-w-md xl:max-w-xl">
+            "The system shall switch telemetry sources <span class="bg-tertiary-fixed text-on-tertiary-fixed px-1 py-0.5 rounded font-medium">without disrupting</span> active guidance within a <span class="bg-tertiary-fixed text-on-tertiary-fixed px-1 py-0.5 rounded font-medium">reasonable timeframe</span>."
+          </span>
+</div>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Pending Human Audit</span>
+<span class="material-symbols-outlined text-outline text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- CARD 3: AMBIGUITY - HUMAN CONFIRMED STATE -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-wrap items-center gap-space-sm min-w-0">
+<span class="w-2.5 h-2.5 rounded-full bg-outline flex-shrink-0" title="Low Severity"></span>
+<span class="font-code-base text-code-base font-semibold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-COMM-102</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Passive / Weak Auxiliary</span>
+<span class="font-body-compact text-body-compact text-on-surface truncate max-w-md xl:max-w-xl">
+            "Data buffers <span class="line-through text-outline">should be periodically cleared</span> shall be flushed every 250ms by the Link Controller."
+          </span>
+</div>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-caption text-label-caption font-medium">
+<span class="material-symbols-outlined text-secondary text-[14px]">verified_user</span>
+<span>Human Confirmed (Alex Chen)</span>
+</div>
+<button class="p-1 text-outline hover:text-on-surface rounded" title="View historical audit record" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- TAB VIEW 2: DUPLICATES & REDUNDANCY                      -->
+<!-- ======================================================== -->
+<div class="hidden flex-col gap-space-md" id="tab-pane-duplicates">
+<!-- Duplicate Header Strip -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-lowest p-space-sm px-space-md rounded-lg">
+<div class="flex items-center gap-space-md">
+<span class="font-headline-sm text-headline-sm text-on-surface">Semantic Redundancy &amp; Duplicate Pairs</span>
+<div class="flex items-center gap-2 px-2 py-1 rounded bg-surface-container-low text-label-caption font-label-caption">
+<span class="text-outline">Similarity Threshold:</span>
+<span class="font-code-compact text-code-compact font-bold text-on-surface">82%</span>
+<span class="text-outline">(3 Pairs Detected)</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="h-7 px-2.5 rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-caption text-label-caption" type="button">Re-run Embedding Pass</button>
+</div>
+</div>
+<!-- Duplicate Pair Container (Side-by-Side Comparison) -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-space-md flex flex-col gap-space-md">
+<!-- Pair Meta Header -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm p-space-xs rounded bg-surface-container-low px-space-md">
+<div class="flex items-center gap-2">
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-semibold">Potential Duplicate</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed">AI</span>
+<span class="font-code-compact text-code-compact font-bold text-secondary">89% Semantic Similarity</span>
+</div>
+<!-- Micro visual comparison indicator -->
+<div class="flex items-center gap-2 w-48">
+<div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 89%;"></div>
+</div>
+<span class="font-code-compact text-code-compact text-outline">cosine: 0.894</span>
+</div>
+</div>
+<!-- Split View Comparison Columns -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-md">
+<!-- Left Item -->
+<div class="flex flex-col gap-2 p-space-md rounded-lg bg-surface">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-base text-code-base font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-FMS-038</span>
+<span class="font-label-caption text-label-caption text-outline">v2.4 • Section 3.2.1</span>
+</div>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Active Document</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface leading-relaxed mt-1">
+            "The flight guidance system shall <span class="bg-surface-container-high text-on-surface font-semibold px-1 py-0.5 rounded">compute lateral waypoint steering vectors</span> at a minimum <span class="bg-surface-container-highest text-on-surface font-semibold px-1 py-0.5 rounded">cycle frequency of 20 Hz</span>."
+          </p>
+<div class="mt-2 pt-2 flex items-center justify-between text-label-caption font-label-caption text-outline">
+<span>Module: Trajectory Gen</span>
+<span>Allocated: NAV_FPGA_01</span>
+</div>
+</div>
+<!-- Right Item -->
+<div class="flex flex-col gap-2 p-space-md rounded-lg bg-surface">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-base text-code-base font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-NAV-112</span>
+<span class="font-label-caption text-label-caption text-outline">v2.1 • Section 4.1.2</span>
+</div>
+<span class="font-label-caption text-label-caption text-outline">Referenced Document</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface leading-relaxed mt-1">
+            "<span class="bg-surface-container-high text-on-surface font-semibold px-1 py-0.5 rounded">Lateral steering guidance vectors shall be computed</span> by the navigation sub-unit at <span class="bg-surface-container-highest text-on-surface font-semibold px-1 py-0.5 rounded">no less than 20 times per second</span>."
+          </p>
+<div class="mt-2 pt-2 flex items-center justify-between text-label-caption font-label-caption text-outline">
+<span>Module: Guidance Unit</span>
+<span>Allocated: NAV_CPU_B</span>
+</div>
+</div>
+</div>
+<!-- Action Triage Bar -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 rounded bg-primary text-on-primary hover:bg-primary-container font-label-caption text-label-caption font-semibold flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">merge</span>
+<span>Merge Into REQ-FMS-038</span>
+</button>
+<button class="h-8 px-3 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-caption text-label-caption flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility_off</span>
+<span>Keep Both (Mark False Positive)</span>
+</button>
+<button class="h-8 px-3 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-caption text-label-caption transition-colors" type="button">
+            Reject Pairing
+          </button>
+</div>
+<span class="font-label-caption text-label-caption text-outline">Recommended: Consolidate to eliminate redundant verification testing overhead.</span>
+</div>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- TAB VIEW 3: CONTRADICTIONS & LOGICAL INVARIANTS           -->
+<!-- ======================================================== -->
+<div class="hidden flex-col gap-space-md" id="tab-pane-contradictions">
+<!-- Header -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-lowest p-space-sm px-space-md rounded-lg">
+<div class="flex items-center gap-space-md">
+<span class="font-headline-sm text-headline-sm text-on-surface">Deterministic Constraint Conflicts &amp; Invariants</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-error-container text-on-error-container font-semibold">Potential Contradiction</span>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed">AI</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-code-compact text-code-compact text-outline">Formal Solver: Z3-SMT Verification Engine</span>
+</div>
+</div>
+<!-- Contradiction Container -->
+<div class="w-full bg-surface-container-lowest rounded-lg p-space-md flex flex-col gap-space-md">
+<!-- Side by Side Constraints with Center Conflict Indicator -->
+<div class="grid grid-cols-1 xl:grid-cols-7 gap-space-md items-center">
+<!-- Left Constraint (3 cols) -->
+<div class="xl:col-span-3 p-space-md rounded-lg bg-surface flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-code-base text-code-base font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-SEC-031</span>
+<span class="font-label-caption text-label-caption text-outline">Security §12.2</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface leading-snug">
+            "Password length must be <span class="font-semibold bg-error-container text-on-error-container px-1 rounded">at least 8 characters</span> and exactly 6 numeric digits."
+          </p>
+<div class="mt-2 p-2 rounded bg-surface-container font-code-compact text-code-compact text-on-surface">
+<span class="text-outline uppercase text-[10px] block font-mono">AST Extracted Constraint:</span>
+<span class="text-secondary font-bold">password.length &gt;= 8 &amp;&amp; password.digits == 6</span>
+</div>
+</div>
+<!-- Center Conflict Node (1 col) -->
+<div class="xl:col-span-1 flex flex-col items-center justify-center p-2 text-center gap-1">
+<div class="w-9 h-9 rounded-full bg-error-container text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">error</span>
+</div>
+<span class="font-code-compact text-code-compact font-bold text-error uppercase leading-tight mt-1">LOGICAL CONFLICT</span>
+<span class="font-label-caption text-label-caption text-outline leading-none">Unsatisfiable Bound</span>
+<span class="font-code-compact text-code-compact text-secondary mt-1">96% Conf.</span>
+</div>
+<!-- Right Constraint (3 cols) -->
+<div class="xl:col-span-3 p-space-md rounded-lg bg-surface flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-code-base text-code-base font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-SEC-049</span>
+<span class="font-label-caption text-label-caption text-outline">Security §12.4</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface leading-snug">
+            "The credential management module shall enforce a minimum total string length of <span class="font-semibold bg-error-container text-on-error-container px-1 rounded">12 alphanumeric characters</span>."
+          </p>
+<div class="mt-2 p-2 rounded bg-surface-container font-code-compact text-code-compact text-on-surface">
+<span class="text-outline uppercase text-[10px] block font-mono">AST Extracted Constraint:</span>
+<span class="text-secondary font-bold">password.total_length &gt;= 12</span>
+</div>
+</div>
+</div>
+<!-- Token-Level Attribution Box -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline">Finding Explanation &amp; Token Attribution</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-surface-container text-on-surface">SMT Satisfiability Result: UNSAT</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface leading-relaxed">
+          The upper constraint set allows valid authentication credentials of length 8 through 11 in <span class="font-code-compact text-code-compact bg-surface-container px-1 py-0.5 rounded">REQ-SEC-031</span>, but <span class="font-code-compact text-code-compact bg-surface-container px-1 py-0.5 rounded">REQ-SEC-049</span> unconditionally rejects all strings with length &lt; 12. Systems adhering to §12.2 will fail compliance verification under §12.4.
+        </p>
+</div>
+<!-- Action Footer -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 rounded bg-primary text-on-primary hover:bg-primary-container font-label-caption text-label-caption font-semibold flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">balance</span>
+<span>Resolve Conflict (Elevate Bound)</span>
+</button>
+<button class="h-8 px-3 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-caption text-label-caption flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">person_add</span>
+<span>Assign to Security Lead</span>
+</button>
+<button class="h-8 px-3 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-caption text-label-caption transition-colors" type="button">
+            Suppress Finding
+          </button>
+</div>
+<div class="flex items-center gap-1.5 text-label-caption font-label-caption text-outline">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+<span>Affects: DO-330 Qualified Toolchain Output</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- TAB VIEW 4: READABILITY & STYLE                          -->
+<!-- ======================================================== -->
+<div class="hidden flex-col gap-space-md" id="tab-pane-readability">
+<div class="bg-surface-container-lowest rounded-lg p-space-md flex items-center justify-between">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Flesch-Kincaid &amp; Technical Readability Metric</h4>
+<p class="font-body-compact text-body-compact text-on-surface-variant mt-0.5">15 requirements exhibit high sentence complexity, passive voice, or excessive nested dependent clauses.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-label-caption text-label-caption uppercase text-outline block">Avg Complexity</span>
+<span class="font-metric-display text-metric-display text-on-surface">14.2</span>
+</div>
+</div>
+</div>
+<!-- Item -->
+<div class="bg-surface-container-lowest rounded-lg p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-base text-code-base font-semibold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-FMS-218</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Excessive Length (64 words)</span>
+</div>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed">AI</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface leading-relaxed">
+        "Whenever the secondary bus drops below 24 VDC during take-off roll while either throttle lever is advanced past 75% detent, the secondary bus tie relay shall be opened unless the tertiary APU backup breaker has been manually tripped by the flight crew or primary hydraulic pressure falls below 2,100 PSI."
+      </p>
+<div class="mt-2 p-2 rounded bg-surface-container-low flex items-center justify-between">
+<span class="font-label-caption text-label-caption text-outline">Recommendation: Split into 3 discrete, single-sentence requirements per ISO 29148 §5.2.4.</span>
+<button class="h-7 px-2.5 rounded bg-primary text-on-primary font-label-caption text-label-caption" type="button">Auto-Decompose</button>
+</div>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- TAB VIEW 5: STRUCTURAL GAPS                              -->
+<!-- ======================================================== -->
+<div class="hidden flex-col gap-space-md" id="tab-pane-structure">
+<div class="bg-surface-container-lowest rounded-lg p-space-md flex items-center justify-between">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Missing Invariants &amp; Untraced Inputs</h4>
+<p class="font-body-compact text-body-compact text-on-surface-variant mt-0.5">8 specifications lack defined exception handlers, return states, or upstream interface ICD mappings.</p>
+</div>
+<span class="font-code-compact text-code-compact px-2 py-1 rounded bg-error-container text-on-error-container font-semibold">8 Incomplete States</span>
+</div>
+<!-- Item -->
+<div class="bg-surface-container-lowest rounded-lg p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-base text-code-base font-semibold text-on-surface bg-surface-container px-2 py-0.5 rounded">REQ-PWR-007</span>
+<span class="font-label-caption text-label-caption px-2 py-0.5 rounded bg-error-container text-on-error-container">Missing Else Clause</span>
+</div>
+<span class="font-code-compact text-code-compact px-1.5 py-0.2 rounded bg-secondary-fixed text-on-secondary-fixed">AI</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface">
+        "If generator voltage exceeds 115 VAC, the inverter shall trigger overvoltage crowbar shutdown."
+      </p>
+<p class="font-label-caption text-label-caption text-outline">
+        Issue: System behavior undefined when voltage drops below nominal or after crowbar triggers without manual reset path specified.
+      </p>
+</div>
+</div>
+</div>
+<!-- Client Tab Switcher Micro-Script -->
+<script>
+  function switchAnalysisTab(tabKey, btnElement) {
+    // Hide all panes
+    const panes = ['ambiguity', 'duplicates', 'contradictions', 'readability', 'structure'];
+    panes.forEach(key => {
+      const pane = document.getElementById('tab-pane-' + key);
+      if (pane) {
+        pane.classList.add('hidden');
+        pane.classList.remove('flex');
+      }
+    });
+
+    // Show target pane
+    const targetPane = document.getElementById('tab-pane-' + tabKey);
+    if (targetPane) {
+      targetPane.classList.remove('hidden');
+      targetPane.classList.add('flex');
+    }
+
+    // Reset button styles
+    const buttons = document.querySelectorAll('.analysis-tab-btn');
+    buttons.forEach(btn => {
+      btn.className = 'analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface';
+    });
+
+    // Highlight active button
+    if (btnElement) {
+      btnElement.className = 'analysis-tab-btn h-9 px-3.5 rounded-lg flex items-center gap-2 font-label-text text-label-text transition-colors bg-surface-container text-on-surface font-semibold';
+    }
+  }
+</script></main></div></body></html>

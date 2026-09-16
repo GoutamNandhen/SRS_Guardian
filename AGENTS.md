@@ -194,3 +194,6 @@ KNOWN ISSUES:
 STATE FILE UPDATED:
 GIT COMMIT:
 
+
+Stitch UI Integration Rule:
+ The Stitch frontend ZIP is a design/reference artifact. Do not integrate, modify, or implement it before Phase 10. When Phase 10 begins, inspect the ZIP and use its DESIGN.md, screens, components, and visual system as the UI design reference. During Phase 11, integrate the approved UI with the actual SRS Guardian backend APIs and data. Do not implement features merely because they appear in the Stitch mockup unless they exist in the project's approved phase plan.
