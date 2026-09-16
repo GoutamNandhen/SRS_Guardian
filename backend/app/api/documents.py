@@ -13,13 +13,25 @@ from backend.app.schemas.requirement import (
     DocumentExtractResponse,
 )
 from backend.app.schemas.duplicate import DocumentDuplicatesResponse
+from backend.app.schemas.scoring import (
+    DocumentQualitySummaryResponse,
+    RequirementScoreResponse,
+    WaterfallStepResponse,
+    PenaltyApplied,
+    WorstRequirementItem,
+)
+
 from backend.app.nlp.extractors import extract_text
 from backend.app.nlp.cleaning import clean_text
 from backend.app.nlp.requirement_extractor import extract_requirements
+from backend.app.nlp.ambiguity import analyze_ambiguity
+from backend.app.nlp.readability import analyze_readability
+from backend.app.nlp.scoring import score_requirement, score_document
 from backend.app.ml.classifier import classify
 from backend.app.ml.explain_classifier import explain
 from backend.app.ml.duplicates import find_duplicates
 from backend.app.utils.file_validation import validate_file
+
 
 
 
@@ -326,4 +338,128 @@ def get_document_duplicates(
         duplicate_pairs_count=len(duplicates),
         duplicates=duplicates,
     )
+
+
+@router.get(
+    "/{document_id}/quality",
+    response_model=DocumentQualitySummaryResponse,
+    summary="Compute deterministic quality scores and waterfall breakdowns for document requirements",
+)
+def get_document_quality(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
+
+    reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == document_id)
+        .order_by(Requirement.id.asc())
+        .all()
+    )
+
+    req_dicts = [
+        {"id": r.id, "req_key": r.req_key, "text": r.text}
+        for r in reqs
+    ]
+
+    # Find duplicates to incorporate duplicate penalties
+    duplicates, _ = find_duplicates(req_dicts)
+    duplicate_map: dict[int, dict[str, Any]] = {}
+    for d in duplicates:
+        r1_id = d["requirement_id_1"]
+        r2_id = d["requirement_id_2"]
+        if r1_id not in duplicate_map:
+            duplicate_map[r1_id] = {
+                "target_req_key": d["req_key_2"],
+                "similarity_score": d["similarity_score"],
+            }
+        if r2_id not in duplicate_map:
+            duplicate_map[r2_id] = {
+                "target_req_key": d["req_key_1"],
+                "similarity_score": d["similarity_score"],
+            }
+
+    scored_reqs = []
+    for r in reqs:
+        ambiguity_findings = analyze_ambiguity(r.text)
+        readability_metrics = analyze_readability(r.text)
+        is_dup = r.id in duplicate_map
+        dup_info = duplicate_map.get(r.id)
+
+        score_res = score_requirement(
+            req_key=r.req_key,
+            text=r.text,
+            ambiguity_findings=ambiguity_findings,
+            readability_metrics=readability_metrics,
+            is_duplicate=is_dup,
+            duplicate_info=dup_info,
+            requirement_id=r.id,
+        )
+        scored_reqs.append(score_res)
+
+    doc_summary = score_document(scored_reqs, document_id=doc.id)
+
+    logger.info(
+        f"Quality score computed for doc {document_id}: mean {doc_summary.mean_score:.1f}, "
+        f"{doc_summary.total_requirements} requirements analyzed"
+    )
+
+    return DocumentQualitySummaryResponse(
+        document_id=doc_summary.document_id,
+        total_requirements=doc_summary.total_requirements,
+        mean_score=round(doc_summary.mean_score, 1),
+        median_score=round(doc_summary.median_score, 1),
+        min_score=round(doc_summary.min_score, 1),
+        max_score=round(doc_summary.max_score, 1),
+        distribution=doc_summary.distribution,
+        worst_requirements=[
+            WorstRequirementItem(
+                requirement_id=w["requirement_id"],
+                req_key=w["req_key"],
+                overall_score=round(w["overall_score"], 1),
+                issues_count=w["issues_count"],
+                text=w["text"],
+            )
+            for w in doc_summary.worst_requirements
+        ],
+        issue_counts=doc_summary.issue_counts,
+        requirements=[
+            RequirementScoreResponse(
+                requirement_id=r.requirement_id,
+                req_key=r.req_key,
+                text=r.text,
+                overall_score=round(r.overall_score, 1),
+                sub_scores={k: round(v, 1) for k, v in r.sub_scores.items()},
+                waterfall=[
+                    WaterfallStepResponse(
+                        step_number=w.step_number,
+                        step_name=w.step_name,
+                        rule_id=w.rule_id,
+                        deduction=round(w.deduction, 1),
+                        current_score=round(w.current_score, 1),
+                        explanation=w.explanation,
+                    )
+                    for w in r.waterfall
+                ],
+                issues_count=r.issues_count,
+                penalties_applied=[
+                    PenaltyApplied(
+                        rule_id=p["rule_id"],
+                        name=p["name"],
+                        deduction=round(p["deduction"], 1),
+                        matched_text=p.get("matched_text"),
+                    )
+                    for p in r.penalties_applied
+                ],
+            )
+            for r in scored_reqs
+        ],
+    )
+
 

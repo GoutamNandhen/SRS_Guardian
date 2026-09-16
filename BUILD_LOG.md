@@ -179,6 +179,36 @@
 - **Known limitations**:
   - Numeric contradictions (like REQ-004 vs REQ-005) currently surface as high semantic duplicates (0.9160) because sentence embeddings capture topic similarity rather than numerical logical exclusivity. A dedicated contradiction module (Phase 12) will address constraint conflicts.
 
+## Phase 7: Requirement Quality Score and Explanation Aggregation
+- **Date**: 2026-09-16
+- **What was built**:
+  - `backend/app/nlp/rules/score_weights.yaml`:
+    - Configurable point deductions for all active ambiguity rules, readability thresholds, and semantic duplicates.
+  - `docs/SCORING.md`:
+    - Formal mathematical formulation of overall score and 6 sub-scores (Clarity, Ambiguity, Testability, Readability, Structure, Consistency).
+    - Deduction weights table with engineering justifications.
+    - Worked example on REQ-001.
+  - `backend/app/nlp/scoring.py`:
+    - `score_requirement`: Calculates 0–100 deterministic quality score, 6 bounded sub-scores, and a step-by-step waterfall trace starting from 100 down to final score.
+    - `score_document`: Aggregates document mean, median, min, max, score distribution bins (`90-100`, `70-89`, `50-69`, `<50`), worst-performing requirements, and issue counts.
+  - `backend/app/schemas/scoring.py`:
+    - Pydantic models: `WaterfallStepResponse`, `PenaltyApplied`, `RequirementScoreResponse`, `WorstRequirementItem`, `DocumentQualitySummaryResponse`.
+  - `backend/app/api/documents.py`:
+    - Exposed `GET /api/documents/{id}/quality` endpoint returning document aggregates and individual requirement waterfall breakdowns.
+  - `backend/tests/test_scoring.py`:
+    - 7 automated tests covering clean requirement scoring, waterfall trace integrity, duplicate penalties, floor clamping, document aggregation, and live API endpoint.
+    - 41/41 tests passing across the backend suite in 54.20s.
+- **Key decisions**:
+  - Entirely deterministic scoring with zero LLM involvement (reproducible, instant, zero cost).
+  - Waterfall audit trail provides complete transparency for why points were deducted.
+- **How to run**:
+  - Run scoring tests: `pytest backend/tests/test_scoring.py -v`
+  - Run all tests: `pytest backend/tests/ -v`
+  - Live endpoint: `curl http://127.0.0.1:8000/api/documents/1/quality`
+- **Known limitations**:
+  - Quality scores reflect only machine-checkable heuristics; human review is required in Phase 8 to accept, reject, or edit findings.
+
+
 
 
 

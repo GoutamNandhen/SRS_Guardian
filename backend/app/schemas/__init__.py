@@ -9,6 +9,13 @@ from backend.app.schemas.duplicate import (
     DuplicatePair,
     DocumentDuplicatesResponse,
 )
+from backend.app.schemas.scoring import (
+    WaterfallStepResponse,
+    PenaltyApplied,
+    RequirementScoreResponse,
+    WorstRequirementItem,
+    DocumentQualitySummaryResponse,
+)
 
 __all__ = [
     "DocumentBase",
@@ -20,5 +27,11 @@ __all__ = [
     "AlignedPhrase",
     "DuplicatePair",
     "DocumentDuplicatesResponse",
+    "WaterfallStepResponse",
+    "PenaltyApplied",
+    "RequirementScoreResponse",
+    "WorstRequirementItem",
+    "DocumentQualitySummaryResponse",
 ]
+
 

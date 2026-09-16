@@ -1,0 +1,67 @@
+# SRS Guardian - Requirement Quality Score Weights Configuration
+# All weights are positive integers representing point deductions from 100.
+
+base_score: 100.0
+
+# Deductions applied to Overall Score
+penalties:
+  CHECK_A_WEAK_TERM:
+    deduction: 20.0
+    name: "Subjective / Vague Term"
+    description: "Subjective terms (e.g. 'quickly', 'user-friendly') degrade precision and testability."
+    affected_subscores: ["ambiguity", "clarity", "testability"]
+
+  CHECK_B_WEAK_MODAL:
+    deduction: 15.0
+    name: "Weak Modal Verb"
+    description: "Non-normative modals ('should', 'may', 'could') make requirements non-binding."
+    affected_subscores: ["ambiguity", "testability"]
+
+  CHECK_C_MISSING_METRIC:
+    deduction: 15.0
+    name: "Missing Measurable Criterion"
+    description: "Performance or capacity concepts without quantified thresholds cannot be verified."
+    affected_subscores: ["ambiguity", "testability"]
+
+  CHECK_D_VAGUE_PRONOUN:
+    deduction: 10.0
+    name: "Vague Pronoun Reference"
+    description: "Pronouns ('it', 'this', 'they') without clear antecedents cause ambiguity."
+    affected_subscores: ["clarity"]
+
+  CHECK_E_COMPOUND_REQ:
+    deduction: 10.0
+    name: "Compound Requirement"
+    description: "Multiple normative clauses or coordinate actions violate requirement singularity."
+    affected_subscores: ["structure"]
+
+  CHECK_F_PASSIVE_VOICE:
+    deduction: 10.0
+    name: "Passive Voice Without Actor"
+    description: "Passive constructions without an agent obscure responsibility."
+    affected_subscores: ["structure", "clarity"]
+
+  READABILITY_HIGH_GUNNING_FOG:
+    deduction: 10.0
+    name: "Excessive Reading Difficulty"
+    description: "Gunning Fog index exceeds 14, indicating overly dense syntax."
+    affected_subscores: ["readability", "clarity"]
+
+  READABILITY_HIGH_PASSIVE:
+    deduction: 5.0
+    name: "Excessive Passive Constructions"
+    description: "Passive clause ratio exceeds 0.40."
+    affected_subscores: ["readability", "structure"]
+
+  SEMANTIC_DUPLICATE:
+    deduction: 15.0
+    name: "Potential Semantic Duplicate"
+    description: "High semantic similarity (>= 0.80) to another requirement indicates redundancy."
+    affected_subscores: ["consistency"]
+
+# Thresholds for triggering readability deductions
+readability_thresholds:
+  gunning_fog_max: 14.0
+  passive_ratio_max: 0.40
+  flesch_reading_ease_min: 50.0
+  max_recommended_words: 35
