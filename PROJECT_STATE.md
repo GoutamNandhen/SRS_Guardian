@@ -55,7 +55,13 @@
 - Full pytest test suite (17 passed in 6.62s) on 2026-09-16 15:36:08.
 - Live curl HTTP test against all endpoints verified on 2026-09-16 15:36:42.
 
+## Remote Repository
+- **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
+- **Tracking Branch**: `main`
+- **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
+
 ## Metadata
-- **Last Updated**: 2026-09-16 15:37:00
-- **Last Commit Hash**: 0073bee
+- **Last Updated**: 2026-09-16 15:42:00
+- **Last Commit Hash**: 72933d3
+
 
