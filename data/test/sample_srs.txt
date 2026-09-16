@@ -1,0 +1,7 @@
+ONLINE BANKING SYSTEM
+REQ-001: The system should respond quickly when the user checks the account balance.
+REQ-002: The system shall allow users to reset their password using their registered email.
+REQ-003: Users must recover forgotten passwords using their registered email address.
+REQ-004: The password must contain at least 8 characters.
+REQ-005: The password must contain exactly 6 characters.
+REQ-006: The system shall allow users to download their transaction history.
