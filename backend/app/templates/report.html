@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SRS Guardian Quality Report — {{ document.filename }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1e293b;
+    line-height: 1.4;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+  }
+  .header {
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: 18pt;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+  }
+  .header .meta {
+    font-size: 9pt;
+    color: #64748b;
+  }
+  .kpi-grid {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .kpi-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    text-align: center;
+  }
+  .kpi-title {
+    font-size: 8pt;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .kpi-value {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #0f172a;
+  }
+  .kpi-sub {
+    font-size: 8pt;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  h2 {
+    font-size: 13pt;
+    color: #0f172a;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 4px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  table {
+    width: 100%;
+    margin-bottom: 15px;
+    font-size: 9pt;
+  }
+  th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: bold;
+    text-align: left;
+    padding: 6px 8px;
+    border: 1px solid #cbd5e1;
+  }
+  td {
+    padding: 6px 8px;
+    border: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 7.5pt;
+    font-weight: bold;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .badge-excellent { background-color: #dcfce7; color: #15803d; }
+  .badge-acceptable { background-color: #e0f2fe; color: #0369a1; }
+  .badge-revision { background-color: #fef9c3; color: #a16207; }
+  .badge-critical { background-color: #fee2e2; color: #b91c1c; }
+  .badge-status { background-color: #e2e8f0; color: #475569; }
+  .badge-accepted { background-color: #dcfce7; color: #166534; }
+  .badge-edited { background-color: #e0e7ff; color: #3730a3; }
+  .badge-rejected { background-color: #fee2e2; color: #991b1b; }
+  .badge-flagged { background-color: #fef3c7; color: #92400e; }
+  .req-card {
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+    padding: 10px;
+    background-color: #ffffff;
+  }
+  .req-header {
+    margin-bottom: 6px;
+  }
+  .req-key {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #0f172a;
+    margin-right: 8px;
+  }
+  .req-text {
+    font-size: 9.5pt;
+    margin-bottom: 8px;
+    color: #334155;
+  }
+  .subscores-bar {
+    font-size: 8pt;
+    color: #64748b;
+    margin-bottom: 8px;
+    background-color: #f8fafc;
+    padding: 4px 6px;
+    border: 1px solid #f1f5f9;
+  }
+  .issue-item {
+    background-color: #f8fafc;
+    border-left: 3px solid #f59e0b;
+    padding: 6px 8px;
+    margin-top: 6px;
+    font-size: 8.5pt;
+  }
+  .issue-item.error { border-left-color: #ef4444; }
+  .issue-item.warning { border-left-color: #f59e0b; }
+  .issue-item.info { border-left-color: #3b82f6; }
+  .issue-header {
+    font-weight: bold;
+    margin-bottom: 2px;
+  }
+  .issue-desc {
+    color: #475569;
+    margin-bottom: 2px;
+  }
+  .issue-sugg {
+    color: #0369a1;
+    font-style: italic;
+  }
+  .issue-review {
+    margin-top: 4px;
+    font-size: 8pt;
+    color: #1e293b;
+    background-color: #ffffff;
+    padding: 3px 6px;
+    border: 1px solid #e2e8f0;
+  }
+  .footer {
+    border-top: 1px solid #cbd5e1;
+    margin-top: 30px;
+    padding-top: 8px;
+    font-size: 8pt;
+    color: #94a3b8;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>SRS Guardian — Quality & Review Report</h1>
+  <div class="meta">
+    Document: <strong>{{ document.filename }}</strong> |
+    Format: {{ document.file_type | upper }} |
+    Status: {{ document.status | upper }} |
+    Report Date: {{ generated_at }}
+  </div>
+</div>
+
+<table class="kpi-grid">
+  <tr>
+    <td class="kpi-card" style="width: 25%;">
+      <div class="kpi-title">Quality Score</div>
+      <div class="kpi-value">{{ summary.mean_score }}</div>
+      <div class="kpi-sub">Scale: 0 - 100 (Mean)</div>
+    </td>
+    <td class="kpi-card" style="width: 25%;">
+      <div class="kpi-title">Requirements</div>
+      <div class="kpi-value">{{ summary.total_requirements }}</div>
+      <div class="kpi-sub">{{ summary.functional_count }} Functional, {{ summary.non_functional_count }} Non-Func</div>
+    </td>
+    <td class="kpi-card" style="width: 25%;">
+      <div class="kpi-title">Total Issues</div>
+      <div class="kpi-value">{{ summary.total_issues }}</div>
+      <div class="kpi-sub">Across All Rules</div>
+    </td>
+    <td class="kpi-card" style="width: 25%;">
+      <div class="kpi-title">Human Reviewed</div>
+      <div class="kpi-value">{{ summary.reviewed_percentage }}%</div>
+      <div class="kpi-sub">{{ summary.reviewed_count }} of {{ summary.total_issues }} Issues</div>
+    </td>
+  </tr>
+</table>
+
+<h2>Executive Quality Summary</h2>
+<table>
+  <tr>
+    <th style="width: 25%;">Metric</th>
+    <th style="width: 25%;">Value</th>
+    <th style="width: 25%;">Metric</th>
+    <th style="width: 25%;">Value</th>
+  </tr>
+  <tr>
+    <td><strong>Mean Quality Score</strong></td>
+    <td>{{ summary.mean_score }} / 100.0</td>
+    <td><strong>Score Range</strong></td>
+    <td>{{ summary.min_score }} - {{ summary.max_score }}</td>
+  </tr>
+  <tr>
+    <td><strong>Median Quality Score</strong></td>
+    <td>{{ summary.median_score }} / 100.0</td>
+    <td><strong>Score Grade</strong></td>
+    <td>
+      {% if summary.mean_score >= 90 %}
+        <span class="badge badge-excellent">Excellent (90-100)</span>
+      {% elif summary.mean_score >= 70 %}
+        <span class="badge badge-acceptable">Acceptable (70-89)</span>
+      {% elif summary.mean_score >= 50 %}
+        <span class="badge badge-revision">Needs Revision (50-69)</span>
+      {% else %}
+        <span class="badge badge-critical">Critical Action Required (&lt;50)</span>
+      {% endif %}
+    </td>
+  </tr>
+</table>
+
+<h2>Score Distribution & Issue Breakdown</h2>
+<table style="margin-bottom: 20px;">
+  <tr>
+    <th style="width: 50%;">Score Distribution</th>
+    <th style="width: 50%;">Issue Breakdown by Type</th>
+  </tr>
+  <tr>
+    <td>
+      <table>
+        <tr><th>Band</th><th>Count</th></tr>
+        <tr><td>Excellent (90 - 100)</td><td>{{ summary.score_distribution['90-100'] }}</td></tr>
+        <tr><td>Acceptable (70 - 89)</td><td>{{ summary.score_distribution['70-89'] }}</td></tr>
+        <tr><td>Needs Revision (50 - 69)</td><td>{{ summary.score_distribution['50-69'] }}</td></tr>
+        <tr><td>Critical (&lt; 50)</td><td>{{ summary.score_distribution['<50'] }}</td></tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr><th>Rule / Check</th><th>Findings</th></tr>
+        {% for rule_type, count in summary.issues_by_type.items() %}
+        <tr><td>{{ rule_type }}</td><td>{{ count }}</td></tr>
+        {% else %}
+        <tr><td colspan="2">No issues flagged.</td></tr>
+        {% endfor %}
+      </table>
+    </td>
+  </tr>
+</table>
+
+<h2>Human Review Decisions Summary</h2>
+<table>
+  <tr>
+    <th>Status</th>
+    <th>Count</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><span class="badge badge-accepted">Accepted</span></td>
+    <td>{{ summary.issues_by_status.get('accepted', 0) }}</td>
+    <td>Human reviewer confirmed AI finding as valid issue</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-edited">Edited</span></td>
+    <td>{{ summary.issues_by_status.get('edited', 0) }}</td>
+    <td>Human reviewer corrected requirement text directly</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-rejected">Rejected</span></td>
+    <td>{{ summary.issues_by_status.get('rejected', 0) }}</td>
+    <td>Human reviewer rejected AI finding as false positive / acceptable</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-flagged">AI Flagged</span></td>
+    <td>{{ summary.issues_by_status.get('ai_flagged', 0) }}</td>
+    <td>Pending human review decision</td>
+  </tr>
+</table>
+
+<h2>Detailed Requirements & Findings</h2>
+{% for req in requirements %}
+<div class="req-card">
+  <div class="req-header">
+    <span class="req-key">{{ req.req_key }}</span>
+    <span class="badge badge-status">{{ req.classification_label }} ({{ (req.classification_prob * 100) | round(1) }}%)</span>
+    {% if req.quality_score >= 90 %}
+      <span class="badge badge-excellent">Score: {{ req.quality_score }}</span>
+    {% elif req.quality_score >= 70 %}
+      <span class="badge badge-acceptable">Score: {{ req.quality_score }}</span>
+    {% elif req.quality_score >= 50 %}
+      <span class="badge badge-revision">Score: {{ req.quality_score }}</span>
+    {% else %}
+      <span class="badge badge-critical">Score: {{ req.quality_score }}</span>
+    {% endif %}
+  </div>
+  
+  <div class="req-text">
+    {{ req.text }}
+  </div>
+
+  {% if req.sub_scores %}
+  <div class="subscores-bar">
+    <strong>Sub-Scores:</strong>
+    Clarity: {{ req.sub_scores.clarity }} |
+    Ambiguity: {{ req.sub_scores.ambiguity }} |
+    Testability: {{ req.sub_scores.testability }} |
+    Readability: {{ req.sub_scores.readability }} |
+    Structure: {{ req.sub_scores.structure }} |
+    Consistency: {{ req.sub_scores.consistency }}
+  </div>
+  {% endif %}
+
+  {% if req.issues %}
+    <div style="margin-top: 6px;">
+      <strong style="font-size: 8.5pt; color: #475569;">Flagged Issues ({{ req.issues | length }}):</strong>
+      {% for issue in req.issues %}
+      <div class="issue-item {{ issue.severity }}">
+        <div class="issue-header">
+          [{{ issue.severity | upper }}] {{ issue.type }}
+          <span style="font-weight: normal; color: #64748b;">(Module: {{ issue.module }})</span>
+          &mdash; Status:
+          {% if issue.status == 'accepted' %}
+            <span class="badge badge-accepted">Accepted</span>
+          {% elif issue.status == 'edited' %}
+            <span class="badge badge-edited">Edited</span>
+          {% elif issue.status == 'rejected' %}
+            <span class="badge badge-rejected">Rejected</span>
+          {% else %}
+            <span class="badge badge-flagged">AI Flagged</span>
+          {% endif %}
+        </div>
+        <div class="issue-desc">{{ issue.explanation.human_explanation }}</div>
+        {% if issue.explanation.suggestion %}
+        <div class="issue-sugg">Suggestion: {{ issue.explanation.suggestion }}</div>
+        {% endif %}
+        {% if issue.reviews %}
+          {% for rev in issue.reviews %}
+          <div class="issue-review">
+            <strong>Reviewer Decision:</strong> {{ rev.action | upper }}
+            {% if rev.note %}&mdash; <em>"{{ rev.note }}"</em>{% endif %}
+            <span style="color: #94a3b8; font-size: 7.5pt;">({{ rev.reviewed_at }})</span>
+          </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="font-size: 8.5pt; color: #16a34a; margin-top: 4px;">
+      No issues detected. Requirement complies with selected machine-checkable criteria.
+    </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<div class="footer">
+  Generated by SRS Guardian &bull; Selected machine-checkable checks based on ISO/IEC/IEEE 29148 &bull; Human reviewer verified
+</div>
+
+</body>
+</html>

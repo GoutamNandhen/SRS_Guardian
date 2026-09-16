@@ -243,6 +243,39 @@
 - **Known limitations**:
   - Export reports (HTML, CSV, PDF) are not yet implemented (deferred to Phase 9).
 
+## Phase 9: Report Generation
+- **Date**: 2026-09-16
+- **What was built**:
+  - `backend/app/services/reports.py`:
+    - `build_report_data`: Compiles document info, functional/non-functional split, quality score distribution, worst requirements, issues grouped by type and severity, and human review decisions.
+    - `generate_html_report`: Jinja2-rendered printable enterprise report.
+    - `generate_csv_report`: Exports `requirements` (row per requirement with sub-scores) or `issues` (row per issue with explanation and review decision).
+    - `generate_pdf_report`: Offline PDF compilation of the HTML report using `xhtml2pdf` (pure Python / ReportLab, zero external GTK system dependencies on Windows).
+  - `backend/app/templates/report.html`:
+    - Clean corporate stylesheet with print layout (`@page A4`), KPI metric cards, score distribution table, issue breakdowns, and per-requirement review audit cards.
+  - `backend/app/api/documents.py`:
+    - Exposed `GET /api/documents/{id}/report?format=html|csv|pdf&type=requirements|issues`.
+  - `backend/tests/test_reports.py`:
+    - 6 automated tests covering HTML rendering, CSV requirements export, CSV issues export, valid binary PDF generation (`%PDF-1.4`), 404 handling, and 400 invalid format validation.
+    - Full test suite passing: 48/48 tests across the backend in 40.19s.
+  - Live verification on sample document (`data/test/sample_srs.txt`) producing:
+    - `data/test/sample_report.html` (16,720 chars)
+    - `data/test/sample_report_requirements.csv` (986 chars)
+    - `data/test/sample_report_issues.csv` (2,567 chars)
+    - `data/test/sample_report.pdf` (14,271 bytes, valid PDF)
+- **Key decisions**:
+  - Selected `xhtml2pdf` over `WeasyPrint` because WeasyPrint requires external C/GTK libraries on Windows, whereas `xhtml2pdf` is 100% self-contained pure Python wheels running completely offline without system DLL configuration.
+  - Jinja2 template is self-contained with embedded CSS for maximum portability and deterministic printing.
+- **How to run**:
+  - Run tests: `pytest backend/tests/test_reports.py -v`
+  - Run all tests: `pytest backend/tests/ -v`
+  - Export HTML: `curl http://127.0.0.1:8000/api/documents/1/report?format=html`
+  - Export CSV: `curl http://127.0.0.1:8000/api/documents/1/report?format=csv&type=requirements`
+  - Export PDF: `curl http://127.0.0.1:8000/api/documents/1/report?format=pdf -o report.pdf`
+- **Known limitations**:
+  - Frontend user interface is not yet built (ready for Phase 10: Frontend foundation).
+
+
 
 
 

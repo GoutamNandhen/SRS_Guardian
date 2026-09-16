@@ -1,8 +1,13 @@
 import json
 import shutil
 from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Response
 from sqlalchemy.orm import Session
+from backend.app.services.reports import (
+    generate_html_report,
+    generate_csv_report,
+    generate_pdf_report,
+)
 from backend.app.core.config import settings
 from backend.app.core.database import get_db
 from backend.app.core.logging import logger
@@ -748,4 +753,49 @@ def get_document_issues(
     return results
 
 
+@router.get(
+    "/{document_id}/report",
+    summary="Generate and export comprehensive quality and review report (HTML, CSV, PDF)",
+)
+def get_document_report(
+    document_id: int,
+    format: str = "html",
+    type: str = "requirements",
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
 
+    clean_filename = Path(doc.filename).stem
+    fmt = format.lower()
+
+    if fmt == "html":
+        html_content = generate_html_report(document_id, db)
+        return Response(content=html_content, media_type="text/html")
+    elif fmt == "csv":
+        csv_content = generate_csv_report(document_id, db, csv_type=type)
+        return Response(
+            content=csv_content,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": f'attachment; filename="{clean_filename}_report_{type}.csv"'
+            },
+        )
+    elif fmt == "pdf":
+        pdf_bytes = generate_pdf_report(document_id, db)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{clean_filename}_report.pdf"'
+            },
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported format '{format}'. Supported formats: html, csv, pdf.",
+        )

@@ -1,0 +1,7 @@
+req_id,req_key,classification,confidence,quality_score,clarity,ambiguity,testability,readability,structure,consistency,issues_count,text
+7,REQ-001,Functional,0.5469,100.0,100.0,100.0,100.0,100.0,100.0,100.0,2,The system shall respond within 2.0 seconds when the user checks account balance.
+8,REQ-002,Functional,0.6944,85.0,100.0,100.0,100.0,100.0,100.0,50.0,1,The system shall allow users to reset their password using their registered email.
+9,REQ-003,Non-Functional,0.5845,85.0,100.0,100.0,100.0,75.0,100.0,50.0,1,Users must recover forgotten passwords using their registered email address.
+10,REQ-004,Non-Functional,0.6745,85.0,100.0,100.0,100.0,100.0,100.0,50.0,1,The password must contain at least 8 characters.
+11,REQ-005,Non-Functional,0.6443,75.0,80.0,100.0,100.0,45.0,100.0,50.0,1,The password must contain exactly 6 characters.
+12,REQ-006,Functional,0.7766,100.0,100.0,100.0,100.0,75.0,100.0,100.0,0,The system shall allow users to download their transaction history.

@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 8
+- **Current Phase**: Phase 9
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface)
-- **Current Task**: Ready to auto-proceed to Phase 9 (Report Generation)
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation)
+- **Current Task**: Ready to proceed to Phase 10 (Frontend Foundation)
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -34,39 +34,43 @@
   - `GET /api/documents/{id}/issues`: Filterable by `module`, `severity`, and `status_filter`.
   - `POST /api/issues/{id}/review`: Records human actions (`accept`, `reject`, `edit`, `mark_reviewed`), creates immutable `Review` audit record, and updates requirement text on edit.
   - `GET /api/requirements/{id}`: Full requirement detail with classification, quality score, waterfall trace, and issues with review status.
-- Full test suite: 42 passing unit and integration tests across the backend.
+- Report Generation (Phase 9):
+  - `backend/app/services/reports.py`: Data aggregation and export engine for HTML, CSV, and PDF formats.
+  - `backend/app/templates/report.html`: Clean corporate report template with KPI cards, score distribution table, issue breakdowns, and requirement review cards.
+  - `GET /api/documents/{id}/report?format=html|csv|pdf&type=requirements|issues`: REST endpoint serving printable HTML, structured CSVs, and offline-rendered PDFs.
+  - Offline PDF generation powered by pure Python `xhtml2pdf` (ReportLab engine, zero external GTK system dependencies on Windows).
+- Full test suite: 48 passing unit and integration tests across the backend.
 
 ## What Has Actually Been Verified
-- 42/42 tests pass in 39.09s with 100% pass rate.
-- End-to-end human review and analysis verified on sample document (`data/test/sample_srs.txt`):
-  - Ingestion -> Analyze -> 6 requirements, 6 AI-flagged issues, quality score 82.5.
-  - Issue accept: CHECK_A_WEAK_TERM on REQ-001 accepted with reviewer note.
-  - Issue edit: CHECK_B_WEAK_MODAL on REQ-001 edited text -> requirement text directly updated in DB.
-  - Issue reject: SEMANTIC_DUPLICATE rejected with note.
-  - Requirement detail query reflects updated text and human-reviewed issues.
+- 48/48 tests pass in 40.19s with 100% pass rate.
+- Report generation verified on sample document (`data/test/sample_srs.txt`):
+  - `sample_report.html` (16,720 chars): Executive KPI cards, score tables, issue summaries, human reviewer notes.
+  - `sample_report_requirements.csv` (986 chars): 6 requirement rows with classifications, confidence, overall score, and 6 sub-scores.
+  - `sample_report_issues.csv` (2,567 chars): 6 issue rows with rule types, explanations, suggestions, and reviewer decisions.
+  - `sample_report.pdf` (14,271 bytes): Valid `%PDF-1.4` binary stream rendered offline.
 
 ## Known Issues
 - None.
 
 ## Important Architecture & Technology Decisions
 - Deterministic scoring and rule-based checks without LLM ensure instantaneous evaluation, zero execution cost, and mathematical repeatability.
-- Clear separation between AI findings (`ai_flagged`) and human decisions (`accepted`, `rejected`, `edited`, `reviewed`).
-- Analysis pipeline is idempotent: re-analyzing clears unreviewed AI flags while preserving human-reviewed decisions.
-- Every review action creates an immutable record in the `reviews` table for auditability and future evaluation.
+- Report generation is 100% offline and self-contained; `xhtml2pdf` runs via pure Python without requiring GTK runtime binaries on Windows.
+- CSV export supports dual modes (`type=requirements` and `type=issues`) for spreadsheet ingestion and auditing.
 
 ## Files/Modules Currently Being Worked On
-- None (Phase 8 completed).
+- None (Phase 9 completed).
 
 ## Exact Next Step
-- Phase 9: Report Generation (HTML, CSV, PDF export of analysis and human review decisions).
-  - Provide short Rule 8 explanation.
-  - Implement report generation service in `backend/app/services/reports.py`.
-  - Expose `GET /api/documents/{id}/report?format=html|csv|pdf`.
-  - Verify on sample document and commit/push.
+- Phase 10: Frontend foundation:
+  - Next.js App Router project in `frontend/` with TypeScript and Tailwind CSS.
+  - Install and configure shadcn/ui and Recharts.
+  - Design system: light/dark theme tokens, typography, enterprise-SaaS layout (no neon, no cyber styling).
+  - App shell with persistent left sidebar (Dashboard, Documents, Requirements, Analysis, Suggestions, Compare, Reports, Settings).
+  - Typed API client in `frontend/services/api.ts` and types in `frontend/types/`.
 
 ## Last Verification Performed
-- `pytest backend/tests/ -v`: 42 passed in 39.09s on 2026-09-16 18:31:01.
-- Live sample document analysis and review workflow verification in `scratch/verify_phase8.py`.
+- `pytest backend/tests/ -v`: 48 passed in 40.19s on 2026-09-16 18:42:06.
+- Live sample document report export verification in `scratch/verify_phase9.py`.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -74,5 +78,6 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-09-16 18:32:00
-- **Last Commit Hash**: b8129ce
+- **Last Updated**: 2026-09-16 18:43:00
+- **Last Commit Hash**: 69d60f0
+
