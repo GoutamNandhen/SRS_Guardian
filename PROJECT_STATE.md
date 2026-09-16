@@ -1,59 +1,73 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 3
+- **Current Phase**: Phase 4
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements)
-- **Current Task**: Ready to begin Phase 4 (Requirement classification with SHAP explainability)
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability)
+- **Current Task**: Ready to begin Phase 5 (Ambiguity detection and readability analysis)
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
 - SQLAlchemy database configuration in `backend/app/core/database.py`.
 - SQLAlchemy ORM models in `backend/app/models/document.py` (`Document`, `DocumentVersion`, `Requirement`).
-- Alembic migration environment (`alembic.ini`, `backend/alembic/env.py`) with initial migration applied to SQLite.
-- Pydantic v2 schemas in `backend/app/schemas/` (`DocumentListItem`, `DocumentDetail`, `RequirementResponse`, `DocumentExtractResponse`).
-- API routes in `backend/app/api/documents.py`:
-  - `POST /api/documents/upload`: Multipart file upload, validation, extraction, cleaning, storage in DB.
-  - `GET /api/documents`: List of documents with requirement counts.
-  - `GET /api/documents/{id}`: Document detail.
-  - `DELETE /api/documents/{id}`: Delete document and cascade.
-  - `POST /api/documents/{id}/extract`: Run layered requirement extraction and persist to database.
-  - `GET /api/documents/{id}/requirements`: List requirements for a document.
-- Mounted routers in `backend/app/main.py`.
-- Full test suite: 17 passing tests across extraction, cleaning, requirement extraction, and API integration.
+- Alembic migrations:
+  - `58e6a70d176c`: Initial tables.
+  - `9f880cb9f8ed`: Requirement classification columns (`classification_label`, `classification_prob`, `classification_explanation`).
+- PROMISE_exp dataset ingested (969 requirements) and documented in `docs/DATASETS.md`.
+- Machine Learning classification pipeline:
+  - `backend/app/ml/train_classifier.py`: TF-IDF (1-2 grams) + Logistic Regression training with stratified 80/20 train/test split.
+  - Test set evaluation (194 samples): Accuracy 86.08%, Non-Functional Precision 82.50%, Non-Functional Recall 94.29%, F1-Score 0.8800.
+  - Serialized pipeline in `backend/app/ml/artifacts/classifier_pipeline.joblib`.
+  - Global SHAP summary plot in `docs/figures/shap_summary.png`.
+- Inference & Explainability modules:
+  - `backend/app/ml/classifier.py`: Loads model once and executes fast predictions.
+  - `backend/app/ml/explain_classifier.py`: Computes top 8 SHAP token contributions per class with in-memory caching.
+- Integrated API:
+  - `POST /api/documents/{id}/extract` classifies all extracted requirements and stores predictions + SHAP token attributions in database.
+  - `GET /api/requirements/{id}` and `GET /api/requirements/{id}/explain` return requirement details and SHAP token explanations.
+- Full test suite: 19 passing unit and integration tests across the backend.
 
 ## What Has Actually Been Verified
-- All 17 unit and integration tests passing in `backend/tests/` (100% pass rate).
-- Live server run and real curl verification against all 6 API endpoints:
-  - `POST /api/documents/upload` with `sample_srs.txt`: returned 201 Created (ID 1, status 'uploaded', version 'v1.0').
-  - `GET /api/documents`: returned 200 OK with list of 1 document.
-  - `GET /api/documents/1`: returned 200 OK with document detail.
-  - `POST /api/documents/1/extract`: returned 200 OK, extracted and saved 6 requirements (REQ-001 to REQ-006).
-  - `GET /api/documents/1/requirements`: returned 200 OK with all 6 extracted requirement records.
-  - `DELETE /api/documents/1`: returned 200 OK and verified subsequent `GET` returned 404 Not Found.
+- 19/19 tests pass in 7.01s with 100% pass rate.
+- Classifier test evaluation metrics verified from actual execution:
+  - Accuracy: 86.08%
+  - Non-Functional Precision: 82.50%
+  - Non-Functional Recall: 94.29%
+  - F1-Score: 0.8800
+  - Confusion Matrix: TN=68, FP=21, FN=6, TP=99
+- Classification and SHAP word-level explanation executed on all 6 sample requirements:
+  - REQ-001: Functional (54.69%) - 'should', 'when', 'the user', 'account'
+  - REQ-002: Functional (69.44%) - 'shall allow', 'allow', 'their'
+  - REQ-003: Non-Functional (58.45%) - 'users', 'their', 'using'
+  - REQ-004: Non-Functional (67.45%) - 'password', 'at', 'must'
+  - REQ-005: Non-Functional (64.43%) - 'password', 'must', 'contain'
+  - REQ-006: Functional (77.66%) - 'shall allow', 'allow', 'download'
+- SHAP summary plot verified at `docs/figures/shap_summary.png`.
 
 ## Known Issues
 - None.
 
 ## Important Architecture & Technology Decisions
-- SQLAlchemy 2.0 with declarative base and simple cascade relationships.
-- Alembic handles schema evolution cleanly with versioned migration scripts.
-- Idempotent requirement extraction cleans existing requirements before inserting new ones.
-- SQLite is default for development via `DATABASE_URL=sqlite:///./srs_guardian.db`.
+- Default Classifier: TF-IDF (word 1-2 grams, min_df=2, sublinear_tf) + Logistic Regression. CPU-runnable, free, fast, and exactly explainable with SHAP LinearExplainer.
+- SHAP LinearExplainer provides word-level attributions in milliseconds, cached per requirement ID.
+- Classification data persisted in the `requirements` table.
 
 ## Files/Modules Currently Being Worked On
-- None (Phase 3 completed).
+- None (Phase 4 completed).
 
 ## Exact Next Step
-- Phase 4: Functional / Non-Functional requirement classification with SHAP explainability:
-  - Add scikit-learn, shap, joblib, pandas to `requirements.txt`.
-  - Obtain confirmation for PROMISE_exp requirements dataset.
-  - Train TF-IDF + Logistic Regression pipeline in `backend/app/ml/train_classifier.py`.
-  - Build `backend/app/ml/classifier.py` and `backend/app/ml/explain_classifier.py` (SHAP LinearExplainer).
-  - Update Requirement model/API.
+- Phase 5: Ambiguity detection and readability analysis (rule-based only, no LLM):
+  - Subjective/vague terms from `weak_terms.yaml`.
+  - Weak modal verbs ("should", "may", "could", "might").
+  - Missing measurable criterion.
+  - Vague pronoun references.
+  - Compound requirements (singularity).
+  - Passive voice without actor.
+  - Readability metrics via textstat and spaCy.
+  - Unified explanation schema.
 
 ## Last Verification Performed
-- Full pytest test suite (17 passed in 6.62s) on 2026-09-16 15:36:08.
-- Live curl HTTP test against all endpoints verified on 2026-09-16 15:36:42.
+- `pytest backend/tests/ -v`: 19 passed in 7.01s on 2026-09-16 15:52:45.
+- Sample requirements evaluation verified with word-level SHAP attributions.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -61,7 +75,5 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-09-16 15:42:00
-- **Last Commit Hash**: 72933d3
-
-
+- **Last Updated**: 2026-09-16 15:53:00
+- **Last Commit Hash**: Pending Phase 4 commit

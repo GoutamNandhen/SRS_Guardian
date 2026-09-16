@@ -89,5 +89,36 @@
   - Analysis, classification (Functional/Non-Functional), and quality scoring are not yet attached to requirements (deferred to Phase 4+).
   - Frontend not yet built (deferred to Phase 10).
 
+## Phase 4: Requirement Classification with SHAP Explainability
+- **Date**: 2026-09-16
+- **What was built**:
+  - PROMISE_exp dataset ingested into `data/raw/PROMISE_exp.arff` (969 total requirements: 444 Functional, 525 Non-Functional) and documented in `docs/DATASETS.md`.
+  - `backend/app/ml/train_classifier.py`: Pipeline training TF-IDF (word 1-2 grams, min_df=2, sublinear_tf=True) + LogisticRegression (`max_iter=1000`, `random_state=42`) with stratified 80/20 train/test split.
+  - Evaluation results on held-out test split (194 samples):
+    - Accuracy: 86.08%
+    - Precision (Non-Functional): 82.50%
+    - Recall (Non-Functional): 94.29%
+    - F1-Score: 0.8800
+    - Confusion Matrix: TN=68, FP=21, FN=6, TP=99
+  - Model pipeline serialized to `backend/app/ml/artifacts/classifier_pipeline.joblib`.
+  - Global SHAP summary plot generated and saved to `docs/figures/shap_summary.png`.
+  - `backend/app/ml/classifier.py`: Lightweight classifier loading pipeline once and predicting label + confidence probability.
+  - `backend/app/ml/explain_classifier.py`: Millisecond-level SHAP LinearExplainer returning top 8 token attributions for the predicted class with in-memory caching.
+  - Database schema & API update:
+    - Added `classification_label`, `classification_prob`, and `classification_explanation` columns to `Requirement` model via Alembic migration `9f880cb9f8ed`.
+    - Integrated classification directly into `POST /api/documents/{id}/extract`.
+    - Added `GET /api/requirements/{id}` and `GET /api/requirements/{id}/explain` endpoints in `backend/app/api/requirements.py`.
+  - Test suite in `backend/tests/test_classifier.py` (2 tests, 19 tests total passing across backend).
+- **Key decisions**:
+  - TF-IDF + Logistic Regression chosen as default: instant CPU inference, deterministic behavior, and exact word-level linear attribution with SHAP.
+  - SHAP values cached per requirement ID to avoid recomputing attributions.
+- **How to run**:
+  - Train model: `python -m backend.app.ml.train_classifier`
+  - Run tests: `pytest backend/tests/ -v`
+  - Query requirement explanation: `curl http://127.0.0.1:8000/api/requirements/1/explain`
+- **Known limitations**:
+  - Semantic duplicate detection and rule-based ambiguity checks are not yet built (deferred to Phase 5 and 6).
+
+
 
 

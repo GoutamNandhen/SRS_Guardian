@@ -10,3 +10,9 @@ python-docx
 spacy
 textstat
 python-dotenv
+scikit-learn
+shap
+joblib
+pandas
+matplotlib
+pytest

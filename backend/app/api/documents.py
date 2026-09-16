@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
@@ -14,7 +15,10 @@ from backend.app.schemas.requirement import (
 from backend.app.nlp.extractors import extract_text
 from backend.app.nlp.cleaning import clean_text
 from backend.app.nlp.requirement_extractor import extract_requirements
+from backend.app.ml.classifier import classify
+from backend.app.ml.explain_classifier import explain
 from backend.app.utils.file_validation import validate_file
+
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -201,6 +205,11 @@ def extract_document_requirements(
 
     db_reqs: list[Requirement] = []
     for r in extracted_reqs:
+        # Run Phase 4 Classification & SHAP token explanation
+        label, prob = classify(r.text)
+        exp_tokens = explain(r.text)
+        exp_data = [{"token": t, "shap_value": v} for t, v in exp_tokens]
+
         db_req = Requirement(
             document_id=doc.id,
             req_key=r.req_id,
@@ -210,12 +219,16 @@ def extract_document_requirements(
             char_start=r.char_start,
             char_end=r.char_end,
             section=r.section,
+            classification_label=label,
+            classification_prob=prob,
+            classification_explanation=json.dumps(exp_data),
         )
         db.add(db_req)
         db_reqs.append(db_req)
 
     doc.status = "extracted"
     db.commit()
+
 
     # Refresh items to populate IDs and timestamps
     for r in db_reqs:
