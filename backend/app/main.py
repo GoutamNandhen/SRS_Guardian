@@ -5,10 +5,20 @@ from backend.app.api.documents import router as documents_router
 from backend.app.api.requirements import router as requirements_router
 from backend.app.api.issues import router as issues_router
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="SRS Guardian API",
     description="AI-assisted review platform for Software Requirement Specifications",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(documents_router, prefix="/api")

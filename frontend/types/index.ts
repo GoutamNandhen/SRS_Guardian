@@ -10,11 +10,17 @@ export interface DocumentListItem {
   page_count: number;
   status: "uploaded" | "extracted" | "analyzed" | "failed";
   uploaded_at: string;
-  requirements_count: number;
+  requirement_count: number;
+  requirements_count?: number;
 }
 
 export interface DocumentDetail extends DocumentListItem {
   cleaned_text: string;
+}
+
+export interface ShapToken {
+  token: string;
+  shap_value: number;
 }
 
 export interface Requirement {
@@ -29,7 +35,7 @@ export interface Requirement {
   section: string | null;
   classification_label: "Functional" | "Non-Functional" | null;
   classification_prob: number | null;
-  classification_explanation: string | null;
+  classification_explanation: ShapToken[] | string | null;
   created_at: string;
 }
 

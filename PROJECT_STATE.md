@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 10
+- **Current Phase**: Phase 11 (MVP Core Feature Pages)
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation)
-- **Current Task**: Ready to proceed to Phase 11 (Core Feature Pages)
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages)
+- **Current Task**: MVP Complete! All 5 core feature pages built, integrated, and verified against live backend APIs and database.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -37,48 +37,76 @@
 - Report Generation (Phase 9):
   - `backend/app/services/reports.py`: Data aggregation and export engine for HTML, CSV, and PDF formats.
   - `backend/app/templates/report.html`: Clean corporate report template with KPI cards, score distribution table, issue breakdowns, and requirement review cards.
-  - `GET /api/documents/{id}/report?format=html|csv|pdf&type=requirements|issues`: REST endpoint serving printable HTML, structured CSVs, and offline-rendered PDFs.
-  - Offline PDF generation powered by pure Python `xhtml2pdf` (ReportLab engine, zero external GTK system dependencies on Windows).
-- Frontend Foundation (Phase 10):
+  - `GET /api/documents/{id}/report?format=html|csv|pdf&type=requirements|issues`: REST endpoint serving printable HTML, structured CSVs, and offline-rendered PDFs via pure Python `xhtml2pdf`.
+- Backend CORS Support:
+  - Enabled `CORSMiddleware` in `backend/app/main.py` allowing cross-origin requests from `http://localhost:3000`.
+- Frontend Foundation & Design System (Phase 10):
   - Next.js 14 App Router project in `frontend/` with TypeScript and Tailwind CSS.
-  - Design system tokens from Stitch UI reference archive: typography (`Inter`, `JetBrains Mono`), color tokens (`surface`, `on-surface`, `secondary`, `primary`, `outline`, `error`), calm enterprise layout without gradients/neon.
-  - Persistent left sidebar (`sidebar.tsx`) with shield logo, workspace switcher, 8 navigation links (`Dashboard`, `Documents`, `Requirement Viewer`, `Analysis`, `AI Suggestions`, `Version Comparison`, `Reports`, `Settings`), and `ISO 29148 Engine Online` badge.
-  - Top bar (`topbar.tsx`) with breadcrumb trail, global search input (`⌘K`), backend connection badge, theme switcher, and user profile.
-  - Reusable UI state components in `frontend/components/ui/`: `LoadingState`, `EmptyState`, `ErrorState`.
-  - Typed API client in `frontend/services/api.ts` with one typed method per FastAPI endpoint.
-  - TypeScript types mirroring backend models in `frontend/types/index.ts`.
-  - Shell pages: `/` (Dashboard overview), `/documents` (Document management repository), and foundation placeholders for all remaining routes.
-- Full test suite: 48 passing unit and integration tests across the backend.
+  - Stitch UI reference design tokens (`surface`, `on-surface`, `secondary`, `outline`, `error`).
+  - Persistent left sidebar (`sidebar.tsx`) and persistent top bar (`topbar.tsx`).
+  - Typed API client (`frontend/services/api.ts`) with typed models in `frontend/types/index.ts`.
+- MVP Core Feature Pages (Phase 11):
+  1. **Page 1 (Documents)** (`frontend/app/documents/page.tsx`):
+     - Drag-and-drop upload zone + file picker for PDF, DOCX, TXT up to 20MB.
+     - Live document table displaying filename, format badge, size, page count, requirement count, status badge, uploaded date.
+     - Real-time search by filename/type, status filter chips (`All`, `Analysed`, `Uploaded`).
+     - Actions per row: "Analyze" / "Re-Analyze" (triggers `api.analyzeDocument`), "View Reqs" (`/requirements?doc={id}`), "Reports" (`/reports?doc={id}`), and Delete with confirmation (`api.deleteDocument`).
+  2. **Page 2 (Requirement Viewer)** (`frontend/app/requirements/page.tsx`):
+     - Document picker selector with count of requirements.
+     - Search in document input and classification filter (`All`, `Functional`, `Non-Functional`).
+     - Requirements list (Left panel) with score badge, statement preview, and active selection border.
+     - Inspection Workspace (Right panel):
+       - Requirement ID, classification badge, probability, copy button.
+       - Overall Quality Score gauge (/100) with rating and delta.
+       - Statement box with problem spans highlighted and tooltips.
+       - Classification Attribution (SHAP) token strip with directional contributions (`+0.32`, `-0.19`).
+       - Waterfall Score Deductions trace (`Base 100 -> -25.0 -> Final`).
+       - 6 Sub-Scores breakdown with color-coded progress bars (Clarity, Ambiguity, Testability, Readability, Structure, Consistency).
+       - Detected Issues cards with Accept, Reject, and direct inline Edit of requirement text.
+  3. **Page 3 (Dashboard)** (`frontend/app/page.tsx`):
+     - Document picker with live statistics.
+     - 4 KPI metric cards: Total Requirements, Average Quality Score, Potential Findings with critical/warning breakdown, Human Review Status.
+     - Quality Score Distribution histogram bars (90-100, 70-89, 50-69, <50).
+     - Findings by Rule Category bars (Ambiguity, Semantic Duplicates, Readability).
+     - Requirement Classification Donut Graphic (Functional vs Non-Functional counts and percentages).
+     - Lowest Scoring Requirements list with overall score badges and direct links to Requirement Viewer.
+  4. **Page 4 (Analysis)** (`frontend/app/analysis/page.tsx`):
+     - Category tabs: All Findings, Ambiguity & Weak Terms, Semantic Duplicates, Readability & Voice.
+     - Search and filter bar by severity (Critical, Warning, Info) and review status (Unreviewed, Accepted, Rejected, Edited).
+     - Issue cards with highlighted statement text, violation explanation, and suggestion.
+     - Side-by-side Semantic Duplicate comparison box showing Req 1 vs Req 2 with cosine similarity percentage and key aligned phrases.
+     - Inline review action buttons: Accept, Reject, Edit Statement.
+  5. **Page 5 (Reports)** (`frontend/app/reports/page.tsx`):
+     - Document selector dropdown.
+     - Executive Scorecard rail showing mean score, total requirements, total findings, human reviews closed, and score range.
+     - Export download buttons: Formal Audit Report (PDF), Printable HTML Scorecard (HTML), Requirements Dataset (CSV), Defect & Review Ledger (CSV).
+     - Live interactive in-browser report preview iframe rendering the full printable HTML report.
 
 ## What Has Actually Been Verified
-- 48/48 tests pass in 40.19s with 100% pass rate.
-- Frontend build: `npm run build` compiled 11/11 static pages with zero errors.
-- Live browser verification: Browser subagent navigated to `http://localhost:3000/`, verified topbar and sidebar with all 8 links, clicked through to `/documents` with shell intact, and returned to `/`.
-- Report generation: Verified on sample document with generated HTML, CSV, and PDF artifacts.
+- 48/48 backend tests pass in 35.52s with 100% pass rate (`pytest backend/tests/ -v`).
+- Frontend build: `npm run build` compiled 11/11 static pages with zero errors (`/`, `/documents`, `/requirements`, `/analysis`, `/reports`).
+- Live browser subagent verification:
+  - Page 1 (Documents): Upload dropzone, live table with 2 documents, format badges, requirement counts, status badges, and action buttons verified.
+  - Page 2 (Requirement Viewer): Document picker, requirement list (REQ-001 through REQ-006), inspection panel with quality score, highlighted problem spans, SHAP tokens, waterfall penalty deductions, 6 sub-scores, and review buttons verified.
+  - Page 3 (Dashboard): 4 KPI cards, score distribution histogram, rule category bars, classification donut, and lowest scoring requirements list verified.
+  - Page 4 (Analysis): Category tabs, issue cards with Accept/Reject/Edit actions, and side-by-side semantic duplicate pair comparison verified.
+  - Page 5 (Reports): Executive scorecard rail, PDF/HTML/CSV export buttons, and live in-browser HTML report preview iframe verified.
 
 ## Known Issues
 - None.
 
 ## Important Architecture & Technology Decisions
-- Deterministic scoring and rule-based checks without LLM ensure instantaneous evaluation, zero execution cost, and mathematical repeatability.
-- Report generation is 100% offline and self-contained; `xhtml2pdf` runs via pure Python without requiring GTK runtime binaries on Windows.
-- Next.js 14 App Router with persistent layout and typed client ensures clean component boundaries and zero redundant re-renders.
-
-## Files/Modules Currently Being Worked On
-- None (Phase 10 completed).
+- Full-stack integration with FastAPI backend running on `http://127.0.0.1:8000` with CORS middleware and Next.js 14 App Router on `http://localhost:3000`.
+- Pure deterministic algorithms (rules, TF-IDF + LR, MiniLM embeddings, mathematical scoring) require zero GPU and zero LLM credits.
+- Offline PDF generation via `xhtml2pdf` requires zero external GTK/C dependencies.
 
 ## Exact Next Step
-- Phase 11: Core frontend feature pages (built one at a time):
-  - Page 1: Documents (Upload drag & drop / picker, list with filename, type, size, req count, status, date, actions: analyze, view, delete).
-  - Page 2: Requirement Viewer (Table/list of requirements, filters, search, click requirement -> detail panel with highlighted problem spans, score waterfall, SHAP token chart, and review buttons).
-  - Page 3: Dashboard (KPI cards, functional vs non-functional donut, issue counts by type, score distribution histogram, worst requirements list).
-  - Page 4: Analysis (Issues grouped by category, expandable cards, side-by-side duplicate view with aligned phrases).
-  - Page 5: Reports (Preview plus export buttons for HTML, CSV, PDF).
+- The MVP is complete! Stop here and report MVP completion to the user.
 
 ## Last Verification Performed
-- `npm run build`: 11/11 pages compiled successfully with zero errors.
-- Live browser subagent testing on 2026-09-16 18:51:53.
-- `pytest backend/tests/ -v`: 48 passed in 40.19s on 2026-09-16 18:42:06.
+- `npm run build`: 11/11 pages compiled with zero errors on 2026-09-16.
+- Live browser subagent verification across all 5 core feature pages on 2026-09-16.
+- `pytest backend/tests/ -v`: 48 passed in 35.52s on 2026-09-16.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -86,7 +114,5 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-09-16 18:52:00
-- **Last Commit Hash**: 1cc83fd
-
-
+- **Last Updated**: 2026-09-16 20:07:00
+- **Last Commit Hash**: 8677692

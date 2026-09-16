@@ -307,7 +307,60 @@
   - Run frontend: `cd frontend && npm run dev`
   - Open browser: `http://localhost:3000`
 - **Known limitations**:
-  - Feature pages are not yet built (deferred to Phase 11: Core frontend pages).
+  - Feature pages are implemented in Phase 11.
+
+## Phase 11: MVP Core Feature Pages & Full-Stack Integration
+- **Date**: 2026-09-16
+- **What was built**:
+  - **FastAPI CORS Middleware**: Added `CORSMiddleware` in `backend/app/main.py` allowing frontend requests from `http://localhost:3000`.
+  - **API Client & Type Definitions**:
+    - `frontend/services/api.ts`: Typed fetch methods with request body-based header handling.
+    - `frontend/types/index.ts`: Updated `DocumentListItem` (`requirement_count`) and `ShapToken` definitions.
+  - **Page 1: Documents** (`frontend/app/documents/page.tsx`):
+    - Drag-and-drop file upload zone with 20MB limit and format validation (.pdf, .docx, .txt).
+    - Real-time search and status filter chips (`All`, `Analysed`, `Uploaded`).
+    - Data table showing filename, format badge, size, page count, requirement count, status badge, and uploaded date.
+    - Actions per row: "Analyze" / "Re-Analyze" (triggers `api.analyzeDocument`), "View Reqs", "Reports", and delete with confirmation dialog.
+  - **Page 2: Requirement Viewer** (`frontend/app/requirements/page.tsx`):
+    - Document selector dropdown with requirement count.
+    - Search in document input and classification filter (`All`, `Functional`, `Non-Functional`).
+    - Requirements list (left pane) with active selection indicator, score badge, and statement preview.
+    - Inspection Workspace (right pane):
+      - Header with requirement key, classification pill, confidence percentage, and copy ID button.
+      - Quality Score gauge (/100) with rating and threshold delta.
+      - Requirement statement box with problematic terms highlighted in amber with tooltip hints.
+      - Classification Attribution (SHAP) token strip showing positive and negative word contributions.
+      - Waterfall Score Deductions trace (`Base 100 -> deductions -> Final`).
+      - 6 Sub-Scores breakdown with colored progress bars (Clarity, Ambiguity, Testability, Readability, Structure, Consistency).
+      - Detected issues cards with human review action buttons (Accept, Reject, inline Edit).
+  - **Page 3: Dashboard** (`frontend/app/page.tsx`):
+    - Document selector with live metrics.
+    - 4 KPI metric cards: Total Requirements, Average Quality Score, Potential Findings, and Human Review Status.
+    - Quality Score Distribution histogram bars (90-100, 70-89, 50-69, <50).
+    - Findings by Rule Category bars (Ambiguity, Semantic Duplicates, Readability).
+    - Requirement Classification Donut Graphic (Functional vs Non-Functional counts and percentages).
+    - Lowest Scoring Requirements list with overall score badges and direct links to Requirement Viewer.
+  - **Page 4: Analysis** (`frontend/app/analysis/page.tsx`):
+    - Category tabs: All Findings, Ambiguity & Weak Terms, Semantic Duplicates, Readability & Voice.
+    - Search and filter bar by severity (Critical, Warning, Info) and status (Unreviewed, Accepted, Rejected, Edited).
+    - Issue cards with highlighted statement text, violation explanation, and suggestion.
+    - Side-by-side Semantic Duplicate comparison box showing Req 1 vs Req 2 with cosine similarity percentage and key aligned phrases.
+    - Inline review action buttons: Accept, Reject, Edit Statement.
+  - **Page 5: Reports** (`frontend/app/reports/page.tsx`):
+    - Document selector dropdown.
+    - Executive Scorecard rail showing mean score, total requirements, total findings, human reviews closed, and score range.
+    - Export download buttons: Formal Audit Report (PDF), Printable HTML Scorecard (HTML), Requirements Dataset (CSV), Defect & Review Ledger (CSV).
+    - Live interactive in-browser report preview iframe rendering the full printable HTML report.
+- **Key decisions**:
+  - All 5 pages wired directly to real backend REST endpoints and database data.
+  - Adhered strictly to Stitch design tokens for calm, clean enterprise layout.
+  - All interactions (upload, analyze, review, export) function end-to-end without mocking.
+- **How to run**:
+  - Run backend: `.venv\Scripts\python -m uvicorn backend.app.main:app --port 8000`
+  - Run frontend: `cd frontend && npm run dev`
+  - Open browser: `http://localhost:3000`
+- **Known limitations**:
+  - None for MVP scope. This completes the core MVP pipeline.
 
 
 
