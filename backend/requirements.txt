@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pydantic-settings
+alembic
+python-multipart
+pymupdf
+python-docx
+spacy
+textstat
+python-dotenv

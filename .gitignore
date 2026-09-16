@@ -1,0 +1,47 @@
+# Environments & Secrets
+.env
+.env.local
+.venv/
+env/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Project uploads and artifacts
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+
+# Models & ML artifacts
+models/
+*.pkl
+*.joblib
+*.pt
+*.bin
+*.onnx
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
