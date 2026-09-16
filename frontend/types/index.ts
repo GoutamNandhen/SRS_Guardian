@@ -80,7 +80,7 @@ export interface Issue {
   module: string;
   type: string;
   severity: "info" | "warning" | "error";
-  explanation: string;
+  explanation: string | Record<string, any>;
   status: "ai_flagged" | "accepted" | "rejected" | "reviewed" | "edited";
   is_human_reviewed: boolean;
   created_at: string;
