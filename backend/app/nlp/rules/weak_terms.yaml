@@ -1,0 +1,96 @@
+speed:
+  quickly:
+    explanation: "Subjective speed descriptor with no measurable latency or response time threshold."
+    suggestion: "Specify an explicit response time bound (e.g. 'within 200 ms')."
+  fast:
+    explanation: "Subjective speed descriptor with no defined numerical benchmark."
+    suggestion: "Define an exact processing time or throughput (e.g. 'processing 500 records per second')."
+  rapidly:
+    explanation: "Vague rate descriptor lacking quantified metric."
+    suggestion: "Provide an exact duration or frequency."
+  slow:
+    explanation: "Imprecise performance characteristic."
+    suggestion: "Quantify acceptable upper latency limit."
+  efficiently:
+    explanation: "Subjective operational term with no measurable resource utilization criteria."
+    suggestion: "Specify target CPU, memory, or execution budget (e.g. 'using under 512 MB RAM')."
+
+quality:
+  effectively:
+    explanation: "Vague outcome quality that cannot be objectively verified."
+    suggestion: "State the measurable success criterion or pass condition."
+  appropriate:
+    explanation: "Subjective suitability qualification open to personal interpretation."
+    suggestion: "Specify explicit requirements or standards to adhere to."
+  adequate:
+    explanation: "Subjective sufficiency threshold lacking concrete boundaries."
+    suggestion: "Define the minimum numerical capacity or criteria required."
+  sufficient:
+    explanation: "Subjective capacity qualification."
+    suggestion: "State the exact numeric minimum required."
+  reasonable:
+    explanation: "Subjective standard that cannot be mechanically tested."
+    suggestion: "Replace with deterministic constraints or acceptable bounds."
+  robust:
+    explanation: "Subjective resilience term without defined failure tolerance."
+    suggestion: "Specify error recovery rates or MTBF (Mean Time Between Failures)."
+  flexible:
+    explanation: "Unverifiable architecture description."
+    suggestion: "State the specific extensibility mechanisms or supported formats."
+  scalable:
+    explanation: "Unquantified growth capability."
+    suggestion: "Specify expected user concurrency or data volume limits."
+  secure:
+    explanation: "Vague security assertion without concrete controls."
+    suggestion: "Specify required encryption protocol or security standard (e.g. 'AES-256', 'TLS 1.3')."
+  optimal:
+    explanation: "Subjective superlative without a defined mathematical cost function."
+    suggestion: "Define the target metric (e.g. 'minimizing memory footprint to under 1 GB')."
+
+usability:
+  easy:
+    explanation: "Subjective usability assertion; ease-of-use cannot be tested without user criteria."
+    suggestion: "Specify task completion rate or maximum steps (e.g. 'completing checkout in under 3 clicks')."
+  simple:
+    explanation: "Subjective complexity qualification."
+    suggestion: "Specify workflow limits or user proficiency assumptions."
+  user-friendly:
+    explanation: "Vague consumer sentiment without measurable usability heuristics."
+    suggestion: "Define UX benchmark (e.g. 'SUS score >= 80' or 'first-time task success rate >= 90%')."
+  intuitive:
+    explanation: "Subjective cognitive claim."
+    suggestion: "Specify training-free task completion metrics or design guideline conformity."
+
+quantity:
+  several:
+    explanation: "Indefinite count leading to ambiguous scope."
+    suggestion: "State an exact number or range (e.g. 'between 3 and 5')."
+  some:
+    explanation: "Vague non-specific quantifier."
+    suggestion: "Specify the exact subset or count."
+  many:
+    explanation: "Subjective quantity threshold."
+    suggestion: "Specify the exact minimum quantity (e.g. 'at least 100')."
+  most:
+    explanation: "Unquantified proportion."
+    suggestion: "Specify an exact percentage (e.g. 'at least 95%')."
+  minimal:
+    explanation: "Unbounded lower limit."
+    suggestion: "Specify the numerical minimum threshold."
+  maximum:
+    explanation: "Unquantified upper bound when used without an accompanying value."
+    suggestion: "Specify the numeric upper limit (e.g. 'a maximum of 10 retries')."
+
+generic:
+  as needed:
+    explanation: "Unspecified triggering condition or frequency."
+    suggestion: "Define the exact event trigger or polling schedule."
+  if necessary:
+    explanation: "Ambiguous conditional clause without criteria for necessity."
+    suggestion: "Define the explicit Boolean condition under which this action occurs."
+  etc:
+    explanation: "Open-ended ellipsis leaving requirements incomplete and untestable."
+    suggestion: "Enumerate all valid elements or define a strict schema."
+  and so on:
+    explanation: "Open-ended trailing phrase leaving requirement list undefined."
+    suggestion: "List all intended items exhaustively."

@@ -119,6 +119,34 @@
 - **Known limitations**:
   - Semantic duplicate detection and rule-based ambiguity checks are not yet built (deferred to Phase 5 and 6).
 
+## Phase 5: Ambiguity Detection and Readability Analysis
+- **Date**: 2026-09-16
+- **What was built**:
+  - `backend/app/nlp/rules/weak_terms.yaml`: Vocabulary of subjective and vague terms categorized into speed, quality, quantity, usability, and generic, with per-term explanations and actionable suggestions.
+  - `backend/app/nlp/ambiguity.py`: Deterministic rule-based ambiguity detection engine featuring 6 independent checks:
+    - CHECK A (Weak / Subjective Terms): Matches configurable YAML terms with exact word boundaries.
+    - CHECK B (Weak Modals): Identifies non-binding modals (`should`, `may`, `could`, `might`).
+    - CHECK C (Missing Measurable Criterion): Detects unquantified performance/capacity concepts (`time`, `speed`, `latency`, etc.) lacking numeric thresholds.
+    - CHECK D (Vague Pronouns): Flags subject pronouns (`it`, `this`, `that`, `they`) lacking preceding noun antecedents.
+    - CHECK E (Compound Requirements): Flags multiple normative modals or coordinated actions violating requirement singularity.
+    - CHECK F (Passive Voice Without Actor): Dependency check identifying `nsubjpass` constructions without an explicit agent (`by <actor>`).
+  - Unified explanation schema contract implemented (`finding_id`, `module`, `method`, `rule_id`, `spans`, `factors`, `human_explanation`, `suggestion`, `confidence`).
+  - `backend/app/nlp/readability.py`: Computes objective readability metrics:
+    - Word count, clause count, clause nesting depth, passive voice ratio, Flesch Reading Ease, and Gunning Fog index.
+  - Unit test suites:
+    - `backend/tests/test_ambiguity.py`: Positive and negative test cases for all 6 ambiguity checks + schema validation.
+    - `backend/tests/test_readability.py`: Metric calculation and passive voice ratio verification.
+  - 28/28 tests passing across the backend test suite.
+- **Key decisions**:
+  - Strictly rule-based without transformer or LLM overhead (free, deterministic, explainable).
+  - Every finding highlights exact character spans (`start`, `end`, `text`) for inline frontend display.
+- **How to run**:
+  - Run tests: `pytest backend/tests/test_ambiguity.py backend/tests/test_readability.py -v`
+  - Run all tests: `pytest backend/tests/ -v`
+- **Known limitations**:
+  - Semantic duplicate detection via embeddings is not yet implemented (deferred to Phase 6).
+
+
 
 
 
