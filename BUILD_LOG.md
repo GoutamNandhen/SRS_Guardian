@@ -41,3 +41,25 @@
   - Requirement segmentation/extraction logic is not yet implemented (deferred to Phase 2).
   - REST endpoints for upload/extraction are not yet wired (deferred to Phase 3).
 
+## Phase 2: Requirement Extraction
+- **Date**: 2026-09-16
+- **What was built**:
+  - `backend/app/nlp/requirement_extractor.py`: Layered requirement extraction architecture:
+    - Layer 1: Explicit ID patterns (`REQ-`, `FR-`, `NFR-`, `\d+\.\d+`, etc.) with confidence 0.95.
+    - Layer 2: Structural cues (bullet/numbered lists within requirement-oriented sections) with confidence 0.85.
+    - Layer 3: Modal verb sentences (`shall`, `must`, `should`, `will`, `is required to`, `needs to`) with subject parsing via spaCy (`en_core_web_sm`) with confidence 0.70.
+    - Layer 4: Fallback for unstructured text with confidence 0.40.
+    - Filters: Automatic exclusion of headings, Table of Contents lines, captions (Figure/Table), and short sentences (< 4 words).
+  - `Requirement` dataclass tracking `req_id`, `text`, `source_layer`, `confidence`, `char_start`, `char_end`, and `section`.
+  - `backend/tests/test_requirement_extractor.py`: 5 tests covering ID-labelled docs, bullet lists in functional sections, modal prose docs, TOC/caption filtering, and fallback layer.
+- **Key decisions**:
+  - Layered approach prioritizes explicit author structure first, falling back progressively to grammatical and keyword signals.
+  - spaCy `en_core_web_sm` loaded for syntactic dependency and POS validation of requirement subjects and modals.
+- **How to run**:
+  - Run tests: `pytest backend/tests/test_requirement_extractor.py -v`
+  - Extract from text: `python -c "from backend.app.nlp.requirement_extractor import extract_requirements; print(len(extract_requirements('REQ-001: The system shall...')))"`
+- **Known limitations**:
+  - Requirements are not yet stored in a persistent database (deferred to Phase 3).
+  - Classification and quality analysis are not yet applied (deferred to Phase 4+).
+
+
