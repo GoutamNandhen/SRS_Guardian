@@ -62,4 +62,32 @@
   - Requirements are not yet stored in a persistent database (deferred to Phase 3).
   - Classification and quality analysis are not yet applied (deferred to Phase 4+).
 
+## Phase 3: Database and API for Documents and Requirements
+- **Date**: 2026-09-16
+- **What was built**:
+  - `backend/app/core/database.py`: SQLAlchemy database engine, session factory, declarative base, and FastAPI session dependency `get_db`.
+  - `backend/app/models/document.py`: SQLAlchemy models for `Document`, `DocumentVersion`, and `Requirement` with simple cascading relationships.
+  - Alembic migration environment initialized (`alembic.ini`, `backend/alembic/env.py`) and migration `58e6a70d176c` applied to SQLite database (`srs_guardian.db`).
+  - Pydantic schemas in `backend/app/schemas/`: `DocumentListItem`, `DocumentDetail`, `RequirementResponse`, and `DocumentExtractResponse`.
+  - REST API router in `backend/app/api/documents.py`:
+    - `POST /api/documents/upload`: Saves file, runs validation, extracts raw/cleaned text, stores Document and DocumentVersion v1.0 (201 Created).
+    - `GET /api/documents`: Lists documents with requirement counts (200 OK).
+    - `GET /api/documents/{id}`: Document detail with cleaned text and requirement count (200 OK, 404 on missing).
+    - `DELETE /api/documents/{id}`: Deletes document and cascading versions/requirements (200 OK).
+    - `POST /api/documents/{id}/extract`: Runs Phase 2 extractor on document text, stores requirements in DB, sets status to 'extracted' (200 OK).
+    - `GET /api/documents/{id}/requirements`: Returns all extracted requirements for a document (200 OK).
+  - API test suite in `backend/tests/test_api_documents.py` (3 tests covering full lifecycle, invalid file rejection, 404 checks).
+- **Key decisions**:
+  - Kept ORM models simple with no polymorphic tables or unnecessary inheritance.
+  - Used Alembic for formal schema tracking and migration history.
+  - Idempotent requirement extraction endpoint wipes existing requirements before re-inserting to prevent duplicate runs.
+- **How to run**:
+  - Run server: `uvicorn backend.app.main:app --port 8000`
+  - Run all tests: `pytest backend/tests/ -v`
+  - Upload document: `curl -X POST "http://127.0.0.1:8000/api/documents/upload" -F "file=@data/test/sample_srs.txt"`
+- **Known limitations**:
+  - Analysis, classification (Functional/Non-Functional), and quality scoring are not yet attached to requirements (deferred to Phase 4+).
+  - Frontend not yet built (deferred to Phase 10).
+
+
 
