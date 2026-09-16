@@ -208,6 +208,42 @@
 - **Known limitations**:
   - Quality scores reflect only machine-checkable heuristics; human review is required in Phase 8 to accept, reject, or edit findings.
 
+## Phase 8: Human-in-the-Loop Review and MVP API Surface
+- **Date**: 2026-09-16
+- **What was built**:
+  - `backend/app/models/document.py`:
+    - `Issue` model (`id`, `requirement_id`, `module`, `type`, `severity`, `explanation_json`, `status`, `created_at`).
+    - `Review` model (`id`, `issue_id`, `action`, `edited_text`, `note`, `reviewed_at`).
+    - Added `issues` relationship on `Requirement` model with cascading delete.
+  - `backend/alembic/versions/3a4b5c6d7e8f_create_issues_and_reviews_tables.py`:
+    - Formal database migration creating `issues` and `reviews` tables with indices and foreign keys.
+  - `backend/app/schemas/issue.py`:
+    - Pydantic models: `ReviewActionRequest`, `ReviewResponse`, `IssueResponse`, `DocumentAnalysisResponse`.
+  - `backend/app/schemas/requirement.py`:
+    - Added `RequirementDetailResponse` with quality score, waterfall, and attached issues.
+  - `backend/app/api/documents.py`:
+    - `POST /api/documents/{id}/analyze`: Orchestrates the complete analysis pipeline (extraction, classification, ambiguity rules, readability, semantic duplicates, quality scoring), persists all detected issues to the `issues` table with `ai_flagged` status while preserving human-reviewed decisions, updates document status to `analyzed`, and returns document summary and issue counts.
+    - `GET /api/documents/{id}/issues`: Returns issues for a document with filtering by `module`, `severity`, and `status_filter`.
+  - `backend/app/api/issues.py`:
+    - `POST /api/issues/{id}/review`: Accepts human reviewer actions (`accept`, `reject`, `edit`, `mark_reviewed`), creates an audit trail entry in `reviews` table, updates the `Issue.status`, and if `action == "edit"` updates the `Requirement.text` directly in the database.
+  - `backend/app/api/requirements.py`:
+    - `GET /api/requirements/{id}`: Returns full requirement detail including requirement metadata, classification, quality score, waterfall trace, and associated issues with human review status.
+  - `backend/tests/test_issues_and_review.py`:
+    - Full end-to-end integration test covering document analysis, issue listing with filters, review actions (accept, edit, reject), database text modification, and requirement detail query.
+    - Full test suite passing: 42/42 tests across the backend in 39.09s.
+- **Key decisions**:
+  - Clear separation between AI findings (`ai_flagged`) and human decisions (`accepted`, `rejected`, `edited`, `reviewed`).
+  - Analysis pipeline is idempotent: re-analyzing clears unreviewed AI flags while preserving human-reviewed decisions.
+  - Every review action creates an immutable record in the `reviews` table for auditability and future evaluation.
+- **How to run**:
+  - Run tests: `pytest backend/tests/test_issues_and_review.py -v`
+  - Run all tests: `pytest backend/tests/ -v`
+  - Trigger analysis: `curl -X POST http://127.0.0.1:8000/api/documents/1/analyze`
+  - Review an issue: `curl -X POST http://127.0.0.1:8000/api/issues/1/review -H "Content-Type: application/json" -d '{"action": "accept", "note": "Verified"}'`
+- **Known limitations**:
+  - Export reports (HTML, CSV, PDF) are not yet implemented (deferred to Phase 9).
+
+
 
 
 

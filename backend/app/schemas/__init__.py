@@ -2,6 +2,7 @@ from backend.app.schemas.document import DocumentBase, DocumentListItem, Documen
 from backend.app.schemas.requirement import (
     RequirementResponse,
     DocumentExtractResponse,
+    RequirementDetailResponse,
 )
 from backend.app.schemas.duplicate import (
     PhraseSpan,
@@ -16,6 +17,12 @@ from backend.app.schemas.scoring import (
     WorstRequirementItem,
     DocumentQualitySummaryResponse,
 )
+from backend.app.schemas.issue import (
+    ReviewActionRequest,
+    ReviewResponse,
+    IssueResponse,
+    DocumentAnalysisResponse,
+)
 
 __all__ = [
     "DocumentBase",
@@ -23,6 +30,7 @@ __all__ = [
     "DocumentDetail",
     "RequirementResponse",
     "DocumentExtractResponse",
+    "RequirementDetailResponse",
     "PhraseSpan",
     "AlignedPhrase",
     "DuplicatePair",
@@ -32,6 +40,11 @@ __all__ = [
     "RequirementScoreResponse",
     "WorstRequirementItem",
     "DocumentQualitySummaryResponse",
+    "ReviewActionRequest",
+    "ReviewResponse",
+    "IssueResponse",
+    "DocumentAnalysisResponse",
 ]
+
 
 

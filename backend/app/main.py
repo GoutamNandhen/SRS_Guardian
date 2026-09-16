@@ -3,6 +3,7 @@ from backend.app.core.config import settings
 from backend.app.core.logging import logger
 from backend.app.api.documents import router as documents_router
 from backend.app.api.requirements import router as requirements_router
+from backend.app.api.issues import router as issues_router
 
 app = FastAPI(
     title="SRS Guardian API",
@@ -12,6 +13,8 @@ app = FastAPI(
 
 app.include_router(documents_router, prefix="/api")
 app.include_router(requirements_router, prefix="/api")
+app.include_router(issues_router, prefix="/api")
+
 
 
 

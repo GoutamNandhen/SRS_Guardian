@@ -41,3 +41,40 @@ class DocumentExtractResponse(BaseModel):
     status: str
     extracted_count: int
     requirements: list[RequirementResponse]
+
+
+from backend.app.schemas.scoring import WaterfallStepResponse
+from backend.app.schemas.issue import IssueResponse
+
+
+class RequirementDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    document_id: int
+    req_key: str
+    text: str
+    source_layer: str
+    confidence: float
+    char_start: int
+    char_end: int
+    section: str | None = None
+    classification_label: str | None = None
+    classification_prob: float | None = None
+    classification_explanation: list[TokenExplanation] | None = None
+    quality_score: float
+    sub_scores: dict[str, float]
+    waterfall: list[WaterfallStepResponse]
+    issues: list[IssueResponse]
+    created_at: datetime
+
+    @field_validator("classification_explanation", mode="before")
+    @classmethod
+    def parse_explanation(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except Exception:
+                return []
+        return v
+

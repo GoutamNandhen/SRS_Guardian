@@ -4,8 +4,14 @@ from backend.app.core.database import get_db
 from backend.app.models.document import Requirement
 from backend.app.schemas.requirement import (
     RequirementResponse,
+    RequirementDetailResponse,
     TokenExplanation,
 )
+from backend.app.schemas.scoring import WaterfallStepResponse
+from backend.app.schemas.issue import IssueResponse, ReviewResponse
+from backend.app.nlp.ambiguity import analyze_ambiguity
+from backend.app.nlp.readability import analyze_readability
+from backend.app.nlp.scoring import score_requirement
 from backend.app.ml.explain_classifier import explain
 
 router = APIRouter(prefix="/requirements", tags=["requirements"])
@@ -13,8 +19,8 @@ router = APIRouter(prefix="/requirements", tags=["requirements"])
 
 @router.get(
     "/{requirement_id}",
-    response_model=RequirementResponse,
-    summary="Get requirement detail by ID with classification and SHAP explanation",
+    response_model=RequirementDetailResponse,
+    summary="Get requirement full detail by ID with findings, quality score waterfall, and issues",
 )
 def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
     req = db.query(Requirement).filter(Requirement.id == requirement_id).first()
@@ -23,7 +29,90 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Requirement with ID {requirement_id} not found",
         )
-    return RequirementResponse.model_validate(req)
+
+    # Calculate quality score and waterfall
+    ambiguity_findings = analyze_ambiguity(req.text)
+    readability_metrics = analyze_readability(req.text)
+
+    # Check if there is an active duplicate issue
+    dup_issue = next(
+        (i for i in req.issues if i.type == "SEMANTIC_DUPLICATE" and i.status != "rejected"),
+        None,
+    )
+    is_dup = dup_issue is not None
+    dup_info = None
+    if dup_issue:
+        try:
+            import json
+            exp_data = json.loads(dup_issue.explanation_json)
+            dup_info = {"target_req_key": "duplicate requirement", "similarity_score": exp_data.get("confidence", 0.8)}
+        except Exception:
+            pass
+
+    score_res = score_requirement(
+        req_key=req.req_key,
+        text=req.text,
+        ambiguity_findings=ambiguity_findings,
+        readability_metrics=readability_metrics,
+        is_duplicate=is_dup,
+        duplicate_info=dup_info,
+        requirement_id=req.id,
+    )
+
+    issues_list = []
+    for issue in req.issues:
+        reviews_list = [
+            ReviewResponse.model_validate(r)
+            for r in sorted(issue.reviews, key=lambda x: x.reviewed_at, reverse=True)
+        ]
+        issues_list.append(
+            IssueResponse(
+                id=issue.id,
+                requirement_id=issue.requirement_id,
+                req_key=req.req_key,
+                module=issue.module,
+                type=issue.type,
+                severity=issue.severity,
+                explanation=issue.explanation_json,
+                status=issue.status,
+                is_human_reviewed=(issue.status != "ai_flagged"),
+                created_at=issue.created_at,
+                reviews=reviews_list,
+            )
+        )
+
+    waterfall_resp = [
+        WaterfallStepResponse(
+            step_number=w.step_number,
+            step_name=w.step_name,
+            rule_id=w.rule_id,
+            deduction=round(w.deduction, 1),
+            current_score=round(w.current_score, 1),
+            explanation=w.explanation,
+        )
+        for w in score_res.waterfall
+    ]
+
+    return RequirementDetailResponse(
+        id=req.id,
+        document_id=req.document_id,
+        req_key=req.req_key,
+        text=req.text,
+        source_layer=req.source_layer,
+        confidence=req.confidence,
+        char_start=req.char_start,
+        char_end=req.char_end,
+        section=req.section,
+        classification_label=req.classification_label,
+        classification_prob=req.classification_prob,
+        classification_explanation=req.classification_explanation,
+        quality_score=round(score_res.overall_score, 1),
+        sub_scores={k: round(v, 1) for k, v in score_res.sub_scores.items()},
+        waterfall=waterfall_resp,
+        issues=issues_list,
+        created_at=req.created_at,
+    )
+
 
 
 @router.get(
