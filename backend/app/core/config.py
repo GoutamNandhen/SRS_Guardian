@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_MB: int = 10
     LLM_ENABLED: bool = False
+    DUPLICATE_SIMILARITY_THRESHOLD: float = 0.80
+
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -39,6 +39,9 @@ models/
 *.pt
 *.bin
 *.onnx
+*.npy
+data/cache/
+
 
 # IDE / OS
 .vscode/

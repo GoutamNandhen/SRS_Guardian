@@ -3,6 +3,12 @@ from backend.app.schemas.requirement import (
     RequirementResponse,
     DocumentExtractResponse,
 )
+from backend.app.schemas.duplicate import (
+    PhraseSpan,
+    AlignedPhrase,
+    DuplicatePair,
+    DocumentDuplicatesResponse,
+)
 
 __all__ = [
     "DocumentBase",
@@ -10,4 +16,9 @@ __all__ = [
     "DocumentDetail",
     "RequirementResponse",
     "DocumentExtractResponse",
+    "PhraseSpan",
+    "AlignedPhrase",
+    "DuplicatePair",
+    "DocumentDuplicatesResponse",
 ]
+

@@ -146,6 +146,40 @@
 - **Known limitations**:
   - Semantic duplicate detection via embeddings is not yet implemented (deferred to Phase 6).
 
+## Phase 6: Semantic Duplicate Detection with Similarity Attribution
+- **Date**: 2026-09-16
+- **What was built**:
+  - `sentence-transformers` added to `backend/requirements.txt` and installed (`all-MiniLM-L6-v2`, 384-dimensional dense vectors on CPU).
+  - `backend/app/ml/embeddings.py`:
+    - Model loaded once on CPU with batching.
+    - Two-tier caching system (in-memory dict + persistent SHA-256 disk cache at `data/cache/embeddings/{hash}.npy`).
+    - Guarantees zero redundant recomputation of embeddings.
+  - `backend/app/core/config.py`:
+    - Added configurable `DUPLICATE_SIMILARITY_THRESHOLD: float = 0.80`.
+  - `backend/app/ml/duplicates.py`:
+    - Candidate blocking for documents with >50 requirements via spaCy content lemma intersection (`NOUN`, `PROPN`, `VERB`).
+    - Pairwise cosine similarity matrix computation over normalized embeddings.
+    - Similarity attribution via noun-chunk and verb-object phrase extraction (`extract_key_phrases`), pairwise phrase encoding, and greedy alignment.
+    - Full compliance with unified explanation schema (`finding_id`, `module="duplicates"`, `method="embedding_similarity"`, `rule_id="SEMANTIC_DUPLICATE"`, `spans`, `factors`, `human_explanation`, `suggestion`, `confidence`).
+  - `backend/app/schemas/duplicate.py`:
+    - Pydantic models: `PhraseSpan`, `AlignedPhrase`, `DuplicatePair`, `DocumentDuplicatesResponse`.
+  - `backend/app/api/documents.py`:
+    - Exposed `GET /api/documents/{id}/duplicates` endpoint with optional `threshold` query parameter.
+  - Test suites and validation:
+    - `backend/tests/test_duplicates.py` with 6 automated tests (embedding disk caching, phrase extraction, duplicate detection, false positive rejection, candidate blocking on 54 requirements, and live FastAPI endpoint test).
+    - Full test suite passing: 34/34 tests across the backend.
+- **Key decisions**:
+  - `all-MiniLM-L6-v2` runs locally on CPU with zero API costs and high semantic fidelity for short technical sentences.
+  - Persistent SHA-256 disk cache ensures embeddings survive server restarts and are never re-encoded.
+  - Similarity attribution extracts both noun chunks and verb-object actions to provide transparent concept mappings (e.g. "reset their password" <-> "recover forgotten passwords").
+- **How to run**:
+  - Run duplicate tests: `pytest backend/tests/test_duplicates.py -v`
+  - Run all tests: `pytest backend/tests/ -v`
+  - Live endpoint: `curl http://127.0.0.1:8000/api/documents/1/duplicates`
+- **Known limitations**:
+  - Numeric contradictions (like REQ-004 vs REQ-005) currently surface as high semantic duplicates (0.9160) because sentence embeddings capture topic similarity rather than numerical logical exclusivity. A dedicated contradiction module (Phase 12) will address constraint conflicts.
+
+
 
 
 

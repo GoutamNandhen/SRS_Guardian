@@ -12,12 +12,15 @@ from backend.app.schemas.requirement import (
     RequirementResponse,
     DocumentExtractResponse,
 )
+from backend.app.schemas.duplicate import DocumentDuplicatesResponse
 from backend.app.nlp.extractors import extract_text
 from backend.app.nlp.cleaning import clean_text
 from backend.app.nlp.requirement_extractor import extract_requirements
 from backend.app.ml.classifier import classify
 from backend.app.ml.explain_classifier import explain
+from backend.app.ml.duplicates import find_duplicates
 from backend.app.utils.file_validation import validate_file
+
 
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -271,3 +274,56 @@ def get_document_requirements(document_id: int, db: Session = Depends(get_db)):
     )
 
     return [RequirementResponse.model_validate(r) for r in reqs]
+
+
+@router.get(
+    "/{document_id}/duplicates",
+    response_model=DocumentDuplicatesResponse,
+    summary="Detect potential semantic duplicate requirements with similarity attribution",
+)
+def get_document_duplicates(
+    document_id: int,
+    threshold: float | None = None,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
+
+    reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == document_id)
+        .order_by(Requirement.id.asc())
+        .all()
+    )
+
+    req_dicts = [
+        {"id": r.id, "req_key": r.req_key, "text": r.text}
+        for r in reqs
+    ]
+
+    active_threshold = (
+        threshold
+        if threshold is not None
+        else settings.DUPLICATE_SIMILARITY_THRESHOLD
+    )
+    duplicates, total_pairs = find_duplicates(
+        req_dicts, threshold=active_threshold
+    )
+
+    logger.info(
+        f"Duplicate check on doc {document_id}: {len(duplicates)} pairs found "
+        f"out of {total_pairs} pairs checked (threshold={active_threshold})"
+    )
+
+    return DocumentDuplicatesResponse(
+        document_id=doc.id,
+        threshold=active_threshold,
+        total_pairs_checked=total_pairs,
+        duplicate_pairs_count=len(duplicates),
+        duplicates=duplicates,
+    )
+
