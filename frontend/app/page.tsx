@@ -130,8 +130,8 @@ export default function DashboardPage() {
     const counts: Record<string, number> = {
       Ambiguity: 0,
       "Semantic Duplicates": 0,
+      Contradictions: 0,
       Readability: 0,
-      Other: 0,
     };
 
     issues.forEach((i) => {
@@ -139,10 +139,12 @@ export default function DashboardPage() {
         counts["Ambiguity"]++;
       } else if (i.module === "duplicates" || i.type.includes("DUPLICATE")) {
         counts["Semantic Duplicates"]++;
+      } else if (i.module === "contradiction" || i.type.includes("CONTRADICTION") || i.type.includes("CONFLICT")) {
+        counts["Contradictions"]++;
       } else if (i.module === "readability" || i.type.includes("READABILITY")) {
         counts["Readability"]++;
       } else {
-        counts["Other"]++;
+        counts["Other"] = (counts["Other"] || 0) + 1;
       }
     });
 

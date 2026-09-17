@@ -47,6 +47,13 @@ from backend.app.nlp.scoring import score_requirement, score_document
 from backend.app.ml.classifier import classify
 from backend.app.ml.explain_classifier import explain
 from backend.app.ml.duplicates import find_duplicates
+from backend.app.nlp.numeric_constraints import detect_numeric_conflicts
+from backend.app.ml.contradictions import detect_semantic_contradictions
+from backend.app.schemas.contradiction import (
+    DocumentContradictionsResponse,
+    ContradictionItem,
+    ContradictionConstraintSchema,
+)
 from backend.app.utils.file_validation import validate_file
 
 
@@ -560,6 +567,43 @@ def analyze_document(
                 "explanation": d["explanation"],
             }
 
+    # 2b. Run Contradiction Detection across all requirements (Phase 12)
+    # Mechanism 1: Deterministic numeric constraint conflict engine
+    numeric_findings = detect_numeric_conflicts(req_dicts)
+    excluded_pairs = {(f.req_key_1, f.req_key_2) for f in numeric_findings}
+
+    # Mechanism 2: Candidate-blocked NLI semantic contradiction engine
+    semantic_findings = detect_semantic_contradictions(req_dicts, excluded_pairs=excluded_pairs)
+
+    contradiction_map: dict[int, list[dict[str, Any]]] = {}
+    for nf in numeric_findings:
+        if nf.requirement_id_1:
+            contradiction_map.setdefault(nf.requirement_id_1, []).append({
+                "target_req_key": nf.req_key_2,
+                "reason": nf.human_explanation,
+                "finding": nf.to_dict(),
+            })
+        if nf.requirement_id_2:
+            contradiction_map.setdefault(nf.requirement_id_2, []).append({
+                "target_req_key": nf.req_key_1,
+                "reason": nf.human_explanation,
+                "finding": nf.to_dict(),
+            })
+
+    for sf in semantic_findings:
+        if sf.requirement_id_1:
+            contradiction_map.setdefault(sf.requirement_id_1, []).append({
+                "target_req_key": sf.req_key_2,
+                "reason": sf.human_explanation,
+                "finding": sf.to_dict(),
+            })
+        if sf.requirement_id_2:
+            contradiction_map.setdefault(sf.requirement_id_2, []).append({
+                "target_req_key": sf.req_key_1,
+                "reason": sf.human_explanation,
+                "finding": sf.to_dict(),
+            })
+
     # 3. Clear previous ai_flagged issues for idempotency (preserve human-reviewed issues)
     req_ids = [r.id for r in reqs]
     db.query(Issue).filter(
@@ -602,6 +646,21 @@ def analyze_document(
             )
             new_issues.append(issue)
 
+        # Persist contradiction issues (Phase 12)
+        if r.id in contradiction_map:
+            for c_item in contradiction_map[r.id]:
+                finding_dict = c_item["finding"]
+                rule_id = finding_dict.get("rule_id", "NUMERIC_CONSTRAINT_CONFLICT")
+                issue = Issue(
+                    requirement_id=r.id,
+                    module="contradiction",
+                    type=rule_id,
+                    severity="critical",
+                    explanation_json=json.dumps(finding_dict),
+                    status="ai_flagged",
+                )
+                new_issues.append(issue)
+
         # Calculate requirement score
         score_res = score_requirement(
             req_key=r.req_key,
@@ -610,6 +669,7 @@ def analyze_document(
             readability_metrics=readability_metrics,
             is_duplicate=is_dup,
             duplicate_info=dup_info,
+            contradiction_findings=contradiction_map.get(r.id),
             requirement_id=r.id,
         )
         scored_reqs.append(score_res)
@@ -799,3 +859,132 @@ def get_document_report(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unsupported format '{format}'. Supported formats: html, csv, pdf.",
         )
+
+
+@router.get(
+    "/{document_id}/contradictions",
+    response_model=DocumentContradictionsResponse,
+    summary="Get all detected contradiction pairs and conflicts for a document",
+)
+def get_document_contradictions(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
+
+    reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == document_id)
+        .order_by(Requirement.id.asc())
+        .all()
+    )
+    if not reqs:
+        return DocumentContradictionsResponse(
+            document_id=document_id,
+            total_contradictions_count=0,
+            numeric_conflicts_count=0,
+            semantic_contradictions_count=0,
+            contradictions=[],
+        )
+
+    req_key_map = {r.req_key: r for r in reqs}
+    req_ids = [r.id for r in reqs]
+
+    issues = (
+        db.query(Issue)
+        .filter(
+            Issue.requirement_id.in_(req_ids),
+            Issue.module == "contradiction",
+        )
+        .all()
+    )
+
+    items: list[ContradictionItem] = []
+    seen_finding_ids = set()
+
+    for issue in issues:
+        if not issue.explanation_json:
+            continue
+        try:
+            data = json.loads(issue.explanation_json)
+        except Exception:
+            continue
+
+        finding_id = data.get("finding_id", f"ISSUE_{issue.id}")
+        if finding_id in seen_finding_ids:
+            continue
+        seen_finding_ids.add(finding_id)
+
+        rule_id = issue.type or data.get("rule_id", "NUMERIC_CONSTRAINT_CONFLICT")
+        mechanism = "numeric" if "NUMERIC" in rule_id else "semantic"
+
+        k1 = data.get("req_key_1", "")
+        k2 = data.get("req_key_2", "")
+        r1 = req_key_map.get(k1)
+        r2 = req_key_map.get(k2)
+
+        c1_schema = None
+        c2_schema = None
+        if "constraint_1" in data and data["constraint_1"]:
+            c1_raw = data["constraint_1"]
+            c1_schema = ContradictionConstraintSchema(
+                entity=c1_raw.get("entity", ""),
+                attribute=c1_raw.get("attribute", ""),
+                comparator=c1_raw.get("comparator", ""),
+                value=float(c1_raw.get("value", 0.0)),
+                value_max=float(c1_raw["value_max"]) if c1_raw.get("value_max") is not None else None,
+                unit=c1_raw.get("unit", ""),
+                range_display=c1_raw.get("range_display", f"{c1_raw.get('comparator', '')} {c1_raw.get('value', '')} {c1_raw.get('unit', '')}"),
+                raw_span=c1_raw.get("raw_span", ""),
+            )
+
+        if "constraint_2" in data and data["constraint_2"]:
+            c2_raw = data["constraint_2"]
+            c2_schema = ContradictionConstraintSchema(
+                entity=c2_raw.get("entity", ""),
+                attribute=c2_raw.get("attribute", ""),
+                comparator=c2_raw.get("comparator", ""),
+                value=float(c2_raw.get("value", 0.0)),
+                value_max=float(c2_raw["value_max"]) if c2_raw.get("value_max") is not None else None,
+                unit=c2_raw.get("unit", ""),
+                range_display=c2_raw.get("range_display", f"{c2_raw.get('comparator', '')} {c2_raw.get('value', '')} {c2_raw.get('unit', '')}"),
+                raw_span=c2_raw.get("raw_span", ""),
+            )
+
+        items.append(
+            ContradictionItem(
+                finding_id=finding_id,
+                issue_id=issue.id,
+                mechanism=mechanism,
+                rule_id=rule_id,
+                severity=issue.severity or "critical",
+                confidence=float(data.get("confidence", 1.0)),
+                requirement_id_1=r1.id if r1 else None,
+                req_key_1=k1,
+                text_1=r1.text if r1 else data.get("premise_text", ""),
+                constraint_1=c1_schema,
+                requirement_id_2=r2.id if r2 else None,
+                req_key_2=k2,
+                text_2=r2.text if r2 else data.get("hypothesis_text", ""),
+                constraint_2=c2_schema,
+                human_explanation=data.get("human_explanation", ""),
+                suggestion=data.get("suggestion", ""),
+                status=issue.status or "ai_flagged",
+            )
+        )
+
+    num_count = sum(1 for it in items if it.mechanism == "numeric")
+    sem_count = sum(1 for it in items if it.mechanism == "semantic")
+
+    return DocumentContradictionsResponse(
+        document_id=document_id,
+        total_contradictions_count=len(items),
+        numeric_conflicts_count=num_count,
+        semantic_contradictions_count=sem_count,
+        contradictions=items,
+    )

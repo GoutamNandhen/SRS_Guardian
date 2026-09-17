@@ -102,6 +102,7 @@ def score_requirement(
     readability_metrics: ReadabilityMetrics | None = None,
     is_duplicate: bool = False,
     duplicate_info: dict[str, Any] | None = None,
+    contradiction_findings: list[dict[str, Any]] | None = None,
     requirement_id: int | None = None,
 ) -> RequirementQualityScore:
     """Calculates deterministic quality score, sub-scores, and waterfall trace for a requirement."""
@@ -263,6 +264,36 @@ def score_requirement(
                 "matched_text": dup_target,
             }
         )
+
+    # 4. Contradiction penalties (Phase 12)
+    if contradiction_findings:
+        cfg = penalties_cfg.get("POTENTIAL_CONTRADICTION", {})
+        deduction = float(cfg.get("deduction", 25.0))
+        for cf in contradiction_findings:
+            current_score = max(0.0, current_score - deduction)
+            step_number += 1
+            target_key = cf.get("target_req_key", "another requirement")
+            reason = cf.get("reason", "Conflicting requirement logic")
+            waterfall.append(
+                WaterfallStep(
+                    step_number=step_number,
+                    step_name=f"Potential Contradiction ({target_key})",
+                    rule_id="POTENTIAL_CONTRADICTION",
+                    deduction=deduction,
+                    current_score=current_score,
+                    explanation=f"Requirement logically contradicts {target_key}: {reason}",
+                )
+            )
+            sub_scores["consistency"] = max(0.0, sub_scores["consistency"] - 60.0)
+            sub_scores["testability"] = max(0.0, sub_scores["testability"] - 30.0)
+            penalties_applied.append(
+                {
+                    "rule_id": "POTENTIAL_CONTRADICTION",
+                    "name": "Potential Contradiction",
+                    "deduction": deduction,
+                    "matched_text": target_key,
+                }
+            )
 
     # Clamp and finalize
     final_overall = max(0.0, min(100.0, current_score))

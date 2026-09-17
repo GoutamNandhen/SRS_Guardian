@@ -11,6 +11,8 @@ import {
   DocumentQualitySummary,
   DocumentAnalysisResponse,
   DocumentDuplicatesResponse,
+  DocumentContradictionsResponse,
+  ContradictionExplainResponse,
   Issue,
   ReviewActionRequest,
 } from "../types";
@@ -134,6 +136,14 @@ export const api = {
     const qs = query.toString();
     const url = qs ? `${API_BASE}/documents/${documentId}/issues?${qs}` : `${API_BASE}/documents/${documentId}/issues`;
     return fetchJson<Issue[]>(url);
+  },
+
+  async getDocumentContradictions(documentId: number): Promise<DocumentContradictionsResponse> {
+    return fetchJson<DocumentContradictionsResponse>(`${API_BASE}/documents/${documentId}/contradictions`);
+  },
+
+  async explainContradiction(issueId: number): Promise<ContradictionExplainResponse> {
+    return fetchJson<ContradictionExplainResponse>(`${API_BASE}/contradictions/${issueId}/explain`);
   },
 
   // --- Human Review ---

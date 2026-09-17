@@ -20,3 +20,4 @@ pyyaml
 sentence-transformers
 jinja2
 xhtml2pdf
+captum

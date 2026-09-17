@@ -388,6 +388,40 @@
   - **Architecture Integrity**: All locked technical decisions (Python 3.11, FastAPI, SQLite, Next.js, spaCy, scikit-learn TF-IDF + LR, all-MiniLM-L6-v2, pure Python xhtml2pdf, LLM disabled) preserved.
 - **Final Result**: READY FOR PHASE 12.
 
+## Phase 12: Contradiction Detection
+- **Date**: 2026-09-17
+- **What was built**:
+  - `backend/app/nlp/numeric_constraints.py`: Mechanism 1 (Numeric Constraint Engine):
+    - Extracts structured 5-tuples `(entity, attribute, comparator, value, unit)` using regex and spaCy dependency parsing.
+    - Mathematical interval conflict detection checking if $[low_1, high_1] \cap [low_2, high_2] = \emptyset$.
+    - Catches REQ-004 ("at least 8 characters" -> `[8, inf)`) vs REQ-005 ("exactly 6 characters" -> `[6, 6]`).
+  - `backend/app/ml/contradictions.py`: Mechanism 2 (Candidate-Blocked NLI Engine):
+    - Candidate blocking filter requiring shared entity lemma >= 1 and embedding cosine similarity >= 0.55 to avoid $O(N^2)$ inference.
+    - Bidirectional NLI inference on CPU with permanent SHA-256 disk caching in `data/cache/nli_cache.json`.
+    - On-demand token attribution using Captum `LayerIntegratedGradients` on token embeddings, cached permanently in `data/cache/nli_attributions_cache.json`.
+  - Scoring & Quality Waterfall:
+    - Added `POTENTIAL_CONTRADICTION: 25.0` penalty in `backend/app/nlp/rules/score_weights.yaml`.
+    - Integrated into `score_requirement` in `backend/app/nlp/scoring.py` with Consistency subscore deduction and waterfall trace.
+  - REST APIs:
+    - Wired into `POST /api/documents/{id}/analyze`.
+    - Added `GET /api/documents/{id}/contradictions` in `backend/app/api/documents.py`.
+    - Added `GET /api/contradictions/{id}/explain` in `backend/app/api/contradictions.py`.
+  - Frontend:
+    - Added Contradictions category tab in `frontend/app/analysis/page.tsx` with side-by-side conflict cards, numeric constraint tags, and review action buttons.
+    - Updated `frontend/services/api.ts` and `frontend/types/index.ts`.
+  - Unit Tests:
+    - `backend/tests/test_contradictions.py`: 8 tests covering extraction, comparators, interval logic, sample cases, candidate blocking, NLI semantic contradictions, Captum attribution, and end-to-end analyze.
+- **Key decisions**:
+  - Rule-based numeric constraint conflict engine chosen as the primary deterministic mechanism for exact explanations and zero ML noise.
+  - Candidate blocking strictly bounds NLI pairs to keep execution cheap on CPU.
+  - Captum attribution run strictly on-demand when requested by human reviewer.
+- **How to run**:
+  - Run tests: `pytest backend/tests/test_contradictions.py -v`
+  - Verify contradictions endpoint: `curl http://127.0.0.1:8000/api/documents/{id}/contradictions`
+- **Known limitations**:
+  - EARS template validation and ISO 29148 checks are deferred to Phase 13.
+
+
 
 
 

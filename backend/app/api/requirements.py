@@ -49,6 +49,25 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
         except Exception:
             pass
 
+    # Check if there are active contradiction issues
+    contra_issues = [
+        i for i in req.issues if i.module == "contradiction" and i.status != "rejected"
+    ]
+    contra_findings = []
+    for ci in contra_issues:
+        try:
+            import json
+            c_data = json.loads(ci.explanation_json)
+            k1 = c_data.get("req_key_1", "")
+            k2 = c_data.get("req_key_2", "")
+            target = k2 if req.req_key == k1 else k1
+            contra_findings.append({
+                "target_req_key": target or "conflicting requirement",
+                "reason": c_data.get("human_explanation", ""),
+            })
+        except Exception:
+            pass
+
     score_res = score_requirement(
         req_key=req.req_key,
         text=req.text,
@@ -56,6 +75,7 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
         readability_metrics=readability_metrics,
         is_duplicate=is_dup,
         duplicate_info=dup_info,
+        contradiction_findings=contra_findings,
         requirement_id=req.id,
     )
 

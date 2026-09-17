@@ -31,6 +31,7 @@ import {
   DocumentListItem,
   Issue,
   DuplicatePair,
+  ContradictionItem,
   Requirement,
 } from "@/types";
 
@@ -45,13 +46,14 @@ function AnalysisPageContent() {
 
   const [issues, setIssues] = useState<Issue[]>([]);
   const [duplicatePairs, setDuplicatePairs] = useState<DuplicatePair[]>([]);
+  const [contradictions, setContradictions] = useState<ContradictionItem[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Tabs: all, ambiguity, duplicates, readability
-  const [activeTab, setActiveTab] = useState<"all" | "ambiguity" | "duplicates" | "readability">("all");
+  // Tabs: all, ambiguity, duplicates, contradictions, readability
+  const [activeTab, setActiveTab] = useState<"all" | "ambiguity" | "duplicates" | "contradictions" | "readability">("all");
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +64,10 @@ function AnalysisPageContent() {
   const [editingIssueId, setEditingIssueId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
   const [actionNotice, setActionNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // On-demand Captum token attribution state
+  const [attributionsMap, setAttributionsMap] = useState<Record<number, { token: string; attribution: number }[]>>({});
+  const [explainingIssueId, setExplainingIssueId] = useState<number | null>(null);
 
   // 1. Fetch available documents
   useEffect(() => {
@@ -85,25 +91,39 @@ function AnalysisPageContent() {
     loadDocs();
   }, []);
 
-  // 2. Fetch issues, duplicates, and requirements for the selected document
+  // 2. Fetch issues, duplicates, contradictions, and requirements for the selected document
   const fetchDocumentAnalysisData = async (docId: number) => {
     try {
       setLoading(true);
       setError(null);
 
-      const [docIssues, dupesRes, reqs] = await Promise.all([
+      const [docIssues, dupesRes, contraRes, reqs] = await Promise.all([
         api.getDocumentIssues(docId).catch(() => []),
         api.getDocumentDuplicates(docId).catch(() => ({ duplicates: [] })),
+        api.getDocumentContradictions(docId).catch(() => ({ contradictions: [] })),
         api.getDocumentRequirements(docId).catch(() => []),
       ]);
 
       setIssues(docIssues);
       setDuplicatePairs(dupesRes.duplicates || []);
+      setContradictions(contraRes.contradictions || []);
       setRequirements(reqs);
     } catch (err: any) {
       setError(err.message || "Failed to fetch document analysis findings");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExplain = async (issueId: number) => {
+    try {
+      setExplainingIssueId(issueId);
+      const res = await api.explainContradiction(issueId);
+      setAttributionsMap((prev) => ({ ...prev, [issueId]: res.tokens }));
+    } catch (err: any) {
+      console.error("Failed to fetch contradiction attribution:", err);
+    } finally {
+      setExplainingIssueId(null);
     }
   };
 
@@ -359,6 +379,21 @@ function AnalysisPageContent() {
         </button>
 
         <button
+          onClick={() => setActiveTab("contradictions")}
+          className={`h-8 px-3.5 rounded-lg flex items-center gap-2 text-xs font-medium transition-colors ${
+            activeTab === "contradictions"
+              ? "bg-surface-container text-on-surface font-semibold shadow-xs"
+              : "text-on-surface-variant hover:bg-surface-container-low"
+          }`}
+        >
+          <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+          <span>Contradictions</span>
+          <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 border border-rose-200">
+            {contradictions.length}
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab("readability")}
           className={`h-8 px-3.5 rounded-lg flex items-center gap-2 text-xs font-medium transition-colors ${
             activeTab === "readability"
@@ -375,7 +410,7 @@ function AnalysisPageContent() {
       </div>
 
       {/* Filter Toolbar (for issue tabs) */}
-      {activeTab !== "duplicates" && (
+      {activeTab !== "duplicates" && activeTab !== "contradictions" && (
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/50 shadow-xs text-xs">
           <div className="flex items-center gap-2 flex-wrap">
             {/* Search */}
@@ -531,6 +566,212 @@ function AnalysisPageContent() {
                             </span>
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      ) : activeTab === "contradictions" ? (
+        /* ========================================================= */
+        /* TAB 3: CONTRADICTIONS (SIDE-BY-SIDE CONFLICT VIEW)        */
+        /* ========================================================= */
+        contradictions.length === 0 ? (
+          <EmptyState
+            title="No potential contradictions detected"
+            description="All quantitative constraints and semantic assertions are mutually compatible."
+            icon={<AlertTriangle className="w-6 h-6 text-outline" />}
+          />
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-on-surface flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <span>
+                  Detected <strong>{contradictions.length} potential contradiction{contradictions.length > 1 ? "s" : ""}</strong> (
+                  {contradictions.filter((c) => c.mechanism === "numeric").length} numeric constraint conflicts,{" "}
+                  {contradictions.filter((c) => c.mechanism === "semantic").length} semantic contradictions). Every detection requires human engineer review.
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {contradictions.map((c, idx) => (
+                <div
+                  key={c.finding_id || idx}
+                  className="p-4 rounded-xl border border-rose-200 bg-surface-container-lowest shadow-xs flex flex-col gap-3"
+                >
+                  {/* Contradiction Header */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-outline-variant/40">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-rose-100 text-rose-800 border border-rose-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                        POTENTIAL CONTRADICTION
+                      </span>
+                      <span className="text-xs font-bold font-mono text-on-surface">
+                        {c.rule_id}
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-low text-on-surface border border-outline-variant/40">
+                        {c.mechanism === "numeric"
+                          ? "Mechanism 1: Rule-Based (100% confidence)"
+                          : `Mechanism 2: NLI (${Math.round(c.confidence * 100)}% confidence)`}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(c.status)}
+                    </div>
+                  </div>
+
+                  {/* Side-by-Side Comparison Box */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Requirement 1 */}
+                    <div className="p-3 rounded-lg bg-surface-container-low/60 border border-outline-variant/40 flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/requirements?doc=${selectedDocId}&req=${c.requirement_id_1}`}
+                          className="text-xs font-mono font-bold text-secondary hover:underline flex items-center gap-1"
+                        >
+                          <span>{c.req_key_1}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                        {c.constraint_1 && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
+                            {c.constraint_1.range_display}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-on-surface leading-relaxed">
+                        {c.text_1}
+                      </p>
+                    </div>
+
+                    {/* Requirement 2 */}
+                    <div className="p-3 rounded-lg bg-surface-container-low/60 border border-outline-variant/40 flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/requirements?doc=${selectedDocId}&req=${c.requirement_id_2}`}
+                          className="text-xs font-mono font-bold text-secondary hover:underline flex items-center gap-1"
+                        >
+                          <span>{c.req_key_2}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                        {c.constraint_2 && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
+                            {c.constraint_2.range_display}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-on-surface leading-relaxed">
+                        {c.text_2}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Violation Explanation & Suggestion */}
+                  <div className="p-3 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col gap-2 text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-semibold text-rose-700 tracking-wider block mb-0.5">
+                        Logical Conflict Analysis
+                      </span>
+                      <p className="text-on-surface-variant leading-relaxed">
+                        {c.human_explanation}
+                      </p>
+                    </div>
+
+                    {c.suggestion && (
+                      <div className="pt-1.5 border-t border-outline-variant/30">
+                        <span className="text-[10px] uppercase font-semibold text-secondary tracking-wider block mb-0.5">
+                          Engineering Remediation Recommendation
+                        </span>
+                        <p className="text-secondary font-mono text-[11px]">
+                          {c.suggestion}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* On-Demand Captum Token Attribution Strip (for semantic contradictions) */}
+                  {c.mechanism === "semantic" && c.issue_id && (
+                    <div className="flex flex-col gap-2 pt-1 border-t border-outline-variant/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase font-semibold text-outline tracking-wider">
+                          Explainability (Captum Integrated Gradients)
+                        </span>
+                        {!attributionsMap[c.issue_id] && (
+                          <button
+                            onClick={() => handleExplain(c.issue_id!)}
+                            disabled={explainingIssueId === c.issue_id}
+                            className="px-2.5 py-1 text-[11px] font-medium rounded bg-surface-container-high hover:bg-surface-container text-on-surface border border-outline-variant/50 transition-colors flex items-center gap-1.5"
+                          >
+                            <Sparkles className="w-3 h-3 text-secondary" />
+                            <span>
+                              {explainingIssueId === c.issue_id
+                                ? "Calculating attributions..."
+                                : "Explain This Finding"}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+
+                      {attributionsMap[c.issue_id] && (
+                        <div className="p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/30 flex flex-col gap-1.5">
+                          <span className="text-[10px] text-outline font-mono">
+                            Token-level influence on contradiction class:
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {attributionsMap[c.issue_id].map((t, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className={`text-[11px] font-mono px-1.5 py-0.5 rounded border ${
+                                  t.attribution < 0
+                                    ? "bg-rose-50 text-rose-800 border-rose-200"
+                                    : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                }`}
+                                title={`Attribution score: ${t.attribution}`}
+                              >
+                                {t.token}{" "}
+                                <span className="opacity-70 text-[9px]">
+                                  ({t.attribution > 0 ? `+${t.attribution}` : t.attribution})
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Review Actions if an issue_id exists */}
+                  {c.issue_id && (
+                    <div className="flex items-center justify-between pt-2 border-t border-outline-variant/30 text-xs">
+                      <span className="text-[11px] text-outline">
+                        Human-in-the-Loop Action:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleReview(c.issue_id!, "accept")}
+                          className="px-2.5 py-1 text-xs rounded border border-emerald-300 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-1 font-medium transition-colors"
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>Accept</span>
+                        </button>
+                        <button
+                          onClick={() => handleReview(c.issue_id!, "reject")}
+                          className="px-2.5 py-1 text-xs rounded border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 flex items-center gap-1 font-medium transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                          <span>Reject</span>
+                        </button>
+                        <Link
+                          href={`/requirements?doc=${selectedDocId}&req=${c.requirement_id_1}`}
+                          className="px-2.5 py-1 text-xs rounded border border-outline-variant/60 text-on-surface hover:bg-surface-container-low flex items-center gap-1 font-medium transition-colors"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit Statement</span>
+                        </Link>
                       </div>
                     </div>
                   )}

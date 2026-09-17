@@ -161,3 +161,48 @@ export interface DocumentDuplicatesResponse {
   duplicate_pairs_count: number;
   duplicates: DuplicatePair[];
 }
+
+export interface ContradictionConstraint {
+  entity: string;
+  attribute: string;
+  comparator: string;
+  value: number;
+  value_max?: number | null;
+  unit: string;
+  range_display: string;
+  raw_span?: string;
+}
+
+export interface ContradictionItem {
+  finding_id: string;
+  issue_id?: number | null;
+  mechanism: "numeric" | "semantic";
+  rule_id: string;
+  severity: "critical" | "warning" | "info";
+  confidence: number;
+  requirement_id_1?: number | null;
+  req_key_1: string;
+  text_1: string;
+  constraint_1?: ContradictionConstraint | null;
+  requirement_id_2?: number | null;
+  req_key_2: string;
+  text_2: string;
+  constraint_2?: ContradictionConstraint | null;
+  human_explanation: string;
+  suggestion: string;
+  status: "ai_flagged" | "accepted" | "rejected" | "reviewed" | "edited";
+}
+
+export interface DocumentContradictionsResponse {
+  document_id: number;
+  total_contradictions_count: number;
+  numeric_conflicts_count: number;
+  semantic_contradictions_count: number;
+  contradictions: ContradictionItem[];
+}
+
+export interface ContradictionExplainResponse {
+  issue_id: number;
+  finding_id: string;
+  tokens: { token: string; attribution: number }[];
+}

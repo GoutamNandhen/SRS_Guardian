@@ -59,6 +59,12 @@ penalties:
     description: "High semantic similarity (>= 0.80) to another requirement indicates redundancy."
     affected_subscores: ["consistency"]
 
+  POTENTIAL_CONTRADICTION:
+    deduction: 25.0
+    name: "Potential Contradiction"
+    description: "Conflicting numeric constraints or logical contradiction with another requirement."
+    affected_subscores: ["consistency", "testability"]
+
 # Thresholds for triggering readability deductions
 readability_thresholds:
   gunning_fog_max: 14.0
