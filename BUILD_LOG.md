@@ -421,6 +421,53 @@
 - **Known limitations**:
   - EARS template validation and ISO 29148 checks are deferred to Phase 13.
 
+## Phase 13: EARS Syntax Validation and ISO 29148 Checks
+- **Date**: 2026-09-18
+- **What was built**:
+  - `backend/app/nlp/ears.py`:
+    - Evaluates requirement syntax against 6 standard EARS templates:
+      1. Ubiquitous: `THE <system> SHALL <response>`
+      2. Event-driven: `WHEN <trigger>, THE <system> SHALL <response>`
+      3. State-driven: `WHILE <state>, THE <system> SHALL <response>`
+      4. Unwanted: `IF <condition>, THEN THE <system> SHALL <response>`
+      5. Optional feature: `WHERE <feature>, THE <system> SHALL <response>`
+      6. Complex: combinations of preconditions (while/when/where/if).
+    - Identifies non-conforming structures and missing elements (e.g. non-normative modals, missing actors/systems).
+    - Generates actionable restructuring tips.
+  - `backend/app/nlp/iso_checks.py`:
+    - Implements 7 selected machine-checkable checks based on ISO/IEC/IEEE 29148:
+      1. `ISO_SINGULAR`: Checks for single obligation per statement (detects multiple modal verbs and conjoined action verbs).
+      2. `ISO_UNAMBIGUOUS`: Flags subjective, vague, or non-normative terms (reuses Phase 5 ambiguity findings without double-penalty).
+      3. `ISO_VERIFIABLE`: Inspects measurable performance criteria and quantitative constraints (flags subjective speed/performance terms lacking metrics).
+      4. `ISO_COMPLETE`: Evaluates syntactic completeness (actor/subject, modal verb, action verb, and target object).
+      5. `ISO_CONSISTENT`: Detects document-wide terminology drift and synonym variation (e.g., 'reset' vs 'recover').
+      6. `ISO_TRACEABLE`: Validates unique persistent identifiers (`REQ-XXX`, `FR-XX`) and extraction provenance.
+      7. `ISO_STRUCTURE`: Evaluates syntactic conformance to EARS template structures.
+  - `docs/ISO_CHECKS.md`:
+    - Complete documentation of all 7 checks, methods, score deductions, and engineering limitations.
+  - Scoring & Waterfall Integration:
+    - Updated `backend/app/nlp/rules/score_weights.yaml` and `backend/app/nlp/scoring.py` to deduct ISO penalties in the waterfall trace while explicitly avoiding double-counting with Phase 5 ambiguity checks.
+  - REST APIs:
+    - `POST /api/documents/{id}/analyze`: Runs ISO 29148 analysis, persists standards issues with `module="standards"`, and incorporates deductions into scores.
+    - `GET /api/documents/{id}/standards`: Returns document-level ISO 29148 and EARS compliance breakdown.
+    - `GET /api/requirements/{id}`: Enriches requirement inspection details with EARS pattern and ISO checks.
+  - Frontend:
+    - `frontend/app/requirements/page.tsx`: Added EARS Syntax & ISO 29148 inspection panel with pattern badges, template preview, and 7-point checklist.
+    - `frontend/app/analysis/page.tsx`: Added `ISO 29148 Checks` category tab for reviewing standards findings.
+    - `frontend/services/api.ts` and `frontend/types/index.ts`: Added typed methods and interfaces.
+  - Automated Tests:
+    - `backend/tests/test_iso_checks.py`: 11 unit and integration tests covering all 6 EARS templates, all 7 ISO checks, scoring waterfall, and API endpoints (100% pass rate).
+- **Key decisions**:
+  - Strictly adhered to Rule 10: "selected machine-checkable checks based on ISO/IEC/IEEE 29148". Zero claims of certification or full standard compliance.
+  - Prevented double-penalization: ISO checks reuse ambiguity findings without redundant point loss.
+- **How to run**:
+  - Run tests: `pytest backend/tests/test_iso_checks.py -v`
+  - Run all tests: `pytest backend/tests/ -v`
+  - Query standards API: `curl http://127.0.0.1:8000/api/documents/{id}/standards`
+- **Known limitations**:
+  - Checks evaluate syntax and explicit terminology; semantic domain completeness requires stakeholder review.
+
+
 
 
 

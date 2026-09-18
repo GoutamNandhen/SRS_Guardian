@@ -52,8 +52,8 @@ function AnalysisPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Tabs: all, ambiguity, duplicates, contradictions, readability
-  const [activeTab, setActiveTab] = useState<"all" | "ambiguity" | "duplicates" | "contradictions" | "readability">("all");
+  // Tabs: all, ambiguity, duplicates, contradictions, standards, readability
+  const [activeTab, setActiveTab] = useState<"all" | "ambiguity" | "duplicates" | "contradictions" | "standards" | "readability">("all");
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,6 +170,10 @@ function AnalysisPageContent() {
     return issues.filter((i) => i.module === "readability" || i.type.includes("READABILITY"));
   }, [issues]);
 
+  const standardsIssues = useMemo(() => {
+    return issues.filter((i) => i.module === "standards" || i.type.startsWith("ISO_"));
+  }, [issues]);
+
   // Filter issues based on active tab, search, severity, and status
   const filteredIssues = useMemo(() => {
     return issues.filter((i) => {
@@ -178,6 +182,8 @@ function AnalysisPageContent() {
         if (i.module !== "ambiguity" && !i.type.includes("WEAK") && !i.type.includes("AMB")) return false;
       } else if (activeTab === "readability") {
         if (i.module !== "readability" && !i.type.includes("READABILITY")) return false;
+      } else if (activeTab === "standards") {
+        if (i.module !== "standards" && !i.type.startsWith("ISO_")) return false;
       }
 
       // Severity filter
@@ -390,6 +396,21 @@ function AnalysisPageContent() {
           <span>Contradictions</span>
           <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 border border-rose-200">
             {contradictions.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("standards")}
+          className={`h-8 px-3.5 rounded-lg flex items-center gap-2 text-xs font-medium transition-colors ${
+            activeTab === "standards"
+              ? "bg-surface-container text-on-surface font-semibold shadow-xs"
+              : "text-on-surface-variant hover:bg-surface-container-low"
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5 text-blue-600" />
+          <span>ISO 29148 Checks</span>
+          <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 border border-blue-200">
+            {standardsIssues.length}
           </span>
         </button>
 

@@ -9,10 +9,13 @@ from backend.app.schemas.requirement import (
 )
 from backend.app.schemas.scoring import WaterfallStepResponse
 from backend.app.schemas.issue import IssueResponse, ReviewResponse
+from backend.app.schemas.iso_checks import EarsResultSchema, IsoCheckItemSchema
 from backend.app.nlp.ambiguity import analyze_ambiguity
 from backend.app.nlp.readability import analyze_readability
 from backend.app.nlp.scoring import score_requirement
+from backend.app.nlp.iso_checks import analyze_iso_checks
 from backend.app.ml.explain_classifier import explain
+
 
 router = APIRouter(prefix="/requirements", tags=["requirements"])
 
@@ -68,6 +71,28 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
         except Exception:
             pass
 
+    # Run ISO 29148 checks and EARS analysis (Phase 13)
+    all_doc_reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == req.document_id)
+        .all()
+    )
+    all_req_dicts = [
+        {"id": r.id, "req_key": r.req_key, "text": r.text, "source_layer": r.source_layer}
+        for r in all_doc_reqs
+    ]
+    current_req_dict = {
+        "id": req.id,
+        "req_key": req.req_key,
+        "text": req.text,
+        "source_layer": req.source_layer,
+    }
+    iso_report = analyze_iso_checks(
+        current_req_dict,
+        all_reqs=all_req_dicts,
+        ambiguity_findings=ambiguity_findings,
+    )
+
     score_res = score_requirement(
         req_key=req.req_key,
         text=req.text,
@@ -76,6 +101,7 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
         is_duplicate=is_dup,
         duplicate_info=dup_info,
         contradiction_findings=contra_findings,
+        iso_checks=iso_report.checks,
         requirement_id=req.id,
     )
 
@@ -113,6 +139,11 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
         for w in score_res.waterfall
     ]
 
+    ears_schema = EarsResultSchema.model_validate(iso_report.ears_result.to_dict())
+    iso_checks_schema = [
+        IsoCheckItemSchema.model_validate(c.to_dict()) for c in iso_report.checks
+    ]
+
     return RequirementDetailResponse(
         id=req.id,
         document_id=req.document_id,
@@ -130,8 +161,11 @@ def get_requirement(requirement_id: int, db: Session = Depends(get_db)):
         sub_scores={k: round(v, 1) for k, v in score_res.sub_scores.items()},
         waterfall=waterfall_resp,
         issues=issues_list,
+        ears_result=ears_schema,
+        iso_checks=iso_checks_schema,
         created_at=req.created_at,
     )
+
 
 
 

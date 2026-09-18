@@ -65,6 +65,36 @@ penalties:
     description: "Conflicting numeric constraints or logical contradiction with another requirement."
     affected_subscores: ["consistency", "testability"]
 
+  ISO_SINGULAR:
+    deduction: 10.0
+    name: "Multiple Obligations (Singularity)"
+    description: "Statement combines multiple independent obligations or conjoined actions."
+    affected_subscores: ["structure"]
+
+  ISO_COMPLETE:
+    deduction: 10.0
+    name: "Syntactic Incompleteness"
+    description: "Requirement lacks essential syntactic components (actor, modal, action, or target)."
+    affected_subscores: ["structure", "clarity"]
+
+  ISO_CONSISTENT:
+    deduction: 10.0
+    name: "Terminology Inconsistency"
+    description: "Alternative vocabulary or synonym drift used to describe the same entity or workflow across document."
+    affected_subscores: ["consistency"]
+
+  ISO_STRUCTURE:
+    deduction: 5.0
+    name: "Non-conforming Requirement Structure"
+    description: "Does not conform to standard EARS pattern or contains non-normative structural elements."
+    affected_subscores: ["structure"]
+
+  ISO_TRACEABLE:
+    deduction: 5.0
+    name: "Missing Traceable Identifier"
+    description: "Requirement lacks an explicit persistent identifier for configuration tracking."
+    affected_subscores: ["structure"]
+
 # Thresholds for triggering readability deductions
 readability_thresholds:
   gunning_fog_max: 14.0

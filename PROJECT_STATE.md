@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 12 (Contradiction Detection)
+- **Current Phase**: Phase 13 (EARS Syntax Validation and ISO 29148 Checks)
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection)
-- **Current Task**: Phase 12 Complete! Two-tier contradiction detection (numeric constraint conflicts + candidate-blocked NLI semantic contradictions with Captum attribution) fully implemented, scored, exposed via REST APIs, integrated into frontend analysis view, and verified.
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks)
+- **Current Task**: Phase 13 Complete! EARS 6-template syntactic pattern recognition engine, 7 machine-checkable checks based on ISO/IEC/IEEE 29148, documentation in docs/ISO_CHECKS.md, scoring waterfall integration, GET /api/documents/{id}/standards REST endpoint, and frontend inspection UI verified.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -30,10 +30,10 @@
   - REST endpoint: `GET /api/documents/{id}/quality`.
 - Human-in-the-Loop Review and MVP API Surface (Phase 8):
   - `Issue` and `Review` SQLAlchemy models with audit history and status lifecycle (`ai_flagged`, `accepted`, `rejected`, `reviewed`, `edited`).
-  - `POST /api/documents/{id}/analyze`: End-to-end orchestration running extraction, classification, ambiguity rules, readability, semantic duplicates, contradiction detection, and quality scoring; persists issues with `ai_flagged` status while preserving human reviews.
+  - `POST /api/documents/{id}/analyze`: End-to-end orchestration running extraction, classification, ambiguity rules, readability, semantic duplicates, contradiction detection, ISO standards checks, and quality scoring; persists issues with `ai_flagged` status while preserving human reviews.
   - `GET /api/documents/{id}/issues`: Filterable by `module`, `severity`, and `status_filter`.
   - `POST /api/issues/{id}/review`: Records human actions (`accept`, `reject`, `edit`, `mark_reviewed`), creates immutable `Review` audit record, and updates requirement text on edit.
-  - `GET /api/requirements/{id}`: Full requirement detail with classification, quality score, waterfall trace, and issues with review status.
+  - `GET /api/requirements/{id}`: Full requirement detail with classification, quality score, waterfall trace, issues, EARS result, and ISO checks.
 - Report Generation (Phase 9):
   - `backend/app/services/reports.py`: Data aggregation and export engine for HTML, CSV, and PDF formats.
   - `backend/app/templates/report.html`: Clean corporate report template with KPI cards, score distribution table, issue breakdowns, and requirement review cards.
@@ -58,32 +58,40 @@
   - `GET /api/documents/{id}/contradictions`: Returns detected contradiction pairs, mechanisms, conflicting constraints/intervals, and review statuses.
   - `GET /api/contradictions/{id}/explain`: On-demand token attribution endpoint.
   - `frontend/app/analysis/page.tsx`: Added Contradictions category tab displaying side-by-side conflict cards, quantitative interval badges, and review action buttons.
+- EARS Syntax Validation & ISO 29148 Checks (Phase 13):
+  - `backend/app/nlp/ears.py`: Evaluates requirements against 6 EARS templates (Ubiquitous, Event-driven, State-driven, Unwanted behavior, Optional feature, Complex), identifies structural non-conformities, and provides restructuring tips.
+  - `backend/app/nlp/iso_checks.py`: Evaluates 7 machine-checkable quality characteristics based on ISO/IEC/IEEE 29148: Singular, Unambiguous, Verifiable, Complete, Consistent, Traceable, Conforming Structure.
+  - `docs/ISO_CHECKS.md`: Documented all 7 checks, what they inspect, scoring impact, and limitations.
+  - `GET /api/documents/{id}/standards`: Returns document-level ISO 29148 conformance statistics and per-requirement reports.
+  - UI integration: EARS syntax and ISO checklist cards in Requirement Viewer (`frontend/app/requirements/page.tsx`) and `ISO 29148 Checks` category tab in Analysis page (`frontend/app/analysis/page.tsx`).
 
 ## What Has Actually Been Verified
-- `pytest backend/tests/ -v`: 56/56 backend unit and integration tests pass with 100% pass rate in 40.57s.
+- `pytest backend/tests/ -v`: 67/67 backend unit and integration tests pass with 100% pass rate in 59.37s.
 - `npm run build`: 11/11 Next.js pages cleanly compiled with zero TypeScript or lint errors.
-- Live browser subagent verification:
-  - Navigated to `http://localhost:3000/analysis?doc=8`.
-  - Confirmed Contradictions tab badge displays `1`.
-  - Confirmed side-by-side card showing REQ-004 vs REQ-005 is visible with the red `POTENTIAL CONTRADICTION` badge, constraint tags `>= 8.0 characters` vs `== 6.0 characters`, logical conflict analysis, and engineering recommendation.
-  - Screenshot verified at `contradictions_tab_1789629210052.png`.
+- Live execution on sample document (`data/test/sample_srs.txt`):
+  - REQ-001: Detected as Event-driven, non-normative modal flagged (`should`), verifiability flagged for lacking numeric response time threshold, waterfall score reflects deductions (60.0/100).
+  - REQ-002 & REQ-003: Detected terminology drift (`reset` vs `recover`).
+  - REQ-004 & REQ-005: Ubiquitous pattern, 7/7 ISO checks passed.
+  - REQ-006: Ubiquitous pattern, fully conforming (100.0/100).
 
 ## Known Issues
 - None.
 
 ## Important Architecture & Technology Decisions
-- Two-tier hybrid contradiction detection: deterministic rules for quantitative numeric intervals (primary) and candidate-blocked NLI for semantic conflicts (secondary).
-- Candidate blocking (lemma overlap + embedding cosine similarity >= 0.55) avoids expensive $O(N^2)$ cross-inferences.
-- Captum Integrated Gradients token attribution is computed strictly on-demand when requested by the user and permanently cached to disk.
-- All contradiction findings are strictly labeled `POTENTIAL contradiction` as per Rule 10.
+- Rule-based EARS pattern parsing using dependency parsing and regular expressions without generative LLM dependency.
+- Selected machine-checkable checks based on ISO/IEC/IEEE 29148 (Rule 10: no claims of ISO certification).
+- Avoided double-penalization between Phase 5 ambiguity checks and ISO checks.
+- All contradiction and quality findings labeled "potential".
 
 ## Exact Next Step
-- Phase 13: EARS and ISO 29148 checks (rule-based EARS pattern matcher in `backend/app/nlp/ears.py` and machine-checkable standards checks in `backend/app/nlp/iso_checks.py`).
+- Phase 14: AI Rewrite Suggestions (Tier 2).
+  - STOP and ask user which LLM provider they want to use (Local via Ollama vs free-tier hosted API like Gemini / Groq).
+  - Provide model comparison and step-by-step setup instructions before writing any integration code.
 
 ## Last Verification Performed
-- `pytest backend/tests/ -v`: 56 passed in 40.57s on 2026-09-17.
-- `npm run build`: 11/11 pages compiled with zero errors on 2026-09-17.
-- Live browser subagent verified Contradictions tab and conflict card rendering on 2026-09-17.
+- `pytest backend/tests/ -v`: 67 passed in 59.37s on 2026-09-18.
+- `npm run build`: 11/11 pages compiled with zero errors on 2026-09-18.
+- Live sample execution verified on 2026-09-18.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -91,5 +99,5 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-09-17 12:47:00
-- **Last Commit Hash**: 24617b2
+- **Last Updated**: 2026-09-18 13:28:00
+- **Last Commit Hash**: 808dc7a

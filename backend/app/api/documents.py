@@ -54,12 +54,18 @@ from backend.app.schemas.contradiction import (
     ContradictionItem,
     ContradictionConstraintSchema,
 )
+from backend.app.nlp.iso_checks import analyze_iso_checks
+from backend.app.schemas.iso_checks import (
+    EarsResultSchema,
+    IsoCheckItemSchema,
+    RequirementIsoReportSchema,
+    DocumentStandardsResponse,
+)
 from backend.app.utils.file_validation import validate_file
 
 
-
-
 router = APIRouter(prefix="/documents", tags=["documents"])
+
 
 
 @router.post(
@@ -416,6 +422,18 @@ def get_document_quality(
         is_dup = r.id in duplicate_map
         dup_info = duplicate_map.get(r.id)
 
+        req_dict = {
+            "id": r.id,
+            "req_key": r.req_key,
+            "text": r.text,
+            "source_layer": r.source_layer,
+        }
+        iso_report = analyze_iso_checks(
+            req_dict,
+            all_reqs=req_dicts,
+            ambiguity_findings=ambiguity_findings,
+        )
+
         score_res = score_requirement(
             req_key=r.req_key,
             text=r.text,
@@ -423,9 +441,11 @@ def get_document_quality(
             readability_metrics=readability_metrics,
             is_duplicate=is_dup,
             duplicate_info=dup_info,
+            iso_checks=iso_report.checks,
             requirement_id=r.id,
         )
         scored_reqs.append(score_res)
+
 
     doc_summary = score_document(scored_reqs, document_id=doc.id)
 
@@ -661,6 +681,32 @@ def analyze_document(
                 )
                 new_issues.append(issue)
 
+        # Run ISO 29148 checks (Phase 13)
+        req_dict = {
+            "id": r.id,
+            "req_key": r.req_key,
+            "text": r.text,
+            "source_layer": r.source_layer,
+        }
+        iso_report = analyze_iso_checks(
+            req_dict,
+            all_reqs=req_dicts,
+            ambiguity_findings=ambiguity_findings,
+        )
+
+        # Persist standards / ISO check issues (Phase 13)
+        for chk in iso_report.checks:
+            if chk.status in ("warning", "failed") and chk.check_id != "ISO_UNAMBIGUOUS":
+                issue = Issue(
+                    requirement_id=r.id,
+                    module="standards",
+                    type=chk.check_id,
+                    severity="warning" if chk.status == "warning" else "critical",
+                    explanation_json=json.dumps(chk.to_dict()),
+                    status="ai_flagged",
+                )
+                new_issues.append(issue)
+
         # Calculate requirement score
         score_res = score_requirement(
             req_key=r.req_key,
@@ -670,6 +716,7 @@ def analyze_document(
             is_duplicate=is_dup,
             duplicate_info=dup_info,
             contradiction_findings=contradiction_map.get(r.id),
+            iso_checks=iso_report.checks,
             requirement_id=r.id,
         )
         scored_reqs.append(score_res)
@@ -988,3 +1035,83 @@ def get_document_contradictions(
         semantic_contradictions_count=sem_count,
         contradictions=items,
     )
+
+
+@router.get(
+    "/{document_id}/standards",
+    response_model=DocumentStandardsResponse,
+    summary="Get ISO 29148 checks and EARS pattern analysis for a document",
+)
+def get_document_standards(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
+
+    reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == document_id)
+        .order_by(Requirement.id.asc())
+        .all()
+    )
+    if not reqs:
+        return DocumentStandardsResponse(
+            document_id=document_id,
+            total_requirements=0,
+            fully_conforming_count=0,
+            warning_count=0,
+            failed_count=0,
+            requirements=[],
+        )
+
+    req_dicts = [
+        {"id": r.id, "req_key": r.req_key, "text": r.text, "source_layer": r.source_layer}
+        for r in reqs
+    ]
+
+    reports: list[RequirementIsoReportSchema] = []
+    fully_conforming = 0
+    total_warnings = 0
+    total_failed = 0
+
+    for r in reqs:
+        r_dict = {"id": r.id, "req_key": r.req_key, "text": r.text, "source_layer": r.source_layer}
+        ambiguity_findings = analyze_ambiguity(r.text)
+        iso_report = analyze_iso_checks(r_dict, all_reqs=req_dicts, ambiguity_findings=ambiguity_findings)
+
+        has_warnings = any(c.status == "warning" for c in iso_report.checks)
+        has_failed = any(c.status == "failed" for c in iso_report.checks)
+
+        if not has_warnings and not has_failed and iso_report.ears_result.is_valid_ears:
+            fully_conforming += 1
+        if has_warnings:
+            total_warnings += 1
+        if has_failed:
+            total_failed += 1
+
+        reports.append(
+            RequirementIsoReportSchema(
+                requirement_id=r.id,
+                req_key=r.req_key,
+                text=r.text,
+                ears_result=EarsResultSchema.model_validate(iso_report.ears_result.to_dict()),
+                checks=[IsoCheckItemSchema.model_validate(c.to_dict()) for c in iso_report.checks],
+                total_iso_deductions=iso_report.total_iso_deductions,
+                conformance_summary=iso_report.conformance_summary,
+            )
+        )
+
+    return DocumentStandardsResponse(
+        document_id=document_id,
+        total_requirements=len(reqs),
+        fully_conforming_count=fully_conforming,
+        warning_count=total_warnings,
+        failed_count=total_failed,
+        requirements=reports,
+    )
+

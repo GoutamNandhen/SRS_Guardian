@@ -193,10 +193,11 @@ def test_api_document_quality_endpoint():
         assert "worst_requirements" in data
         assert len(data["requirements"]) == 2
 
-        # Check REQ-001 waterfall in response
+        # Check REQ-001 waterfall in response (100 - 20 weak term - 15 weak modal - 5 ISO structure = 60.0)
         req1_data = next(r for r in data["requirements"] if r["req_key"] == "REQ-001")
-        assert req1_data["overall_score"] == 65.0
+        assert req1_data["overall_score"] == 60.0
         assert len(req1_data["waterfall"]) >= 3
         assert req1_data["waterfall"][0]["step_name"] == "Base Score"
+
     finally:
         app.dependency_overrides.clear()

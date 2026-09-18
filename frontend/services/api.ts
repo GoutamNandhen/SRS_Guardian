@@ -13,9 +13,11 @@ import {
   DocumentDuplicatesResponse,
   DocumentContradictionsResponse,
   ContradictionExplainResponse,
+  DocumentStandardsResponse,
   Issue,
   ReviewActionRequest,
 } from "../types";
+
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
 
@@ -145,6 +147,11 @@ export const api = {
   async explainContradiction(issueId: number): Promise<ContradictionExplainResponse> {
     return fetchJson<ContradictionExplainResponse>(`${API_BASE}/contradictions/${issueId}/explain`);
   },
+
+  async getDocumentStandards(documentId: number): Promise<DocumentStandardsResponse> {
+    return fetchJson<DocumentStandardsResponse>(`${API_BASE}/documents/${documentId}/standards`);
+  },
+
 
   // --- Human Review ---
   async reviewIssue(issueId: number, actionData: ReviewActionRequest): Promise<Issue> {

@@ -651,9 +651,82 @@ function RequirementViewerContent() {
                   </div>
                 )}
 
+                {/* 5b. EARS Syntax & ISO 29148 Standards Checks */}
+                {reqDetail.ears_result && (
+                  <div className="flex flex-col gap-2 pt-2 border-t border-outline-variant/30">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-blue-600" />
+                        <span className="text-xs font-semibold text-on-surface">
+                          EARS Syntax & ISO 29148
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded font-medium border ${
+                          reqDetail.ears_result.is_valid_ears
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                            : "bg-amber-50 text-amber-800 border-amber-200"
+                        }`}
+                      >
+                        {reqDetail.ears_result.pattern.replace("_", " ").toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col gap-2 text-xs">
+                      {reqDetail.ears_result.matched_template && (
+                        <div className="flex items-start gap-1.5">
+                          <span className="text-[11px] text-outline font-medium flex-shrink-0">Template:</span>
+                          <span className="text-[11px] font-mono text-on-surface bg-surface-container px-1.5 py-0.5 rounded">
+                            {reqDetail.ears_result.matched_template}
+                          </span>
+                        </div>
+                      )}
+                      <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                        {reqDetail.ears_result.explanation}
+                      </p>
+                      {reqDetail.ears_result.suggestion && (
+                        <div className="p-2 rounded bg-blue-50/60 border border-blue-200 text-blue-900 text-[11px] flex items-start gap-1.5">
+                          <span className="font-semibold flex-shrink-0">Tip:</span>
+                          <span>{reqDetail.ears_result.suggestion}</span>
+                        </div>
+                      )}
+
+                      {/* 7 ISO Checks Pills */}
+                      {reqDetail.iso_checks && reqDetail.iso_checks.length > 0 && (
+                        <div className="flex flex-col gap-1 pt-1.5 border-t border-outline-variant/40">
+                          <span className="text-[10px] font-semibold text-outline uppercase tracking-wider">
+                            Selected Machine-Checkable ISO 29148 Checks
+                          </span>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {reqDetail.iso_checks.map((chk) => (
+                              <div
+                                key={chk.check_id}
+                                title={`${chk.characteristic}: ${chk.explanation}`}
+                                className={`flex items-center justify-between p-1.5 rounded border text-[10px] ${
+                                  chk.status === "passed"
+                                    ? "bg-emerald-50/60 border-emerald-200 text-emerald-800"
+                                    : chk.status === "warning"
+                                    ? "bg-amber-50/60 border-amber-200 text-amber-800"
+                                    : "bg-rose-50/60 border-rose-200 text-rose-800"
+                                }`}
+                              >
+                                <span className="font-medium truncate">{chk.characteristic}</span>
+                                <span className="font-mono font-bold uppercase text-[9px] ml-1">
+                                  {chk.status === "passed" ? "✓" : chk.status === "warning" ? "!" : "✕"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* 6. Detected Issues & Human-in-the-Loop Review Actions */}
                 <div className="flex flex-col gap-2 pt-2 border-t border-outline-variant/30">
                   <div className="flex items-center justify-between">
+
                     <span className="text-xs font-semibold text-on-surface">
                       Findings & Remediation
                     </span>

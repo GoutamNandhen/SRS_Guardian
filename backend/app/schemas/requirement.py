@@ -45,6 +45,7 @@ class DocumentExtractResponse(BaseModel):
 
 from backend.app.schemas.scoring import WaterfallStepResponse
 from backend.app.schemas.issue import IssueResponse
+from backend.app.schemas.iso_checks import EarsResultSchema, IsoCheckItemSchema
 
 
 class RequirementDetailResponse(BaseModel):
@@ -66,7 +67,10 @@ class RequirementDetailResponse(BaseModel):
     sub_scores: dict[str, float]
     waterfall: list[WaterfallStepResponse]
     issues: list[IssueResponse]
+    ears_result: EarsResultSchema | None = None
+    iso_checks: list[IsoCheckItemSchema] | None = None
     created_at: datetime
+
 
     @field_validator("classification_explanation", mode="before")
     @classmethod

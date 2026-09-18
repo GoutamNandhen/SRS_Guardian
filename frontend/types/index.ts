@@ -92,7 +92,56 @@ export interface RequirementDetail extends Requirement {
   sub_scores?: SubScores;
   waterfall?: WaterfallStep[];
   issues: Issue[];
+  ears_result?: EarsResult | null;
+  iso_checks?: IsoCheckItem[] | null;
 }
+
+export interface EarsResult {
+  pattern: string;
+  is_valid_ears: boolean;
+  trigger?: string | null;
+  state?: string | null;
+  feature?: string | null;
+  condition?: string | null;
+  system?: string | null;
+  modal?: string | null;
+  response?: string | null;
+  missing_elements: string[];
+  explanation: string;
+  suggestion?: string | null;
+  matched_template?: string | null;
+}
+
+export interface IsoCheckItem {
+  check_id: string;
+  characteristic: string;
+  status: "passed" | "warning" | "failed";
+  score_deduction: number;
+  explanation: string;
+  suggestion?: string | null;
+  spans?: Array<{ start: number; end: number; text: string }>;
+}
+
+export interface RequirementIsoReport {
+  requirement_id?: number | null;
+  req_key: string;
+  text: string;
+  ears_result: EarsResult;
+  checks: IsoCheckItem[];
+  total_iso_deductions: number;
+  conformance_summary: string;
+}
+
+export interface DocumentStandardsResponse {
+  document_id: number;
+  total_requirements: number;
+  standards_name: string;
+  fully_conforming_count: number;
+  warning_count: number;
+  failed_count: number;
+  requirements: RequirementIsoReport[];
+}
+
 
 export interface WorstRequirementItem {
   requirement_id: number;

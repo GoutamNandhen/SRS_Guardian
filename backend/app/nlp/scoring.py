@@ -103,6 +103,7 @@ def score_requirement(
     is_duplicate: bool = False,
     duplicate_info: dict[str, Any] | None = None,
     contradiction_findings: list[dict[str, Any]] | None = None,
+    iso_checks: list[Any] | None = None,
     requirement_id: int | None = None,
 ) -> RequirementQualityScore:
     """Calculates deterministic quality score, sub-scores, and waterfall trace for a requirement."""
@@ -292,6 +293,61 @@ def score_requirement(
                     "name": "Potential Contradiction",
                     "deduction": deduction,
                     "matched_text": target_key,
+                }
+            )
+
+    # 5. ISO 29148 check penalties (Phase 13)
+    if iso_checks:
+        for chk in iso_checks:
+            cid = chk.get("check_id") if isinstance(chk, dict) else getattr(chk, "check_id", None)
+            cstatus = chk.get("status") if isinstance(chk, dict) else getattr(chk, "status", None)
+            cexplanation = chk.get("explanation") if isinstance(chk, dict) else getattr(chk, "explanation", "")
+
+            if not cid or cstatus == "passed":
+                continue
+
+            # Avoid double-penalizing compound requirements already caught in Phase 5
+            if cid == "ISO_SINGULAR" and any(p["rule_id"] == "CHECK_E_COMPOUND_REQ" for p in penalties_applied):
+                continue
+
+            # Skip ISO_UNAMBIGUOUS as Phase 5 ambiguity checks already apply exact penalties
+            if cid == "ISO_UNAMBIGUOUS":
+                continue
+
+            # Avoid double-penalizing missing metrics already caught in Phase 5
+            if cid == "ISO_VERIFIABLE" and any(p["rule_id"] == "CHECK_C_MISSING_METRIC" for p in penalties_applied):
+                continue
+
+            cfg = penalties_cfg.get(cid)
+            if not cfg:
+                continue
+
+            deduction = float(cfg.get("deduction", 5.0))
+            current_score = max(0.0, current_score - deduction)
+            step_number += 1
+
+            waterfall.append(
+                WaterfallStep(
+                    step_number=step_number,
+                    step_name=f"ISO 29148: {cfg.get('name', cid)}",
+                    rule_id=cid,
+                    deduction=deduction,
+                    current_score=current_score,
+                    explanation=cexplanation,
+                )
+            )
+
+            affected = cfg.get("affected_subscores", [])
+            for sub in affected:
+                if sub in sub_scores:
+                    sub_scores[sub] = max(0.0, sub_scores[sub] - (deduction * 2.0))
+
+            penalties_applied.append(
+                {
+                    "rule_id": cid,
+                    "name": f"ISO 29148: {cfg.get('name', cid)}",
+                    "deduction": deduction,
+                    "matched_text": None,
                 }
             )
 
