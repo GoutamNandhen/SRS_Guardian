@@ -583,17 +583,32 @@
 - **Known limitations**:
   - For very small documents (< 3 requirements), clusters collapse to 1 or 2 groups.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Phase 15C: Version Comparison & Semantic Diffing (Tier 3)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/nlp/version_comparison.py`:
+    - Cross-version requirement alignment engine using a hybrid matching strategy:
+      1. Exact requirement key match (e.g. `REQ-001` <-> `REQ-001`).
+      2. High-confidence semantic similarity fallback using cached `all-MiniLM-L6-v2` embeddings (cosine similarity $\ge 0.70$).
+    - Requirement delta classification: `added`, `removed`, `modified`, `unchanged`.
+    - Fine-grained word-level diffing utilizing Python `difflib.SequenceMatcher` producing structured inline chunks (`[-deleted-]`, `[+added+]`, unchanged).
+    - Quality score delta tracking between base and target document requirements.
+    - Defect lifecycle tracking: identifies `resolved_issues` (present in base, resolved in target) and `new_issues` (introduced in target).
+  - `backend/app/schemas/comparison.py`:
+    - Pydantic models: `RequirementDiffItem`, `VersionComparisonSummary`, `VersionComparisonResponse`.
+  - REST API:
+    - Added `GET /api/documents/{id}/compare/{other_id}` in `backend/app/api/documents.py`.
+  - Frontend:
+    - Updated `frontend/services/api.ts` with `compareDocuments(id, otherId)`.
+    - Updated `frontend/types/index.ts` with version comparison types.
+    - `frontend/app/compare/page.tsx`: Implemented full side-by-side comparison page with document selectors, 6 KPI cards (Score Delta, Added, Removed, Modified, Resolved Issues, New Issues), filter tabs, inline diff viewing, and defect lifecycle badges.
+  - Automated Tests:
+    - `backend/tests/test_version_comparison.py`: 3 tests covering text diff generation, full version comparison lifecycle (modified requirement, defect resolution, score improvements), and 404 validation (100% pass rate).
+- **Key decisions**:
+  - Reused existing MiniLM embeddings disk cache for semantic matching of renumbered requirements.
+  - Inline word-level diffing makes requirement changes instantly clear without requiring external tools.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_version_comparison.py -v`
+  - Query API: `curl http://127.0.0.1:8000/api/documents/1/compare/2`
+- **Known limitations**:
+  - Re-ordering of paragraphs without textual changes is classified as unchanged based on key/embedding alignment.

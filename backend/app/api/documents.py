@@ -67,6 +67,12 @@ from backend.app.schemas.clustering import (
     DocumentClustersResponse,
     ClusterGroup,
 )
+from backend.app.nlp.version_comparison import compare_document_versions
+from backend.app.schemas.comparison import (
+    DocumentComparisonResponse,
+    RequirementComparisonItem,
+    IssueDiffItem,
+)
 
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -1163,5 +1169,26 @@ def get_document_clusters(
         num_clusters=result["num_clusters"],
         clusters=[ClusterGroup(**c) for c in result["clusters"]],
     )
+
+
+@router.get(
+    "/{document_id}/compare/{other_document_id}",
+    response_model=DocumentComparisonResponse,
+    summary="Compare two documents or document versions with semantic diffing and score deltas",
+)
+def compare_documents_endpoint(
+    document_id: int,
+    other_document_id: int,
+    db: Session = Depends(get_db),
+):
+    try:
+        result = compare_document_versions(document_id, other_document_id, db=db)
+        return DocumentComparisonResponse(**result)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+
 
 

@@ -301,4 +301,45 @@ export interface DocumentClustersResponse {
   clusters: ClusterGroup[];
 }
 
+export interface IssueDiffItem {
+  rule_id: string;
+  severity: "critical" | "warning" | "info";
+  human_explanation: string;
+}
+
+export interface RequirementComparisonItem {
+  status: "added" | "removed" | "modified" | "unchanged";
+  req_key: string;
+  text_v1?: string | null;
+  text_v2?: string | null;
+  score_v1?: number | null;
+  score_v2?: number | null;
+  score_delta?: number | null;
+  similarity?: number | null;
+  diff_text?: string | null;
+  resolved_issues: IssueDiffItem[];
+  new_issues: IssueDiffItem[];
+  persistent_issues: IssueDiffItem[];
+}
+
+export interface DocumentComparisonResponse {
+  doc1_id: number;
+  doc1_filename: string;
+  doc2_id: number;
+  doc2_filename: string;
+  total_v1: number;
+  total_v2: number;
+  added_count: number;
+  removed_count: number;
+  modified_count: number;
+  unchanged_count: number;
+  avg_score_v1: number;
+  avg_score_v2: number;
+  score_delta: number;
+  total_resolved_issues: number;
+  total_new_issues: number;
+  items: RequirementComparisonItem[];
+}
+
+
 

@@ -19,6 +19,7 @@ import {
   RewriteSuggestionResponse,
   GherkinGenerationResponse,
   DocumentClustersResponse,
+  DocumentComparisonResponse,
 } from "../types";
 
 
@@ -181,6 +182,11 @@ export const api = {
   async getDocumentClusters(documentId: number, k?: number): Promise<DocumentClustersResponse> {
     const query = k ? `?k=${k}` : "";
     return fetchJson<DocumentClustersResponse>(`${API_BASE}/documents/${documentId}/clusters${query}`);
+  },
+
+  // --- Version Comparison (Tier 3 - Phase 15C) ---
+  async compareDocuments(documentId1: number, documentId2: number): Promise<DocumentComparisonResponse> {
+    return fetchJson<DocumentComparisonResponse>(`${API_BASE}/documents/${documentId1}/compare/${documentId2}`);
   },
 
   // --- Reports Export URLs ---
