@@ -33,6 +33,7 @@ import {
   DuplicatePair,
   ContradictionItem,
   Requirement,
+  ClusterGroup,
 } from "@/types";
 
 function AnalysisPageContent() {
@@ -48,12 +49,13 @@ function AnalysisPageContent() {
   const [duplicatePairs, setDuplicatePairs] = useState<DuplicatePair[]>([]);
   const [contradictions, setContradictions] = useState<ContradictionItem[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [clusters, setClusters] = useState<ClusterGroup[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Tabs: all, ambiguity, duplicates, contradictions, standards, readability
-  const [activeTab, setActiveTab] = useState<"all" | "ambiguity" | "duplicates" | "contradictions" | "standards" | "readability">("all");
+  // Tabs: all, ambiguity, duplicates, contradictions, standards, clusters, readability
+  const [activeTab, setActiveTab] = useState<"all" | "ambiguity" | "duplicates" | "contradictions" | "standards" | "clusters" | "readability">("all");
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,17 +99,19 @@ function AnalysisPageContent() {
       setLoading(true);
       setError(null);
 
-      const [docIssues, dupesRes, contraRes, reqs] = await Promise.all([
+      const [docIssues, dupesRes, contraRes, reqs, clustersRes] = await Promise.all([
         api.getDocumentIssues(docId).catch(() => []),
         api.getDocumentDuplicates(docId).catch(() => ({ duplicates: [] })),
         api.getDocumentContradictions(docId).catch(() => ({ contradictions: [] })),
         api.getDocumentRequirements(docId).catch(() => []),
+        api.getDocumentClusters(docId).catch(() => ({ clusters: [] })),
       ]);
 
       setIssues(docIssues);
       setDuplicatePairs(dupesRes.duplicates || []);
       setContradictions(contraRes.contradictions || []);
       setRequirements(reqs);
+      setClusters(clustersRes.clusters || []);
     } catch (err: any) {
       setError(err.message || "Failed to fetch document analysis findings");
     } finally {
@@ -428,10 +432,25 @@ function AnalysisPageContent() {
             {readabilityIssues.length}
           </span>
         </button>
+
+        <button
+          onClick={() => setActiveTab("clusters")}
+          className={`h-8 px-3.5 rounded-lg flex items-center gap-2 text-xs font-medium transition-colors ${
+            activeTab === "clusters"
+              ? "bg-surface-container text-on-surface font-semibold shadow-xs"
+              : "text-on-surface-variant hover:bg-surface-container-low"
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5 text-indigo-600" />
+          <span>Thematic Clusters</span>
+          <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+            {clusters.length}
+          </span>
+        </button>
       </div>
 
       {/* Filter Toolbar (for issue tabs) */}
-      {activeTab !== "duplicates" && activeTab !== "contradictions" && (
+      {activeTab !== "duplicates" && activeTab !== "contradictions" && activeTab !== "clusters" && (
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/50 shadow-xs text-xs">
           <div className="flex items-center gap-2 flex-wrap">
             {/* Search */}
@@ -796,6 +815,90 @@ function AnalysisPageContent() {
                       </div>
                     </div>
                   )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      ) : activeTab === "clusters" ? (
+        /* ========================================================= */
+        /* TAB 4: THEMATIC CLUSTERS (TIER 3 - PHASE 15B)             */
+        /* ========================================================= */
+        clusters.length === 0 ? (
+          <EmptyState
+            title="No requirement clusters generated"
+            description="Extract requirements from this document to inspect functional clusters."
+            icon={<Layers className="w-6 h-6 text-outline" />}
+          />
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-on-surface flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-indigo-700" />
+                <span>
+                  Grouped <strong>{requirements.length} requirements</strong> into{" "}
+                  <strong>{clusters.length} functional clusters</strong> using sentence embeddings and TF-IDF topic keyword extraction.
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {clusters.map((cluster) => (
+                <div
+                  key={cluster.cluster_id}
+                  className="p-4 rounded-xl border border-outline-variant/60 bg-surface-container-lowest shadow-xs flex flex-col gap-3"
+                >
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-outline-variant/40">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-800 font-mono text-xs font-bold flex items-center justify-center">
+                        {cluster.cluster_id + 1}
+                      </span>
+                      <span className="font-semibold text-xs text-on-surface">
+                        {cluster.label}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">
+                      {cluster.size} requirement{cluster.size > 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 py-1">
+                    {cluster.keywords.map((kw, ki) => (
+                      <span
+                        key={ki}
+                        className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200"
+                      >
+                        #{kw}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-1">
+                    {cluster.requirements.map((r) => (
+                      <div
+                        key={r.id}
+                        className="p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/30 text-xs flex flex-col gap-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <Link
+                            href={`/requirements?doc=${selectedDocId}&req=${r.id}`}
+                            className="font-mono font-bold text-primary text-[11px] hover:underline flex items-center gap-1"
+                          >
+                            <span>{r.req_key}</span>
+                            <ExternalLink className="w-2.5 h-2.5 text-outline" />
+                          </Link>
+                          {r.classification_label && (
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-mono">
+                              {r.classification_label}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-on-surface leading-relaxed">
+                          {r.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

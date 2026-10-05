@@ -62,6 +62,11 @@ from backend.app.schemas.iso_checks import (
     DocumentStandardsResponse,
 )
 from backend.app.utils.file_validation import validate_file
+from backend.app.ml.clustering import cluster_requirements
+from backend.app.schemas.clustering import (
+    DocumentClustersResponse,
+    ClusterGroup,
+)
 
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -1114,4 +1119,49 @@ def get_document_standards(
         failed_count=total_failed,
         requirements=reports,
     )
+
+
+@router.get(
+    "/{document_id}/clusters",
+    response_model=DocumentClustersResponse,
+    summary="Get thematic requirements clusters with distinctive topic labels for a document",
+)
+def get_document_clusters(
+    document_id: int,
+    k: int | None = None,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
+
+    reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == document_id)
+        .order_by(Requirement.id)
+        .all()
+    )
+
+    req_dicts = [
+        {
+            "id": r.id,
+            "req_key": r.req_key,
+            "text": r.text,
+            "classification_label": r.classification_label,
+            "section": r.section,
+        }
+        for r in reqs
+    ]
+
+    result = cluster_requirements(req_dicts, n_clusters=k)
+    return DocumentClustersResponse(
+        document_id=document_id,
+        total_requirements=result["total_requirements"],
+        num_clusters=result["num_clusters"],
+        clusters=[ClusterGroup(**c) for c in result["clusters"]],
+    )
+
 

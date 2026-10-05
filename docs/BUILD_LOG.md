@@ -557,6 +557,33 @@
 - **Known limitations**:
   - Rule-based skeletons produce template steps; domain-specific edge test cases require human reviewer refinement or optional LLM augmentation.
 
+## Phase 15B: Requirement Clustering & Thematic Topic Labeling (Tier 3)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/ml/clustering.py`:
+    - Reuses existing cached `all-MiniLM-L6-v2` embeddings from `backend.app.ml.embeddings` (Rule 7: zero recomputation).
+    - Adaptive cluster sizing $k$ scaled logarithmically to document size.
+    - Deterministic `AgglomerativeClustering` using cosine metric and average linkage.
+    - TF-IDF topic keyword extraction to auto-label clusters with top distinguishing terms (e.g. `Password / Contain / Characters`).
+  - `backend/app/schemas/clustering.py`:
+    - `ClusteredRequirementItem`, `ClusterGroup`, `DocumentClustersResponse`.
+  - REST API:
+    - `GET /api/documents/{id}/clusters?k=<optional>`: Fetches and clusters document requirements.
+  - Frontend:
+    - `frontend/services/api.ts` & `frontend/types/index.ts`: Typed methods and data structures.
+    - `frontend/app/analysis/page.tsx`: Added "Thematic Clusters" category tab displaying cluster groups, size badges, top keyword tags, and member requirements with links to requirement detail.
+  - Automated Tests:
+    - `backend/tests/test_clustering.py`: 5 unit and integration tests covering empty, single, sample requirements, and REST API (100% pass rate).
+- **Key decisions**:
+  - Zero recomputation: MiniLM embeddings are fetched from existing SQLite / file cache.
+  - TF-IDF cluster auto-labeling gives immediate human-readable topic summaries without calling generative LLMs.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_clustering.py -v`
+  - Query API: `curl http://127.0.0.1:8000/api/documents/{id}/clusters`
+- **Known limitations**:
+  - For very small documents (< 3 requirements), clusters collapse to 1 or 2 groups.
+
+
 
 
 

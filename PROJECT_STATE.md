@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
 - **Current Phase**: Phase 15 (Tier 3 Advanced Features)
-- **Phase Status**: IN_PROGRESS (Phase 15A Complete; starting Phase 15B)
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS)
-- **Current Task**: Phase 15A Complete! Deterministic rule-based Given/When/Then generator in backend/app/nlp/gherkin.py, 8 unit/integration tests (100% passing), API response schema enriched with source and ears_pattern, frontend badges integrated, sample requirements verified. Next: Phase 15B Requirement Clustering.
+- **Phase Status**: IN_PROGRESS (Phases 15A & 15B Complete; starting Phase 15C)
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling)
+- **Current Task**: Phase 15B Complete! Implemented clustering engine in backend/app/ml/clustering.py reusing cached MiniLM embeddings, distinctive TF-IDF topic auto-labeling, GET /api/documents/{id}/clusters endpoint, Thematic Clusters category tab in frontend, 5 unit/integration tests (100% passing). Next: Phase 15C Version Comparison.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -69,18 +69,23 @@
   - `backend/app/nlp/gherkin.py`: Deterministic Given/When/Then scenario generator mapping from EARS parsed elements (Event-driven, State-driven, Unwanted, Optional, Ubiquitous, Complex) with fallback to LLM or deterministic template.
   - REST endpoints `POST /api/requirements/{id}/generate-gherkin` and ad-hoc `POST /api/requirements/generate-gherkin` return `source` (`ears_rule`, `llm`, `fallback_rule`) and `ears_pattern`.
   - Frontend badges in `frontend/app/requirements/page.tsx` display `EARS Rule-Based` (emerald) and pattern tag.
+- Requirement Clustering & Thematic Topic Labeling (Phase 15B):
+  - `backend/app/ml/clustering.py`: Adaptive requirement clustering over cached sentence embeddings with deterministic Agglomerative Clustering.
+  - Distinctive TF-IDF topic keyword extraction providing human-readable cluster titles.
+  - REST endpoint: `GET /api/documents/{id}/clusters`.
+  - Frontend: `Thematic Clusters` category tab in `frontend/app/analysis/page.tsx` displaying grouped cards, sizes, and keywords.
 
 ## What Has Actually Been Verified
+- `pytest backend/tests/test_clustering.py -v`: 5/5 unit and integration tests pass with 100% pass rate in 21.55s.
 - `pytest backend/tests/test_gherkin.py -v`: 8/8 unit and integration tests pass with 100% pass rate in 14.70s.
 - `npm run build`: 11/11 Next.js pages cleanly compiled with zero TypeScript or lint errors.
 - Live execution on sample document (`data/test/sample_srs.txt`):
-  - REQ-001: Event-driven Gherkin generated (`When The user checks the account balance -> Then the system should respond quickly`).
-  - REQ-002: Ubiquitous Gherkin generated (`Then the system shall allow users to reset their password using their registered email`).
-  - REQ-003: Ubiquitous Gherkin generated (`Then Users must recover forgotten passwords using their registered email address`).
-  - REQ-004: Ubiquitous Gherkin generated (`Then the password must contain at least 8 characters`).
-  - REQ-005: Ubiquitous Gherkin generated (`Then the password must contain exactly 6 characters`).
-  - REQ-006: Ubiquitous Gherkin generated (`Then the system shall allow users to download their transaction history`).
-  - 100% generated via rule engine (`source: ears_rule`) with zero LLM API calls and zero credit cost.
+  - Clustered into 4 distinct functional groups:
+    - Cluster 1: `Using / Registered / Email` (REQ-002, REQ-003: Password recovery/reset)
+    - Cluster 2: `Contain / Characters / Password` (REQ-004, REQ-005: Length constraints)
+    - Cluster 3: `User / Respond / Account` (REQ-001: Balance checking)
+    - Cluster 4: `Transaction / History / Download` (REQ-006: Transaction history export)
+  - 100% offline, CPU-runnable, utilizing cached embeddings.
 
 ## Known Issues
 - None.
@@ -91,20 +96,22 @@
 - Avoided double-penalization between Phase 5 ambiguity checks and ISO checks.
 - All contradiction and quality findings labeled "potential".
 - Live Runtime Architecture Mapping: Added Archify skill (`.agents/skills/archify`) and generated verified standalone HTML diagram (`architecture.html` and `docs/architecture.html`) with verified commit line references.
-- Rule 6 Enforced: Generative LLM is strictly quarantined to Phase 14 rewrite suggestions and fallback Gherkin generation. All core classification, ambiguity detection, duplication checks, contradiction detection, and quality scoring remain 100% functional offline with zero LLM dependence.
-- Rule 7 Enforced: Permanent SHA-256 disk caching prevents any duplicate API calls.
+- Rule 6 Enforced: Generative LLM is strictly quarantined to Phase 14 rewrite suggestions and fallback Gherkin generation. All core classification, ambiguity detection, duplication checks, contradiction detection, clustering, and quality scoring remain 100% functional offline with zero LLM dependence.
+- Rule 7 Enforced: Permanent SHA-256 disk caching prevents any duplicate API calls or embedding recomputation.
 
 ## Exact Next Step
-- Phase 15B: Requirement Clustering.
-  - KMeans or Agglomerative clustering over cached embeddings (`backend/app/ml/embeddings.py`).
-  - Auto-label each cluster using its most distinctive terms (TF-IDF per cluster).
-  - Return cluster sizes, centroids, and assigned requirements via `GET /api/documents/{id}/clusters`.
-  - Frontend visual cluster view or badges.
+- Phase 15C: Version Comparison.
+  - Cross-version requirement alignment via composite matching (explicit `req_key` match + embedding cosine similarity).
+  - Classification: `added`, `removed`, `modified`, `unchanged`.
+  - Score diffs ($S_{v1} \to S_{v2}$), text diff highlights, newly introduced issues, and resolved issues.
+  - REST endpoint: `GET /api/documents/{id}/compare/{other_id}`.
+  - Dedicated side-by-side frontend Compare page in `frontend/app/compare/page.tsx`.
 
 ## Last Verification Performed
+- `pytest backend/tests/test_clustering.py -v`: 5/5 passed on 2026-10-05.
 - `pytest backend/tests/test_gherkin.py -v`: 8/8 passed on 2026-10-05.
 - `npm run build`: 11/11 pages compiled with zero errors on 2026-10-05.
-- Live sample execution verified on REQ-001 to REQ-006 on 2026-10-05.
+- Live sample clustering execution verified on 2026-10-05.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -112,7 +119,7 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-10-05 20:45:00
-- **Last Commit Hash**: 29043c1
+- **Last Updated**: 2026-10-05 20:52:00
+- **Last Commit Hash**: 578a25b
 
 

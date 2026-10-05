@@ -278,3 +278,27 @@ export interface GherkinGenerationResponse {
   error?: string | null;
 }
 
+export interface ClusteredRequirementItem {
+  id: number;
+  req_key: string;
+  text: string;
+  classification_label?: string | null;
+  section?: string | null;
+}
+
+export interface ClusterGroup {
+  cluster_id: number;
+  label: string;
+  keywords: string[];
+  size: number;
+  requirements: ClusteredRequirementItem[];
+}
+
+export interface DocumentClustersResponse {
+  document_id: number;
+  total_requirements: number;
+  num_clusters: number;
+  clusters: ClusterGroup[];
+}
+
+

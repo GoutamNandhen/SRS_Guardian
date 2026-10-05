@@ -18,6 +18,7 @@ import {
   ReviewActionRequest,
   RewriteSuggestionResponse,
   GherkinGenerationResponse,
+  DocumentClustersResponse,
 } from "../types";
 
 
@@ -174,6 +175,12 @@ export const api = {
     return fetchJson<GherkinGenerationResponse>(`${API_BASE}/requirements/${requirementId}/generate-gherkin`, {
       method: "POST",
     });
+  },
+
+  // --- Thematic Clustering (Tier 3 - Phase 15B) ---
+  async getDocumentClusters(documentId: number, k?: number): Promise<DocumentClustersResponse> {
+    const query = k ? `?k=${k}` : "";
+    return fetchJson<DocumentClustersResponse>(`${API_BASE}/documents/${documentId}/clusters${query}`);
   },
 
   // --- Reports Export URLs ---
