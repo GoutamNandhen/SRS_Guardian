@@ -2,80 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SRS Guardian Comprehensive Analysis Report - {{ document.filename }}</title>
+    <title>SRS Guardian Review Report - {{ document.filename }}</title>
     <style>
         @page {
             size: a4 portrait;
-            margin: 15mm 15mm 15mm 15mm;
+            margin: 12mm 15mm 12mm 15mm;
         }
         body {
             font-family: Helvetica, Arial, sans-serif;
-            font-size: 9pt;
-            line-height: 1.45;
+            font-size: 8.5pt;
+            line-height: 1.4;
             color: #1e293b;
-        }
-        .cover-page {
-            page-break-after: always;
-            text-align: center;
-            padding-top: 140px;
-        }
-        .cover-title {
-            font-size: 26pt;
-            font-weight: bold;
-            color: #0f172a;
-            margin-bottom: 8px;
-        }
-        .cover-subtitle {
-            font-size: 14pt;
-            color: #475569;
-            margin-bottom: 30px;
-        }
-        .cover-badge {
-            display: inline-block;
-            background-color: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 10pt;
-            color: #334155;
-            margin-bottom: 40px;
-        }
-        .cover-meta {
-            margin-top: 60px;
-            font-size: 9pt;
-            color: #64748b;
-            line-height: 1.8;
         }
         .page-break {
             page-break-before: always;
         }
-        h1 {
-            font-size: 15pt;
-            color: #0f172a;
-            border-bottom: 1.5px solid #0284c7;
-            padding-bottom: 4px;
-            margin-top: 18px;
+        .header-box {
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 8px;
             margin-bottom: 12px;
         }
-        h2 {
-            font-size: 11pt;
-            color: #1e293b;
+        .main-title {
+            font-size: 17pt;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .meta-bar {
+            font-size: 8.5pt;
+            color: #475569;
+            line-height: 1.6;
+        }
+        h1 {
+            font-size: 13pt;
+            color: #0f172a;
+            border-bottom: 1px solid #0284c7;
+            padding-bottom: 3px;
             margin-top: 14px;
+            margin-bottom: 8px;
+        }
+        h2 {
+            font-size: 10.5pt;
+            color: #1e293b;
+            margin-top: 12px;
             margin-bottom: 6px;
         }
         p {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 14px;
-            font-size: 8.5pt;
+            margin-bottom: 10px;
+            font-size: 8pt;
         }
         th, td {
             border: 0.5px solid #cbd5e1;
-            padding: 5px 8px;
+            padding: 4px 6px;
             text-align: left;
+            vertical-align: top;
         }
         th {
             background-color: #f8fafc;
@@ -92,84 +77,180 @@
         .badge-critical { background-color: #fee2e2; color: #991b1b; }
         .badge-warning { background-color: #fef3c7; color: #92400e; }
         .badge-info { background-color: #e0f2fe; color: #075985; }
+        .badge-ok { background-color: #dcfce7; color: #166534; }
         .badge-high { background-color: #dcfce7; color: #166534; }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-low { background-color: #f1f5f9; color: #475569; }
-        .card {
-            border: 0.5px solid #e2e8f0;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
+
+        .finding-card {
+            border: 0.5px solid #cbd5e1;
+            border-left: 3px solid #f59e0b;
+            padding: 6px 10px;
+            margin-bottom: 8px;
             background-color: #ffffff;
+        }
+        .finding-card.critical {
+            border-left: 3px solid #dc2626;
+        }
+        .finding-title {
+            font-weight: bold;
+            font-size: 8.5pt;
+            margin-bottom: 2px;
+        }
+        .finding-text {
+            font-style: italic;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+        .decision-box {
+            border: 1px solid #94a3b8;
+            background-color: #f8fafc;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .callout {
             background-color: #f8fafc;
             border-left: 3px solid #0284c7;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            font-size: 8.5pt;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+            font-size: 8pt;
         }
         .disclaimer {
-            font-size: 8pt;
+            font-size: 7.5pt;
             color: #64748b;
             font-style: italic;
-            margin-top: 15px;
+            margin-top: 10px;
             border-top: 0.5px dashed #cbd5e1;
-            padding-top: 6px;
+            padding-top: 4px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Section 1: Cover Page -->
-    <div class="cover-page">
-        <div class="cover-title">SRS GUARDIAN</div>
-        <div class="cover-subtitle">Explainable Requirement Analysis & Audit Report</div>
-        <div class="cover-badge">Document: {{ document.filename }} (ID: {{ document.id }})</div>
-        <div class="cover-meta">
-            <strong>Target Document:</strong> {{ document.filename }}<br>
-            <strong>Extraction Status:</strong> {{ document.status | upper }}<br>
-            <strong>Generated Date:</strong> {{ generated_at }}<br>
-            <strong>Overall Document Quality Score:</strong> {{ quality_summary.mean_score | round(1) }} / 100<br>
-            <strong>Audited Requirements:</strong> {{ total_requirements }} | <strong>Potential Findings:</strong> {{ total_findings }}<br>
-            <br>
-            <em>Prepared by SRS Guardian Automated Audit Engine</em>
+    <!-- ===================================================================== -->
+    <!-- PART 1: PRIMARY EXECUTIVE SOFTWARE REQUIREMENT REVIEW (PAGE 1)        -->
+    <!-- ===================================================================== -->
+    <div class="header-box">
+        <div class="main-title">SRS GUARDIAN — Software Requirement Review</div>
+        <div class="meta-bar">
+            <strong>Document:</strong> {{ document.filename }} &nbsp;|&nbsp;
+            <strong>Requirements Reviewed:</strong> {{ total_requirements }} &nbsp;|&nbsp;
+            <strong>Overall Status:</strong>
+            {% if overall_status == 'NEEDS ATTENTION' %}
+                <span class="badge badge-critical">{{ overall_status }}</span>
+            {% elif overall_status == 'PASSED WITH WARNINGS' %}
+                <span class="badge badge-warning">{{ overall_status }}</span>
+            {% else %}
+                <span class="badge badge-ok">{{ overall_status }}</span>
+            {% endif %}
+            &nbsp;|&nbsp;
+            <strong>Mean Quality Score:</strong> {{ quality_summary.mean_score | round(1) }}/100
         </div>
     </div>
 
-    <!-- Section 2: Document Information -->
-    <h1>1. Document Information</h1>
+    <!-- 1. Executive Summary Table -->
+    <h2>1. Executive Review Summary</h2>
     <table>
-        <tr><th style="width: 25%;">Property</th><th>Value</th></tr>
-        <tr><td>Filename</td><td><strong>{{ document.filename }}</strong></td></tr>
-        <tr><td>Document ID</td><td>#{{ document.id }}</td></tr>
-        <tr><td>File Format</td><td>{{ document.file_type | upper }}</td></tr>
-        <tr><td>Uploaded At</td><td>{{ document.uploaded_at }}</td></tr>
-        <tr><td>Ingestion Status</td><td>{{ document.status | upper }}</td></tr>
-        <tr><td>Total Requirements</td><td>{{ total_requirements }}</td></tr>
-        <tr><td>Analysis Timestamp</td><td>{{ generated_at }}</td></tr>
+        <thead>
+            <tr>
+                <th style="width: 20%;">Requirement</th>
+                <th style="width: 14%;">Status</th>
+                <th style="width: 33%;">Finding</th>
+                <th style="width: 33%;">Suggested Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in executive_summary_table %}
+            <tr>
+                <td><strong>{{ row.requirement.replace("↔", "<->") }}</strong></td>
+                <td>
+                    {% if row.status == 'CRITICAL' %}
+                        <span class="badge badge-critical">{{ row.status }}</span>
+                    {% elif row.status == 'WARNING' %}
+                        <span class="badge badge-warning">{{ row.status }}</span>
+                    {% else %}
+                        <span class="badge badge-ok">{{ row.status }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ row.finding }}</td>
+                <td>{{ row.suggested_action }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 
-    <!-- Section 3: Executive Summary -->
-    <h1>2. Executive Summary</h1>
-    <div class="callout">
-        This audit evaluated <strong>{{ total_requirements }}</strong> extracted software requirements using deterministic rule-based ambiguity checking, semantic duplicate detection with sentence embeddings, mathematical interval and NLI contradiction analysis, EARS template parsing, and selected ISO 29148 machine-checkable checks.
-    </div>
-    <p>
-        The document achieved an overall average Quality Score of <strong>{{ quality_summary.mean_score | round(1) }} / 100</strong> (Median: {{ quality_summary.median_score | round(1) }}).
-        A total of <strong>{{ total_findings }}</strong> potential findings were identified across all modules ({{ findings_by_severity.critical or 0 }} critical, {{ findings_by_severity.warning or 0 }} warning, {{ findings_by_severity.info or 0 }} informational).
-        Every detection is flagged as a potential issue requiring human engineering review and decision.
-    </p>
+    <!-- 2. Important Findings -->
+    <h2>2. Important Findings — Items Needing Attention</h2>
+    {% if important_findings %}
+        {% for item in important_findings %}
+        <div class="finding-card {% if item.status == 'CRITICAL' %}critical{% endif %}">
+            <div class="finding-title">
+                [{{ item.requirement.replace("↔", "<->") }}]
+                {% if item.status == 'CRITICAL' %}
+                    <span class="badge badge-critical">{{ item.status }}</span>
+                {% else %}
+                    <span class="badge badge-warning">{{ item.status }}</span>
+                {% endif %}
+                {% if item.confidence is not none %}
+                    <span class="badge badge-{{ item.confidence_band }}">Conf: {{ (item.confidence * 100) | round(0) | int }}%</span>
+                {% endif %}
+            </div>
+            <div class="finding-text">"{{ item.text_snippet }}"</div>
+            <table style="margin-bottom: 2px;">
+                {% if item.problem_phrase %}
+                <tr><td style="width: 25%; font-weight: bold;">Problem Phrase:</td><td>"{{ item.problem_phrase }}"</td></tr>
+                {% endif %}
+                <tr><td style="width: 25%; font-weight: bold;">Short Reason:</td><td>{{ item.short_reason }}</td></tr>
+                <tr><td style="width: 25%; font-weight: bold;">Suggested Action:</td><td><strong>{{ item.suggested_action }}</strong></td></tr>
+            </table>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No critical or warning-level issues detected in this document.</p>
+    {% endif %}
 
-    <!-- Section 4: Requirement Statistics -->
-    <h1>3. Requirement Statistics</h1>
+    <!-- 3. Requirements with No Issue Detected -->
+    <h2>3. Requirements with No Issue Detected</h2>
+    {% if no_issue_detected %}
+        <table>
+            <tr><th style="width: 20%;">Requirement</th><th>Statement</th></tr>
+            {% for item in no_issue_detected %}
+            <tr>
+                <td><strong>{{ item.requirement.replace("↔", "<->") }}</strong></td>
+                <td><em>"{{ item.text_snippet }}"</em></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>All evaluated requirements have potential findings requiring reviewer inspection.</p>
+    {% endif %}
+
+    <!-- 4. Reviewer Decision Block -->
+    <h2>4. Reviewer Decision & Sign-off</h2>
+    <div class="decision-box">
+        <p><strong>Reviewer Action:</strong> &nbsp;&nbsp; [ &nbsp; ] Accept All &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Accept with Edits &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Reject / Needs Rework</p>
+        <p style="margin-top: 8px;"><strong>Reviewer Name:</strong> ____________________________________ &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> ____________________</p>
+        <p style="margin-top: 8px;"><strong>Reviewer Comments / Sign-off Notes:</strong></p>
+        <p style="color: #64748b; margin-top: 14px;">___________________________________________________________________________________________________</p>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PART 2: TECHNICAL EVIDENCE & DETAILED ANALYSIS                        -->
+    <!-- ===================================================================== -->
+    <div class="page-break"></div>
+    <div class="main-title" style="font-size: 15pt; margin-top: 5px;">Technical Evidence & Detailed Analysis</div>
+    <p style="color: #64748b; font-size: 8pt; margin-bottom: 12px;">Secondary analytical layer containing deterministic metrics, syntactic checks, similarity matrices, and empirical benchmarks.</p>
+
+    <!-- 5. Requirement Classification -->
+    <h1>5. Requirement Classification & Distribution</h1>
     <table>
         <tr>
             <th>Total Requirements</th>
             <th>Functional</th>
             <th>Non-Functional</th>
             <th>Unclassified</th>
-            <th>Valid EARS Syntax</th>
+            <th>EARS Conforming</th>
         </tr>
         <tr>
             <td><strong>{{ total_requirements }}</strong></td>
@@ -180,148 +261,72 @@
         </tr>
     </table>
 
-    <!-- Section 5: Quality Overview -->
-    <h1>4. Quality Overview</h1>
-    <table>
-        <tr><th>Metric</th><th>Score</th><th>Benchmark Interpretation</th></tr>
-        <tr><td>Mean Quality Score</td><td><strong>{{ quality_summary.mean_score | round(1) }} / 100</strong></td><td>Average requirement quality</td></tr>
-        <tr><td>Median Quality Score</td><td>{{ quality_summary.median_score | round(1) }} / 100</td><td>50th percentile requirement quality</td></tr>
-        <tr><td>Minimum Score</td><td>{{ quality_summary.min_score | round(1) }} / 100</td><td>Lowest scoring requirement</td></tr>
-        <tr><td>Maximum Score</td><td>{{ quality_summary.max_score | round(1) }} / 100</td><td>Highest scoring requirement</td></tr>
-    </table>
-
-    <h2>Score Distribution</h2>
+    <!-- 6. Ambiguity Analysis Evidence -->
+    <h1>6. Ambiguity Analysis Evidence</h1>
+    {% set amb_findings = [] %}
+    {% for f in all_findings %}{% if f.module == 'ambiguity' %}{% set _ = amb_findings.append(f) %}{% endif %}{% endfor %}
+    {% if amb_findings %}
     <table>
         <tr>
-            <th>Score Range</th>
-            <th>Count</th>
-            <th>Percentage</th>
+            <th style="width: 12%;">ID</th>
+            <th style="width: 15%;">Requirement</th>
+            <th style="width: 25%;">Rule Checked</th>
+            <th style="width: 18%;">Detected Phrase</th>
+            <th>Explanation</th>
         </tr>
-        {% for score_range, count in (quality_summary.distribution or {}).items() %}
+        {% for af in amb_findings %}
         <tr>
-            <td><strong>{{ score_range }}</strong></td>
-            <td>{{ count }}</td>
-            <td>{{ (count / (total_requirements if total_requirements > 0 else 1) * 100) | round(1) }}%</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <!-- Section 6: Issue Overview -->
-    <div class="page-break"></div>
-    <h1>5. Issue Overview</h1>
-    <table>
-        <tr><th>Category / Module</th><th>Count</th><th>Severity Breakdown</th></tr>
-        {% for mod, count in findings_by_module.items() %}
-        <tr>
-            <td><strong>{{ mod | upper }}</strong></td>
-            <td>{{ count }}</td>
-            <td>{{ mod_breakdown.get(mod, 'Standard check') }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <!-- Section 7: Detailed Findings -->
-    <h1>6. Detailed Findings by Requirement</h1>
-    {% for req in requirements %}
-    <div class="card">
-        <table style="margin-bottom: 6px;">
-            <tr style="background-color: #f1f5f9;">
-                <td style="width: 20%;"><strong>{{ req.req_key }}</strong></td>
-                <td><strong>Quality Score: {{ req.quality_score | round(1) }} / 100</strong> | Class: {{ req.classification_label or 'Unclassified' }} | EARS: {{ req.ears_pattern or 'Non-conforming' }}</td>
-            </tr>
-            <tr>
-                <td colspan="2"><em>"{{ req.text }}"</em></td>
-            </tr>
-        </table>
-        
-        {% if req.findings %}
-        <table>
-            <tr style="background-color: #f8fafc;">
-                <th style="width: 14%;">Issue ID</th>
-                <th style="width: 14%;">Module</th>
-                <th style="width: 14%;">Type</th>
-                <th style="width: 12%;">Severity</th>
-                <th style="width: 12%;">Confidence</th>
-                <th>Explanation & Suggestion</th>
-                <th style="width: 10%;">Review</th>
-            </tr>
-            {% for f in req.findings %}
-            <tr>
-                <td><strong>{{ f.finding_id }}</strong></td>
-                <td>{{ f.module }}</td>
-                <td>{{ f.type }}</td>
-                <td>
-                    <span class="badge {% if f.severity == 'critical' %}badge-critical{% elif f.severity == 'warning' %}badge-warning{% else %}badge-info{% endif %}">
-                        {{ f.severity | upper }}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge badge-{{ f.confidence_band }}">
-                        {{ (f.confidence * 100) | round(0) | int if f.confidence is not none else 'N/A' }}%
-                    </span>
-                </td>
-                <td>
-                    {{ f.human_explanation }}
-                    {% if f.suggestion %}
-                    <br><strong>Suggestion:</strong> <em>{{ f.suggestion }}</em>
-                    {% endif %}
-                </td>
-                <td>{{ f.status }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% else %}
-        <p style="color: #166534; font-size: 8pt; margin: 4px 0;">No potential issues flagged for this requirement.</p>
-        {% endif %}
-    </div>
-    {% endfor %}
-
-    <!-- Section 8: Duplicate Analysis -->
-    <div class="page-break"></div>
-    <h1>7. Duplicate Analysis</h1>
-    <p>Semantic duplicate detection utilizes dense vector embeddings from the <code>all-MiniLM-L6-v2</code> model on CPU with candidate blocking. Similarity thresholds $\ge 0.80$ surface potential duplication.</p>
-    {% if duplicate_findings %}
-    <table>
-        <tr>
-            <th>Source Req</th>
-            <th>Target Req</th>
-            <th>Cosine Similarity</th>
-            <th>Attributed Key Phrases</th>
-            <th>Status</th>
-        </tr>
-        {% for dup in duplicate_findings %}
-        <tr>
-            <td><strong>{{ dup.req_key }}</strong></td>
-            <td><strong>{{ dup.target_req_key }}</strong></td>
-            <td>{{ (dup.confidence * 100) | round(1) if dup.confidence else 'N/A' }}%</td>
-            <td>{{ dup.human_explanation }}</td>
-            <td>{{ dup.status }}</td>
+            <td><strong>{{ af.finding_id }}</strong></td>
+            <td>{{ af.req_key }}</td>
+            <td><code>{{ af.type }}</code></td>
+            <td>{% if af.spans %}"{{ af.spans[0].text }}"{% else %}—{% endif %}</td>
+            <td>{{ af.human_explanation }}</td>
         </tr>
         {% endfor %}
     </table>
     {% else %}
-    <p>No semantic duplicate pairs detected at threshold 0.80.</p>
+    <p>No ambiguity defects flagged across evaluated requirements.</p>
     {% endif %}
 
-    <!-- Section 9: Contradiction Analysis -->
-    <h1>8. Contradiction Analysis</h1>
-    <p>Identifies logical and quantitative conflicts using deterministic interval intersection ($[low_1, high_1] \cap [low_2, high_2] = \emptyset$) and candidate-blocked Natural Language Inference (NLI).</p>
+    <!-- 7. Semantic Duplicate Evidence (Deduplicated Pairs) -->
+    <h1>7. Semantic Duplicate Evidence</h1>
+    {% if duplicate_findings %}
+    <table>
+        <tr>
+            <th style="width: 22%;">Requirement Pair</th>
+            <th style="width: 12%;">Similarity</th>
+            <th style="width: 40%;">Attributed Concepts</th>
+            <th>Suggested Action</th>
+        </tr>
+        {% for d in duplicate_findings %}
+        <tr>
+            <td><strong>{{ d.req_key }} &lt;-&gt; {{ d.target_req_key or '—' }}</strong></td>
+            <td>{{ (d.confidence * 100) | round(1) if d.confidence else 'N/A' }}%</td>
+            <td>{{ d.human_explanation }}</td>
+            <td>{{ d.suggestion or 'Check / consolidate' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No semantic duplicate pairs detected.</p>
+    {% endif %}
+
+    <!-- 8. Contradiction Analysis Evidence (Deduplicated Pairs) -->
+    <h1>8. Contradiction Analysis Evidence</h1>
     {% if contradiction_findings %}
     <table>
         <tr>
-            <th>Requirement 1</th>
-            <th>Requirement 2</th>
-            <th>Mechanism</th>
-            <th>Conflict Description</th>
-            <th>Status</th>
+            <th style="width: 22%;">Requirement Pair</th>
+            <th style="width: 15%;">Mechanism</th>
+            <th style="width: 40%;">Conflict Reason</th>
+            <th>Suggested Action</th>
         </tr>
         {% for c in contradiction_findings %}
         <tr>
-            <td><strong>{{ c.req_key }}</strong></td>
-            <td><strong>{{ c.target_req_key }}</strong></td>
-            <td>{{ c.type }}</td>
+            <td><strong>{{ c.req_key }} &lt;-&gt; {{ c.target_req_key or '—' }}</strong></td>
+            <td><code>{{ c.type }}</code></td>
             <td>{{ c.human_explanation }}</td>
-            <td>{{ c.status }}</td>
+            <td>{{ c.suggestion or 'Resolve conflicting constraints' }}</td>
         </tr>
         {% endfor %}
     </table>
@@ -329,137 +334,77 @@
     <p>No potential contradiction pairs detected.</p>
     {% endif %}
 
-    <!-- Section 10: EARS Analysis -->
-    <h1>9. EARS Syntax Analysis</h1>
-    <p>Easy Approach to Requirements Syntax (EARS) template conformity inspection evaluates structure against 6 normative patterns (Ubiquitous, Event-driven, State-driven, Unwanted behavior, Optional feature, Complex).</p>
-    <table>
-        <tr>
-            <th>Pattern</th>
-            <th>Count</th>
-            <th>Template Form</th>
-        </tr>
-        <tr><td>Event-driven</td><td>{{ ears_counts.get('Event-driven', 0) }}</td><td>WHEN &lt;trigger&gt;, THE &lt;system&gt; SHALL &lt;response&gt;</td></tr>
-        <tr><td>State-driven</td><td>{{ ears_counts.get('State-driven', 0) }}</td><td>WHILE &lt;state&gt;, THE &lt;system&gt; SHALL &lt;response&gt;</td></tr>
-        <tr><td>Ubiquitous</td><td>{{ ears_counts.get('Ubiquitous', 0) }}</td><td>THE &lt;system&gt; SHALL &lt;response&gt;</td></tr>
-        <tr><td>Unwanted Behavior</td><td>{{ ears_counts.get('Unwanted behavior', 0) }}</td><td>IF &lt;condition&gt;, THEN THE &lt;system&gt; SHALL &lt;response&gt;</td></tr>
-        <tr><td>Optional Feature</td><td>{{ ears_counts.get('Optional feature', 0) }}</td><td>WHERE &lt;feature&gt;, THE &lt;system&gt; SHALL &lt;response&gt;</td></tr>
-        <tr><td>Complex</td><td>{{ ears_counts.get('Complex', 0) }}</td><td>Combinations of pre-conditions</td></tr>
-        <tr><td>Non-conforming</td><td>{{ ears_counts.get('Non-conforming', 0) }}</td><td>Unstructured requirement prose</td></tr>
-    </table>
-
-    <!-- Section 11: Standards-Oriented Checks -->
-    <h1>10. Standards-Oriented Checks (ISO/IEC/IEEE 29148)</h1>
+    <!-- 9. EARS Syntax & ISO 29148 Checks -->
+    <h1>9. EARS Syntax Conformance & Selected ISO 29148 Checks</h1>
     <div class="callout">
-        <strong>Notice:</strong> These checks are selected machine-checkable checks based on ISO/IEC/IEEE 29148 (Singular, Unambiguous, Verifiable, Complete, Consistent, Traceable, Conforming Structure). This report does NOT constitute formal ISO compliance certification.
+        <strong>EARS Conformance:</strong> {{ conforming_ears_count }} of {{ total_requirements }} requirements match standard EARS syntax templates (Ubiquitous, Event-driven, State-driven, Unwanted behavior, or Optional feature).
     </div>
+    <p class="disclaimer">Notice: Selected machine-checkable checks based on ISO/IEC/IEEE 29148. Not compliance certification.</p>
+
+    <!-- 10. Requirement Quality Scores & Waterfall Analysis -->
+    <h1>10. Requirement Quality Scores & Waterfall Deductions</h1>
+    <p>Authoritative Document Quality: <strong>Mean {{ quality_summary.mean_score | round(1) }}/100</strong> (Median: {{ quality_summary.median_score | round(1) }}, Min: {{ quality_summary.min_score | round(1) }}, Max: {{ quality_summary.max_score | round(1) }}).</p>
     <table>
         <tr>
-            <th>Check ID</th>
-            <th>Characteristic</th>
-            <th>Method</th>
-            <th>Issues Flagged</th>
+            <th style="width: 15%;">Requirement</th>
+            <th style="width: 14%;">Overall Score</th>
+            <th style="width: 20%;">EARS Pattern</th>
+            <th>Waterfall Penalty Steps</th>
         </tr>
-        <tr><td>ISO_SINGULAR</td><td>Singularity</td><td>Checks for multiple modal verbs / coordinated action clauses</td><td>{{ iso_stats.get('ISO_SINGULAR', 0) }}</td></tr>
-        <tr><td>ISO_UNAMBIGUOUS</td><td>Unambiguity</td><td>Subjective and non-normative terms check</td><td>{{ iso_stats.get('ISO_UNAMBIGUOUS', 0) }}</td></tr>
-        <tr><td>ISO_VERIFIABLE</td><td>Verifiability</td><td>Checks for quantifiable performance thresholds and metrics</td><td>{{ iso_stats.get('ISO_VERIFIABLE', 0) }}</td></tr>
-        <tr><td>ISO_COMPLETE</td><td>Completeness</td><td>Syntactic dependency check (actor + modal + action + target)</td><td>{{ iso_stats.get('ISO_COMPLETE', 0) }}</td></tr>
-        <tr><td>ISO_CONSISTENT</td><td>Consistency</td><td>Document-wide terminology drift and synonym detection</td><td>{{ iso_stats.get('ISO_CONSISTENT', 0) }}</td></tr>
-        <tr><td>ISO_TRACEABLE</td><td>Traceability</td><td>Validates persistent unique identifiers (e.g. REQ-XXX)</td><td>{{ iso_stats.get('ISO_TRACEABLE', 0) }}</td></tr>
-        <tr><td>ISO_STRUCTURE</td><td>Structure</td><td>Evaluates syntactic conformance to EARS templates</td><td>{{ iso_stats.get('ISO_STRUCTURE', 0) }}</td></tr>
-    </table>
-
-    <!-- Section 12: AI Rewrite Suggestions -->
-    <div class="page-break"></div>
-    <h1>11. AI Rewrite Suggestions & Gherkin Scenarios</h1>
-    <p>Controlled generative AI assistance strictly isolated to Phase 14 rewrite suggestions and acceptance test generation. Cached permanently via SHA-256.</p>
-    {% if ai_suggestions %}
-    {% for s in ai_suggestions %}
-    <div class="card">
-        <p><strong>{{ s.req_key }} Original:</strong> <em>"{{ s.original_text }}"</em></p>
-        <p><strong>Suggested Rewrite:</strong> <code>{{ s.suggested_rewrite }}</code></p>
-        <p><strong>Rationale:</strong> {{ s.rationale }}</p>
-        {% if s.gherkin %}
-        <pre style="background: #f8fafc; padding: 6px; font-size: 8pt; border: 0.5px solid #cbd5e1;">{{ s.gherkin }}</pre>
-        {% endif %}
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>No AI rewrite suggestions recorded for this document.</p>
-    {% endif %}
-
-    <!-- Section 13: Human Review Summary -->
-    <h1>12. Human Review Summary</h1>
-    <p>SRS Guardian enforces human-in-the-loop oversight. Every AI detection must be confirmed, edited, or rejected by a human requirements engineer.</p>
-    <table>
+        {% for r in requirements %}
         <tr>
-            <th>Status</th>
-            <th>Count</th>
-            <th>Percentage</th>
-        </tr>
-        <tr><td>AI Flagged (Pending Review)</td><td>{{ review_stats.ai_flagged }}</td><td>{{ review_stats.pct_ai_flagged }}%</td></tr>
-        <tr><td>Accepted</td><td>{{ review_stats.accepted }}</td><td>{{ review_stats.pct_accepted }}%</td></tr>
-        <tr><td>Rejected (False Positive Dismissed)</td><td>{{ review_stats.rejected }}</td><td>{{ review_stats.pct_rejected }}%</td></tr>
-        <tr><td>Edited / Restructured</td><td>{{ review_stats.edited }}</td><td>{{ review_stats.pct_edited }}%</td></tr>
-        <tr><td>Reviewed (Acknowledged)</td><td>{{ review_stats.reviewed }}</td><td>{{ review_stats.pct_reviewed }}%</td></tr>
-    </table>
-
-    <!-- Section 14: Version Comparison -->
-    <h1>13. Version Comparison</h1>
-    {% if version_comparison %}
-    <p>Compared Document #{{ document.id }} against Baseline Document #{{ version_comparison.other_document_id }}:</p>
-    <table>
-        <tr><th>Metric</th><th>Delta</th></tr>
-        <tr><td>Quality Score Delta</td><td>{{ version_comparison.score_delta | round(2) }}</td></tr>
-        <tr><td>Added Requirements</td><td>{{ version_comparison.added_count }}</td></tr>
-        <tr><td>Modified Requirements</td><td>{{ version_comparison.modified_count }}</td></tr>
-        <tr><td>Resolved Issues</td><td>{{ version_comparison.resolved_issues_count }}</td></tr>
-        <tr><td>New Issues Introduced</td><td>{{ version_comparison.new_issues_count }}</td></tr>
-    </table>
-    {% else %}
-    <p>Single version analyzed. Cross-version semantic diffing available when comparing with a prior baseline.</p>
-    {% endif %}
-
-    <!-- Section 15: Requirement Clustering -->
-    <h1>14. Requirement Clustering & Functional Topics</h1>
-    {% if clusters %}
-    <p>Unsupervised Agglomerative Clustering over cached MiniLM embeddings grouped requirements into {{ clusters | length }} thematic functional clusters:</p>
-    <table>
-        <tr>
-            <th>Cluster #</th>
-            <th>Distinctive Topic Keywords</th>
-            <th>Size</th>
-            <th>Member Requirements</th>
-        </tr>
-        {% for cl in clusters %}
-        <tr>
-            <td><strong>Cluster {{ cl.cluster_id }}</strong></td>
-            <td>{{ cl.topic_keywords | join(" / ") }}</td>
-            <td>{{ cl.size }}</td>
-            <td>{{ cl.req_keys | join(", ") }}</td>
+            <td><strong>{{ r.req_key }}</strong></td>
+            <td><strong>{{ r.quality_score | round(1) }}</strong> / 100</td>
+            <td>{{ r.ears_pattern or '—' }}</td>
+            <td>
+                {% set steps = [] %}
+                {% for st in r.waterfall_steps %}
+                    {% if st.deduction > 0 %}
+                        {% set _ = steps.append("-" ~ st.deduction ~ " (" ~ st.rule_id ~ ")") %}
+                    {% endif %}
+                {% endfor %}
+                {{ steps | join(", ") if steps else "None (Base 100.0)" }}
+            </td>
         </tr>
         {% endfor %}
     </table>
-    {% else %}
-    <p>Requirement clustering not generated for this document.</p>
+
+    <!-- 11. AI Rewrites & Test Scenarios -->
+    {% if ai_suggestions %}
+    <h1>11. AI Rewrites & Test Scenarios</h1>
+    <table>
+        <tr>
+            <th style="width: 15%;">Requirement</th>
+            <th style="width: 40%;">Suggested Rewrite</th>
+            <th>Gherkin Test Scenario</th>
+        </tr>
+        {% for s in ai_suggestions %}
+        <tr>
+            <td><strong>{{ s.req_key }}</strong></td>
+            <td>{{ s.suggested_rewrite or '—' }}</td>
+            <td><pre style="font-size: 7pt; margin: 0;">{{ s.gherkin or '—' }}</pre></td>
+        </tr>
+        {% endfor %}
+    </table>
     {% endif %}
 
-    <!-- Section 16: System Evaluation -->
+    <!-- 12. System Evaluation Benchmarks -->
     <div class="page-break"></div>
-    <h1>15. System Evaluation Benchmark</h1>
-    <p>The following performance metrics represent actual empirical evaluation results measured on held-out test datasets:</p>
+    <h1>12. System Evaluation Benchmark</h1>
+    <p>Authoritative empirical evaluation benchmarks measured on held-out test datasets:</p>
     <table>
         <tr>
             <th>Module</th>
-            <th>Benchmark Dataset</th>
+            <th>Dataset</th>
             <th>Accuracy</th>
             <th>Precision</th>
             <th>Recall</th>
             <th>F1-Score</th>
-            <th>Latency (CPU)</th>
+            <th>Latency</th>
         </tr>
         <tr>
             <td>Classification</td>
-            <td>PROMISE (194 held-out)</td>
+            <td>PROMISE (194)</td>
             <td>{{ (system_eval.classification.accuracy * 100) | round(1) if system_eval else '85.1' }}%</td>
             <td>{{ (system_eval.classification.macro_precision * 100) | round(1) if system_eval else '86.8' }}%</td>
             <td>{{ (system_eval.classification.macro_recall * 100) | round(1) if system_eval else '84.1' }}%</td>
@@ -468,7 +413,7 @@
         </tr>
         <tr>
             <td>Ambiguity Detection</td>
-            <td>Curated Ambiguity (40 reqs)</td>
+            <td>Curated (40)</td>
             <td>{{ (system_eval.ambiguity.accuracy * 100) | round(1) if system_eval else '72.5' }}%</td>
             <td>{{ (system_eval.ambiguity.precision * 100) | round(1) if system_eval else '88.9' }}%</td>
             <td>{{ (system_eval.ambiguity.recall * 100) | round(1) if system_eval else '64.0' }}%</td>
@@ -477,16 +422,16 @@
         </tr>
         <tr>
             <td>Duplicate Detection</td>
-            <td>Semantic Pairs (36 pairs)</td>
-            <td>{{ (system_eval.duplicates.accuracy * 100) | round(1) if system_eval else '83.3' }}%</td>
+            <td>Eval Set (36)</td>
+            <td>{{ (system_eval.duplicates.accuracy * 100) | round(1) if system_eval else '72.2' }}%</td>
             <td>{{ (system_eval.duplicates.precision * 100) | round(1) if system_eval else '87.5' }}%</td>
-            <td>{{ (system_eval.duplicates.recall * 100) | round(1) if system_eval else '87.5' }}%</td>
-            <td>{{ (system_eval.duplicates.f1_score * 100) | round(1) if system_eval else '87.5' }}%</td>
+            <td>{{ (system_eval.duplicates.recall * 100) | round(1) if system_eval else '43.8' }}%</td>
+            <td>{{ (system_eval.duplicates.f1_score * 100) | round(1) if system_eval else '58.3' }}%</td>
             <td>{{ system_eval.duplicates.avg_latency_ms if system_eval else '4.15' }} ms</td>
         </tr>
         <tr>
             <td>Contradiction Detection</td>
-            <td>Conflict Pairs (32 pairs)</td>
+            <td>Eval Set (32)</td>
             <td>{{ (system_eval.contradictions.accuracy * 100) | round(1) if system_eval else '65.6' }}%</td>
             <td>{{ (system_eval.contradictions.precision * 100) | round(1) if system_eval else '60.0' }}%</td>
             <td>{{ (system_eval.contradictions.recall * 100) | round(1) if system_eval else '93.8' }}%</td>
@@ -495,26 +440,15 @@
         </tr>
     </table>
 
-    <!-- Section 17: Limitations -->
-    <h1>16. Known System Limitations</h1>
+    <!-- 13. Limitations & Conclusion -->
+    <h1>13. Known Limitations & Dynamic Conclusion</h1>
+    <p>{{ dynamic_conclusion }}</p>
     <div class="callout">
-        <ol style="margin: 0; padding-left: 15px;">
-            <li><strong>Syntactic Scope:</strong> Rule-based and embedding analyses operate on syntax and lexicosemantic similarity. Deep domain logic completeness requires human engineering expertise.</li>
-            <li><strong>Language Support:</strong> Current NLP models and rules are calibrated for standard English requirements documentation.</li>
-            <li><strong>Standards Alignment:</strong> Checks evaluate machine-checkable syntactic characteristics based on ISO/IEC/IEEE 29148, but do not replace legal or regulatory certification.</li>
-            <li><strong>Human Authority:</strong> All findings are advisory and labeled "potential". The human reviewer possesses absolute authority to accept, edit, or reject any detection.</li>
-        </ol>
+        All detections are advisory and labeled potential. Human reviewers retain authority to accept, edit, or reject findings. Selected checks based on ISO/IEC/IEEE 29148 do not replace human requirements engineering validation.
     </div>
 
-    <!-- Section 18: Conclusion -->
-    <h1>17. Conclusion & Next Steps</h1>
-    <p>
-        The requirements document contains <strong>{{ total_requirements }}</strong> statements with a mean quality score of <strong>{{ quality_summary.mean_score | round(1) }}/100</strong>.
-        Prioritize resolving the <strong>{{ findings_by_severity.critical or 0 }}</strong> critical contradiction/singularity issues, followed by clarifying weak terms in the <strong>{{ findings_by_severity.warning or 0 }}</strong> warning-level ambiguity findings.
-    </p>
-
-    <!-- Section 19: Appendix -->
-    <h1>18. Appendix: Rule Catalog & Weights</h1>
+    <!-- 14. Rule Catalog -->
+    <h1>14. Rule Catalog & Score Weights</h1>
     <table>
         <tr><th>Rule ID</th><th>Description</th><th>Sub-score Penalty</th></tr>
         <tr><td>CHECK_A_WEAK_TERM</td><td>Subjective or vague adjectives/adverbs lacking quantifiable threshold</td><td>-15.0 (Ambiguity)</td></tr>
@@ -524,6 +458,45 @@
         <tr><td>NUMERIC_CONSTRAINT_CONFLICT</td><td>Disjoint mathematical intervals on the same entity and attribute</td><td>-25.0 (Consistency)</td></tr>
         <tr><td>ISO_SINGULAR</td><td>Multiple obligations conjoined in a single requirement</td><td>-15.0 (Structure)</td></tr>
     </table>
+
+    <!-- ===================================================================== -->
+    <!-- PART 3: SHAP EXPLAINABILITY APPENDIX (FINAL SECTION)                 -->
+    <!-- ===================================================================== -->
+    {% if shap_attributions %}
+    <div class="page-break"></div>
+    <h1>15. Explainability Appendix: SHAP Feature Attribution</h1>
+    <p>SHAP (SHapley Additive exPlanations) LinearExplainer feature attribution for the requirement classification model. Tokens with positive values push prediction toward the indicated class, while negative values push toward the alternative class.</p>
+    
+    {% for sa in shap_attributions %}
+    <div style="border: 0.5px solid #cbd5e1; padding: 6px 10px; margin-bottom: 8px; background-color: #ffffff;">
+        <div style="font-weight: bold; margin-bottom: 3px;">
+            [{{ sa.req_key }}] Predicted: <strong>{{ sa.predicted_class }}</strong> (Confidence: {{ (sa.probability * 100) | round(1) }}%)
+        </div>
+        <div style="font-style: italic; color: #475569; margin-bottom: 4px;">"{{ sa.text }}"</div>
+        <p style="margin-bottom: 4px;"><strong>Interpretation:</strong> {{ sa.human_interpretation }}</p>
+        {% if sa.top_features %}
+        <table style="width: 80%; margin-bottom: 4px;">
+            <thead><tr><th style="width: 40%;">Token</th><th style="width: 30%;">SHAP Value</th><th>Impact Direction</th></tr></thead>
+            <tbody>
+                {% for ft in sa.top_features %}
+                <tr>
+                    <td><code>{{ ft.token }}</code></td>
+                    <td>{{ "%+.4f" | format(ft.shap_value) }}</td>
+                    <td>
+                        {% if ft.direction == 'positive' %}
+                            <span class="badge badge-high">Positive (Supports)</span>
+                        {% else %}
+                            <span class="badge badge-warning">Negative (Opposes)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
 
     <div class="disclaimer">
         Generated automatically by SRS Guardian. Selected machine-checkable checks based on ISO/IEC/IEEE 29148. Not compliance certification.

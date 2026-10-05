@@ -74,6 +74,36 @@ class RequirementReviewItem(BaseModel):
     review_status: str = "pending"  # "pending", "accepted", "rejected", "edited", "reviewed"
 
 
+class ExecutiveReviewRow(BaseModel):
+    requirement: str  # e.g. "REQ-001" or "REQ-002 ↔ REQ-003"
+    status: str       # "CRITICAL", "WARNING", "OK"
+    finding: str      # Concise finding label e.g. "“quickly” is unclear"
+    suggested_action: str  # e.g. "Make response time measurable"
+    problem_phrase: Optional[str] = None
+    short_reason: Optional[str] = None
+    is_pair: bool = False
+    req_ids: List[int] = Field(default_factory=list)
+    confidence: Optional[float] = None
+    confidence_band: str = "unavailable"
+    text_snippet: Optional[str] = None
+
+
+class ShapFeatureItem(BaseModel):
+    token: str
+    shap_value: float
+    direction: str  # "positive" (supports predicted class) or "negative" (opposes)
+
+
+class ShapRequirementAttribution(BaseModel):
+    requirement_id: int
+    req_key: str
+    text: str
+    predicted_class: str
+    probability: float
+    top_features: List[ShapFeatureItem] = Field(default_factory=list)
+    human_interpretation: str
+
+
 class DocumentReviewReportResponse(BaseModel):
     document_id: int
     filename: str
@@ -85,11 +115,16 @@ class DocumentReviewReportResponse(BaseModel):
     raw_text: Optional[str] = None
     total_requirements: int
     total_findings: int
+    overall_status: str = "ACCEPTABLE"  # "NEEDS ATTENTION", "PASSED WITH WARNINGS", "ACCEPTABLE"
     quality_summary: Dict[str, Any]
     findings_by_severity: Dict[str, int]
     findings_by_module: Dict[str, int]
     findings_by_confidence: Dict[str, int]
+    executive_summary_table: List[ExecutiveReviewRow] = Field(default_factory=list)
     requirements: List[RequirementReviewItem]
     all_findings: List[AnnotatedFinding]
     clusters: Optional[List[Dict[str, Any]]] = None
     system_evaluation: Optional[Dict[str, Any]] = None
+    shap_attributions: Optional[List[ShapRequirementAttribution]] = None
+    dynamic_conclusion: Optional[str] = None
+

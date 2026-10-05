@@ -393,6 +393,36 @@ export interface RequirementReviewItem {
   review_status: string;
 }
 
+export interface ExecutiveReviewRow {
+  requirement: string;
+  status: "CRITICAL" | "WARNING" | "OK";
+  finding: string;
+  suggested_action: string;
+  problem_phrase?: string | null;
+  short_reason?: string | null;
+  is_pair: boolean;
+  req_ids: number[];
+  confidence?: number | null;
+  confidence_band: "high" | "medium" | "low" | "unavailable";
+  text_snippet?: string | null;
+}
+
+export interface ShapFeatureItem {
+  token: string;
+  shap_value: number;
+  direction: "positive" | "negative";
+}
+
+export interface ShapRequirementAttribution {
+  requirement_id: number;
+  req_key: string;
+  text: string;
+  predicted_class: string;
+  probability: number;
+  top_features: ShapFeatureItem[];
+  human_interpretation: string;
+}
+
 export interface DocumentReviewReport {
   document_id: number;
   filename: string;
@@ -404,14 +434,19 @@ export interface DocumentReviewReport {
   raw_text?: string | null;
   total_requirements: number;
   total_findings: number;
+  overall_status?: "NEEDS ATTENTION" | "PASSED WITH WARNINGS" | "ACCEPTABLE" | string;
   quality_summary: any;
   findings_by_severity: Record<string, number>;
   findings_by_module: Record<string, number>;
   findings_by_confidence: Record<string, number>;
+  executive_summary_table?: ExecutiveReviewRow[];
   requirements: RequirementReviewItem[];
   all_findings: AnnotatedFinding[];
   system_evaluation?: any | null;
+  shap_attributions?: ShapRequirementAttribution[];
+  dynamic_conclusion?: string | null;
 }
+
 
 
 

@@ -708,3 +708,39 @@
   - Access UI: Open browser at `http://localhost:3000/reports/review`
 - **Known limitations**:
   - When source documents are uploaded as plain text (.txt), the Annotated SRS PDF renders a clean typographic page layout representation since native visual PDF pages do not exist in plain text.
+
+## Phase 18.1: Simplified Review Output & SHAP Appendix
+- **Date**: 2026-10-06
+- **What was built**:
+  - **Executive Review Presentation Layer**:
+    - Re-architected PDF (`backend/app/templates/comprehensive_report.html`), DOCX (`backend/app/services/review_report.py`), and Web UI (`frontend/app/reports/review/page.tsx`) to prioritize human reviewer clarity.
+    - Page 1 / Section 1: Executive Review Summary Table (`Requirement | Status | Finding Summary | Suggested Action`) with instant status badges (`NEEDS ATTENTION`, `PASSED WITH WARNINGS`, `ACCEPTABLE`).
+    - Section 2: Important Findings (cards for flagged items with problem phrases, short reasons, suggested actions, and confidence levels).
+    - Section 3: Requirements with No Issue Detected (compact list of passing statements).
+    - Section 4: Human Reviewer Decision & Sign-off Block (Accept / Require Revision / Reject interactive determinations and notes).
+    - Section 5: Technical Evidence & Algorithmic Verification layer placed *after* the human review.
+  - **SHAP Classifier Feature Attribution Appendix**:
+    - Placed strictly as the **final section** of Technical Evidence.
+    - Integrated real TF-IDF + Logistic Regression linear explainability via `backend.app.ml.explain_classifier.explain`.
+    - Computed CPU-fast in real time and cached; includes token-level attributions, positive/negative directions, and plain-English interpretations.
+  - **Report Integrity & Defect Fixes**:
+    - Fixed Scoring Inconsistency: Passed real evaluated requirement score objects to `score_document` rather than recalculating unpenalized requirements (verified mean score is consistently 81.7/100).
+    - Fixed Duplicate Target Req Display: Robust target key resolution across `factors`, regex on `human_explanation`, and finding IDs (resolves `REQ-003` accurately instead of `None`).
+    - Fixed Duplicate Pair Rows: Paired findings ($A \leftrightarrow B$) are represented once in both executive and technical summary tables.
+    - Contradiction vs. Duplicate Priority: Quantitative constraint conflicts (e.g. REQ-004 $[8, \infty)$ vs REQ-005 $[6, 6]$) are prioritized and surfaced as critical contradictions rather than duplicates.
+    - Dynamic Conclusion Text: Replaced static singular text with dynamic count-aware wording referencing empirical evaluation benchmarks.
+  - **Automated Verification & Tests**:
+    - `backend/tests/test_review_report.py`: 6 tests passing in 39s verifying score consistency (81.7), status determination, executive table structure, pair deduplication, and real SHAP attributions.
+    - `scratch/verify_phase18.py`: Live generation of `scratch/sample_srs_annotated.pdf`, `scratch/sample_srs_comprehensive_report.pdf`, and `scratch/sample_srs_comprehensive_report.docx`.
+    - `npm run build`: All 12 Next.js pages cleanly compiled with zero TypeScript or JSX compile errors.
+- **Key decisions**:
+    - Adhered strictly to Phase 18.1 prompt pack specifications.
+    - Zero LLM calls in report generation; all summaries, scores, explanations, and SHAP feature attributions are deterministic.
+    - SHAP is strictly appended as an appendix at the very end of technical evidence.
+- **How to run**:
+  - Run backend tests: `.venv\Scripts\python.exe -m pytest backend/tests/test_review_report.py -v`
+  - Run live verification: `.venv\Scripts\python.exe scratch/verify_phase18.py`
+  - Access UI: Open browser at `http://localhost:3000/reports/review`
+- **Known limitations**:
+  - None. System is fully operational and verified end-to-end.
+

@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: ALL PHASES COMPLETE (Phases 0 through 18)
+- **Current Phase**: ALL PHASES COMPLETE (Phases 0 through 18.1)
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation), Phase 17 (Packaging, Documentation, and Final Presentation Readiness), Phase 18 (Explainable Visual Review & Comprehensive Reporting).
-- **Current Task**: All planned phases (0 to 18) are 100% complete, fully verified with automated test suites and live evaluation benchmarks, containerized via Docker and Docker Compose, and comprehensively documented for final-year project defense.
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation), Phase 17 (Packaging, Documentation, and Final Presentation Readiness), Phase 18 (Explainable Visual Review & Comprehensive Reporting), Phase 18.1 (Simplified Review Output & SHAP Appendix).
+- **Current Task**: All planned phases (0 to 18.1) are 100% complete, fully verified with automated test suites and live evaluation benchmarks, containerized via Docker and Docker Compose, and comprehensively documented for final-year project defense.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -82,16 +82,21 @@
     - `generate_comprehensive_pdf_report`: Renders 19-section formal audit report to PDF via `xhtml2pdf`.
     - `generate_comprehensive_docx_report`: Renders 19-section formal audit report to Microsoft Word (`.docx`) format using `python-docx`.
   - REST Endpoints in `backend/app/api/review_reports.py`:
-    - `GET /api/documents/{id}/review-report`
+    - `GET /api/documents/{id}/review-report` (includes `overall_status`, `executive_summary_table`, `shap_attributions`, `dynamic_conclusion`)
     - `GET /api/documents/{id}/review-report/annotated-pdf`
-    - `GET /api/documents/{id}/review-report/pdf`
-    - `GET /api/documents/{id}/review-report/docx`
-  - Frontend Interactive Detailed Review Page in `frontend/app/reports/review/page.tsx` with 3-pane workbench (Left: filters & search, Center: interactive highlighted spans, Right: contextual finding card & why-highlighted explanation).
+    - `GET /api/documents/{id}/review-report/pdf` (formal Executive PDF Review Report)
+    - `GET /api/documents/{id}/review-report/docx` (formal Executive Word DOCX Report)
+  - Phase 18.1 Simplified Review Output & SHAP Appendix:
+    - Primary output re-architected to prioritize human reviewer scannability: Page 1 Executive Summary Table (`Requirement | Status | Finding Summary | Suggested Action`), Important Findings cards, No Issue Detected list, and Reviewer Decision & Sign-off Block.
+    - Section 6 / Final Section: Classifier Feature Attribution (SHAP) Appendix with real TF-IDF + Logistic Regression linear explainability via `backend.app.ml.explain_classifier.explain` (CPU real-time and cached, showing tokens, SHAP values, and plain-English interpretations).
+    - Report integrity fixes: 100% scoring consistency (81.7/100 verified), target requirement resolution (`REQ-003`), pair finding deduplication, and contradiction prioritization over duplicates for quantitative conflicts.
+  - Frontend Interactive Detailed Review Page in `frontend/app/reports/review/page.tsx`:
+    - Tab Switcher: `[Executive Review]` (default executive report layout with decision block) and `[Interactive Workbench]` (3-pane span highlight and inspection interface).
   - Dynamic redirect route `frontend/app/reports/review/[id]/page.tsx`.
 
 ## What Has Actually Been Verified
-- `pytest backend/tests/test_review_report.py -v`: 6/6 unit and integration tests pass with 100% pass rate in 26.60s.
-- `python scratch/verify_phase18.py`: Live end-to-end demonstration on `data/test/sample_srs.txt` passed, verified REQ-001 ambiguity ('quickly'), REQ-002/003 duplicate, REQ-004/005 contradiction, REQ-006 acceptable, and generated all 3 artifacts (`sample_srs_annotated.pdf`, `sample_srs_comprehensive_report.pdf`, `sample_srs_comprehensive_report.docx`).
+- `pytest backend/tests/test_review_report.py -v`: 6/6 unit and integration tests pass with 100% pass rate in 39.97s (verifying score consistency, status determination, executive table structure, pair deduplication, and real SHAP attributions).
+- `python scratch/verify_phase18.py`: Live end-to-end demonstration on `data/test/sample_srs.txt` passed, verified REQ-001 ambiguity ('quickly'), REQ-002/003 duplicate, REQ-004/005 contradiction, REQ-006 acceptable (score 100), document score 81.7, and generated all 3 artifacts (`sample_srs_annotated.pdf`, `sample_srs_comprehensive_report.pdf`, `sample_srs_comprehensive_report.docx`).
 - `npm run build`: 12/12 Next.js pages cleanly compiled with zero TypeScript or lint errors.
 - Live execution on sample document (`data/test/sample_srs.txt`):
   - Clustered into 4 distinct functional groups:
@@ -132,7 +137,7 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-10-05 21:12:00
-- **Last Commit Hash**: 4b019b6
+- **Last Updated**: 2026-10-06 00:48:00
+- **Last Commit Hash**: 53ddb8e
 
 

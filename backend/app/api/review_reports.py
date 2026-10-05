@@ -64,13 +64,17 @@ def get_review_report_data_endpoint(
             raw_text=report_dict["document"].get("raw_text"),
             total_requirements=report_dict["total_requirements"],
             total_findings=report_dict["total_findings"],
+            overall_status=report_dict.get("overall_status", "ACCEPTABLE"),
             quality_summary=report_dict["quality_summary"],
             findings_by_severity=report_dict["findings_by_severity"],
             findings_by_module=report_dict["findings_by_module"],
             findings_by_confidence=report_dict["findings_by_confidence"],
+            executive_summary_table=report_dict.get("executive_summary_table", []),
             requirements=report_dict["requirements"],
             all_findings=report_dict["all_findings"],
             system_evaluation=report_dict.get("system_eval"),
+            shap_attributions=report_dict.get("shap_attributions"),
+            dynamic_conclusion=report_dict.get("dynamic_conclusion"),
         )
     except Exception as e:
         logger.error(f"Error compiling review report for document {document_id}: {e}")
