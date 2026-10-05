@@ -465,6 +465,72 @@
 - **Known limitations**:
   - Checks evaluate syntax and explicit terminology; semantic domain completeness requires stakeholder review.
 
+## Architecture Tooling: Archify Live Runtime Diagram
+- **Date**: 2026-10-05
+- **What was built**:
+  - Integrated Archify agent skill into the repository under `.agents/skills/archify`.
+  - Authored repository-backed architecture specification (`.archify/architecture-srs-guardian-20261005-084200/candidate.json`).
+  - Executed `archify finalize` to build verified interactive HTML architecture diagram:
+    - Target: `architecture.html` and `docs/architecture.html` (771 KB standalone interactive HTML).
+    - 11 core components mapped in exact runtime sequence:
+      1. Requirements Engineer (Browser client)
+      2. Next.js Web UI (`frontend/app/page.tsx`, `frontend/services/api.ts`)
+      3. FastAPI REST Gateway (`backend/app/main.py`, `backend/app/api/documents.py`)
+      4. Document Ingestion & Extraction (`backend/app/nlp/requirement_extractor.py`)
+      5. Classification & SHAP (`backend/app/ml/classifier.py`)
+      6. Ambiguity & Readability Engine (`backend/app/nlp/ambiguity.py`)
+      7. Semantic Duplicate Detection (`backend/app/ml/duplicates.py`)
+      8. Contradiction Detection Engine (`backend/app/nlp/numeric_constraints.py`)
+      9. EARS & ISO 29148 Engine (`backend/app/nlp/iso_checks.py`)
+      10. Deterministic Quality Scoring (`backend/app/nlp/scoring.py`)
+      11. Relational Database & Audit Store (`backend/app/core/database.py`)
+    - Trust Boundaries: "SRS Guardian System Environment" (system boundary) and "NLP & ML Verification Pipeline" (security group boundary).
+    - Live Runtime Mapping: Continuous serpentine primary path connecting all components in runtime order with 0 crossings and 0 bends.
+    - Verified Source Links: All components include verified line references pinned to commit `43cd880ae7c519e1694006f82e353b969314d8c9`.
+    - Guided Story (Press P): 5 presentation chapters covering Ingress, Extraction, Verification, Scoring, and Storage.
+- **Key decisions**:
+  - Followed Master Prompt guidelines: 11 core components (within 8-12 limit), 1 primary runtime path, trust boundaries, and cards for secondary details.
+  - Zero external cloud/LLM runtime dependency; diagram file is 100% self-contained and opens offline in any browser.
+- **How to run**:
+  - Open `architecture.html` or `docs/architecture.html` directly in any web browser (Chrome, Edge, Firefox).
+  - Re-generate / re-finalize: `node .agents/skills/archify/bin/archify.mjs finalize architecture <candidate.json> <output.html> --repo-root . --quality showcase --json`
+- **Known limitations**:
+  - Requires modern browser with JavaScript enabled for interactive filters, routing inspection, and story presentation.
+
+## Phase 14: AI Rewrite Suggestions and Gherkin Generation (Tier 2)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/services/llm.py`:
+    - Single centralized gateway for all generative LLM calls in compliance with Rule 6.
+    - Global on/off switch governed by `settings.LLM_ENABLED` (system remains 100% operational offline when disabled).
+    - Hard disk caching via SHA-256 in `data/cache/llm_cache.json` ensuring no prompt is ever sent twice (Rule 7).
+    - `suggest_rewrite`: Resolves flagged ambiguity and ISO defects while preserving domain intent and conforming to EARS templates.
+    - `generate_gherkin`: Converts requirements into standard Given-When-Then testable acceptance criteria.
+  - `backend/app/schemas/llm.py`:
+    - `RewriteSuggestionRequest`, `RewriteSuggestionResponse`, `GherkinGenerationRequest`, `GherkinGenerationResponse`.
+  - `backend/app/api/requirements.py`:
+    - `POST /api/requirements/{id}/suggest-rewrite`
+    - `POST /api/requirements/{id}/generate-gherkin`
+    - `POST /api/requirements/suggest-rewrite` (ad-hoc)
+    - `POST /api/requirements/generate-gherkin` (ad-hoc)
+  - `backend/tests/test_llm.py`:
+    - 6 unit and integration tests verifying disabled behavior, disk caching hits, ad-hoc endpoints, and requirement endpoints (100% passing).
+  - Frontend Integration:
+    - `frontend/services/api.ts` & `frontend/types/index.ts`: Typed API client methods and response models.
+    - `frontend/app/requirements/page.tsx`: Added AI Assistance panel with "Suggest Rewrite" and "Generate Gherkin" action buttons, cached badges, rationale breakdown, formatted Gherkin copy button, and "Use This Rewrite" human-in-the-loop edit injection.
+- **Key decisions**:
+  - Provider: Google Gemini API free-tier (`gemini-2.5-flash`) via official `google-genai` SDK.
+  - LLM usage strictly bounded to rewrite suggestions and Gherkin generation; all analytical core detection remains classical ML, rules, and embeddings.
+  - Human-in-the-loop guarantee: AI suggestions are never applied automatically; reviewer must explicitly accept or edit.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_llm.py -v`
+  - Query rewrite API: `curl -X POST http://127.0.0.1:8000/api/requirements/{id}/suggest-rewrite`
+  - Query Gherkin API: `curl -X POST http://127.0.0.1:8000/api/requirements/{id}/generate-gherkin`
+- **Known limitations**:
+  - Free-tier rate limits apply if disk cache is bypassed with novel requirements; production deployments should consider dedicated quotas or local Ollama models.
+
+
+
 
 
 

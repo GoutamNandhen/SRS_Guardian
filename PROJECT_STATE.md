@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 13 (EARS Syntax Validation and ISO 29148 Checks)
+- **Current Phase**: Phase 14 (AI Rewrite Suggestions & Gherkin Generation - Tier 2)
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks)
-- **Current Task**: Phase 13 Complete! EARS 6-template syntactic pattern recognition engine, 7 machine-checkable checks based on ISO/IEC/IEEE 29148, documentation in docs/ISO_CHECKS.md, scoring waterfall integration, GET /api/documents/{id}/standards REST endpoint, and frontend inspection UI verified.
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation)
+- **Current Task**: Phase 14 Complete! Centralized LLM gateway in backend/app/services/llm.py, global switch settings.LLM_ENABLED, SHA-256 disk caching in data/cache/llm_cache.json, rewrite suggestion with EARS conformance, Gherkin scenario generator, REST API endpoints, 6 unit/integration tests (100% passing), and frontend AI assistance UI verified.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -82,16 +82,21 @@
 - Selected machine-checkable checks based on ISO/IEC/IEEE 29148 (Rule 10: no claims of ISO certification).
 - Avoided double-penalization between Phase 5 ambiguity checks and ISO checks.
 - All contradiction and quality findings labeled "potential".
+- Live Runtime Architecture Mapping: Added Archify skill (`.agents/skills/archify`) and generated verified standalone HTML diagram (`architecture.html` and `docs/architecture.html`) with verified commit line references.
+- Rule 6 Enforced: Generative LLM (Google Gemini Flash) is strictly quarantined to Phase 14 rewrite suggestions and Gherkin generation. All core classification, ambiguity detection, duplication checks, contradiction detection, and quality scoring remain 100% functional offline with zero LLM dependence.
+- Rule 7 Enforced: Permanent SHA-256 disk caching prevents any duplicate API calls.
 
 ## Exact Next Step
-- Phase 14: AI Rewrite Suggestions (Tier 2).
-  - STOP and ask user which LLM provider they want to use (Local via Ollama vs free-tier hosted API like Gemini / Groq).
-  - Provide model comparison and step-by-step setup instructions before writing any integration code.
+- Phase 15: Docker Containerization and Deployment Packaging.
+  - Multi-stage Dockerfile for FastAPI backend.
+  - Standalone Dockerfile for Next.js frontend.
+  - `docker-compose.yml` orchestrating backend, frontend, and persistent volumes for database and model cache.
 
 ## Last Verification Performed
-- `pytest backend/tests/ -v`: 67 passed in 59.37s on 2026-09-18.
-- `npm run build`: 11/11 pages compiled with zero errors on 2026-09-18.
-- Live sample execution verified on 2026-09-18.
+- `pytest backend/tests/test_llm.py -v`: 6/6 passed on 2026-10-05.
+- `npm run build`: 11/11 pages compiled with zero errors on 2026-10-05.
+- Live sample execution verified on REQ-001 with cached repeat hit on 2026-10-05.
+- `node .agents/skills/archify/bin/archify.mjs finalize`: 4/4 gates passed (`validate`, `deliver`, `check`, `browser-check`) on 2026-10-05.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -99,5 +104,7 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-09-18 13:28:00
-- **Last Commit Hash**: 322244c
+- **Last Updated**: 2026-10-05 15:05:00
+- **Last Commit Hash**: 43cd880
+
+

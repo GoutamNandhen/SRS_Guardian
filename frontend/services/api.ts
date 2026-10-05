@@ -16,6 +16,8 @@ import {
   DocumentStandardsResponse,
   Issue,
   ReviewActionRequest,
+  RewriteSuggestionResponse,
+  GherkinGenerationResponse,
 } from "../types";
 
 
@@ -161,8 +163,22 @@ export const api = {
     });
   },
 
+  // --- AI Assistance (Tier 2 - Phase 14) ---
+  async suggestRewrite(requirementId: number): Promise<RewriteSuggestionResponse> {
+    return fetchJson<RewriteSuggestionResponse>(`${API_BASE}/requirements/${requirementId}/suggest-rewrite`, {
+      method: "POST",
+    });
+  },
+
+  async generateGherkin(requirementId: number): Promise<GherkinGenerationResponse> {
+    return fetchJson<GherkinGenerationResponse>(`${API_BASE}/requirements/${requirementId}/generate-gherkin`, {
+      method: "POST",
+    });
+  },
+
   // --- Reports Export URLs ---
   getReportUrl(documentId: number, format: "html" | "csv" | "pdf", type: "requirements" | "issues" = "requirements"): string {
     return `${API_BASE}/documents/${documentId}/report?format=${format}&type=${type}`;
   },
 };
+

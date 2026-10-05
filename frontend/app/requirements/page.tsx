@@ -32,6 +32,8 @@ import {
   RequirementDetail,
   Issue,
   ShapToken,
+  RewriteSuggestionResponse,
+  GherkinGenerationResponse,
 } from "@/types";
 
 function RequirementViewerContent() {
@@ -64,6 +66,61 @@ function RequirementViewerContent() {
 
   // Copy ID feedback
   const [copiedId, setCopiedId] = useState(false);
+
+  // AI Assistance (Phase 14)
+  const [loadingRewrite, setLoadingRewrite] = useState(false);
+  const [rewriteResult, setRewriteResult] = useState<RewriteSuggestionResponse | null>(null);
+  const [loadingGherkin, setLoadingGherkin] = useState(false);
+  const [gherkinResult, setGherkinResult] = useState<GherkinGenerationResponse | null>(null);
+  const [activeAiTab, setActiveAiTab] = useState<"none" | "rewrite" | "gherkin">("none");
+  const [copiedGherkin, setCopiedGherkin] = useState(false);
+
+  // Clear AI results when selected requirement changes
+  useEffect(() => {
+    setRewriteResult(null);
+    setGherkinResult(null);
+    setActiveAiTab("none");
+  }, [selectedReqId]);
+
+  async function handleSuggestRewrite() {
+    if (!selectedReqId) return;
+    try {
+      setLoadingRewrite(true);
+      setActiveAiTab("rewrite");
+      const res = await api.suggestRewrite(selectedReqId);
+      setRewriteResult(res);
+    } catch (err: any) {
+      setRewriteResult({
+        enabled: true,
+        cached: false,
+        original_text: reqDetail?.text || "",
+        error: err.message || "Failed to generate rewrite suggestion",
+        changes_made: [],
+        conforms_to_ears: false,
+      });
+    } finally {
+      setLoadingRewrite(false);
+    }
+  }
+
+  async function handleGenerateGherkin() {
+    if (!selectedReqId) return;
+    try {
+      setLoadingGherkin(true);
+      setActiveAiTab("gherkin");
+      const res = await api.generateGherkin(selectedReqId);
+      setGherkinResult(res);
+    } catch (err: any) {
+      setGherkinResult({
+        enabled: true,
+        cached: false,
+        requirement_text: reqDetail?.text || "",
+        error: err.message || "Failed to generate Gherkin scenarios",
+      });
+    } finally {
+      setLoadingGherkin(false);
+    }
+  }
 
   // 1. Fetch available documents
   useEffect(() => {
@@ -544,6 +601,174 @@ function RequirementViewerContent() {
                   <div className="p-3 rounded-lg bg-surface-container-low/60 border border-outline-variant/50 text-xs leading-relaxed text-on-surface">
                     {renderHighlightedStatement(reqDetail.text, reqDetail.issues)}
                   </div>
+                </div>
+
+                {/* 2b. AI Assistance (Phase 14: Tier 2 Rewrite & Gherkin) */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-outline-variant/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                      <span className="text-xs font-semibold text-on-surface">AI Assistance (Tier 2)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSuggestRewrite}
+                        disabled={loadingRewrite}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary/10 hover:bg-secondary/20 text-secondary text-[11px] font-medium transition-colors border border-secondary/30 disabled:opacity-50"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        <span>{loadingRewrite ? "Generating..." : "Suggest Rewrite"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleGenerateGherkin}
+                        disabled={loadingGherkin}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-[11px] font-medium transition-colors border border-indigo-200 disabled:opacity-50"
+                      >
+                        <ListOrdered className="w-3 h-3" />
+                        <span>{loadingGherkin ? "Generating..." : "Generate Gherkin"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Active AI Result Panel */}
+                  {activeAiTab === "rewrite" && rewriteResult && (
+                    <div className="p-3 rounded-xl border border-secondary/40 bg-secondary/5 flex flex-col gap-2.5 text-xs animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                          <span className="font-semibold text-on-surface">AI Rewrite Proposal</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {rewriteResult.cached && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container text-outline border border-outline-variant/50">
+                              Cached
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setActiveAiTab("none")}
+                            className="text-outline hover:text-on-surface"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {!rewriteResult.enabled ? (
+                        <div className="p-2.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px]">
+                          {rewriteResult.rationale || "LLM service is currently disabled."}
+                        </div>
+                      ) : rewriteResult.error ? (
+                        <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[11px]">
+                          {rewriteResult.error}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="p-2 rounded bg-surface-container-lowest border border-outline-variant/40 flex flex-col gap-1">
+                            <span className="text-[10px] font-semibold text-outline uppercase tracking-wider">Suggested Statement</span>
+                            <p className="text-xs font-medium text-emerald-800 font-sans leading-relaxed">
+                              {rewriteResult.suggested_text}
+                            </p>
+                          </div>
+
+                          {rewriteResult.rationale && (
+                            <div className="text-[11px] text-on-surface-variant leading-relaxed">
+                              <strong className="text-on-surface">Rationale: </strong>
+                              {rewriteResult.rationale}
+                            </div>
+                          )}
+
+                          {rewriteResult.changes_made && rewriteResult.changes_made.length > 0 && (
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[10px] font-semibold text-outline uppercase tracking-wider">Key Changes</span>
+                              <ul className="list-disc list-inside text-[11px] text-on-surface-variant space-y-0.5">
+                                {rewriteResult.changes_made.map((ch, idx) => (
+                                  <li key={idx}>{ch}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Action button to apply suggestion */}
+                          <div className="flex items-center justify-end gap-2 pt-1 border-t border-secondary/20">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (rewriteResult.suggested_text && reqDetail.issues.length > 0) {
+                                  setEditingIssueId(reqDetail.issues[0].id);
+                                  setEditText(rewriteResult.suggested_text);
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded bg-secondary text-white hover:bg-secondary/90 text-xs font-medium transition-colors"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Use This Rewrite</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {activeAiTab === "gherkin" && gherkinResult && (
+                    <div className="p-3 rounded-xl border border-indigo-200 bg-indigo-50/40 flex flex-col gap-2.5 text-xs animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <ListOrdered className="w-3.5 h-3.5 text-indigo-700" />
+                          <span className="font-semibold text-on-surface">Gherkin Test Scenarios</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {gherkinResult.cached && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container text-outline border border-outline-variant/50">
+                              Cached
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setActiveAiTab("none")}
+                            className="text-outline hover:text-on-surface"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {!gherkinResult.enabled ? (
+                        <div className="p-2.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px]">
+                          {gherkinResult.error || "LLM service is currently disabled."}
+                        </div>
+                      ) : gherkinResult.error ? (
+                        <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[11px]">
+                          {gherkinResult.error}
+                        </div>
+                      ) : (
+                        <>
+                          <pre className="p-2.5 rounded bg-surface-container-lowest border border-outline-variant/40 font-mono text-[11px] leading-relaxed text-on-surface overflow-x-auto whitespace-pre-wrap">
+                            {gherkinResult.gherkin_scenarios}
+                          </pre>
+                          <div className="flex items-center justify-end gap-2 pt-1 border-t border-indigo-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (gherkinResult.gherkin_scenarios) {
+                                  navigator.clipboard.writeText(gherkinResult.gherkin_scenarios);
+                                  setCopiedGherkin(true);
+                                  setTimeout(() => setCopiedGherkin(false), 2000);
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-medium transition-colors"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>{copiedGherkin ? "Copied!" : "Copy Scenarios"}</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* 3. SHAP Word Feature Attribution Chart */}

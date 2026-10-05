@@ -14,7 +14,15 @@ from backend.app.nlp.ambiguity import analyze_ambiguity
 from backend.app.nlp.readability import analyze_readability
 from backend.app.nlp.scoring import score_requirement
 from backend.app.nlp.iso_checks import analyze_iso_checks
+from backend.app.nlp.ears import analyze_ears
 from backend.app.ml.explain_classifier import explain
+from backend.app.schemas.llm import (
+    RewriteSuggestionRequest,
+    RewriteSuggestionResponse,
+    GherkinGenerationRequest,
+    GherkinGenerationResponse,
+)
+from backend.app.services.llm import suggest_rewrite, generate_gherkin
 
 
 router = APIRouter(prefix="/requirements", tags=["requirements"])
@@ -188,3 +196,93 @@ def get_requirement_explanation(
     return [
         TokenExplanation(token=t, shap_value=v) for t, v in tokens
     ]
+
+
+@router.post(
+    "/{requirement_id}/suggest-rewrite",
+    response_model=RewriteSuggestionResponse,
+    summary="Get an AI rewrite suggestion for a requirement resolving detected issues",
+)
+def suggest_requirement_rewrite(
+    requirement_id: int, db: Session = Depends(get_db)
+):
+    req = db.query(Requirement).filter(Requirement.id == requirement_id).first()
+    if not req:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Requirement with ID {requirement_id} not found",
+        )
+
+    # Gather active issues (excluding rejected ones)
+    active_issues = [
+        {
+            "rule_id": issue.rule_id,
+            "human_explanation": issue.human_explanation,
+            "severity": issue.severity,
+            "suggestion": issue.suggestion,
+        }
+        for issue in req.issues
+        if issue.status != "rejected"
+    ]
+
+    ears_result = analyze_ears(req.text)
+    pattern_name = ears_result.pattern if ears_result else None
+
+    result = suggest_rewrite(
+        requirement_text=req.text,
+        issues=active_issues,
+        ears_pattern=pattern_name,
+    )
+    return RewriteSuggestionResponse(**result)
+
+
+@router.post(
+    "/{requirement_id}/generate-gherkin",
+    response_model=GherkinGenerationResponse,
+    summary="Generate standard Gherkin Given/When/Then acceptance criteria for a requirement",
+)
+def generate_requirement_gherkin(
+    requirement_id: int, db: Session = Depends(get_db)
+):
+    req = db.query(Requirement).filter(Requirement.id == requirement_id).first()
+    if not req:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Requirement with ID {requirement_id} not found",
+        )
+
+    result = generate_gherkin(
+        requirement_text=req.text,
+        classification_label=req.classification_label,
+        requirement_id=req.id,
+    )
+    return GherkinGenerationResponse(**result)
+
+
+@router.post(
+    "/suggest-rewrite",
+    response_model=RewriteSuggestionResponse,
+    summary="Ad-hoc AI rewrite suggestion for arbitrary requirement text",
+)
+def suggest_adhoc_rewrite(request: RewriteSuggestionRequest):
+    result = suggest_rewrite(
+        requirement_text=request.requirement_text,
+        issues=request.issues,
+        ears_pattern=request.ears_pattern,
+    )
+    return RewriteSuggestionResponse(**result)
+
+
+@router.post(
+    "/generate-gherkin",
+    response_model=GherkinGenerationResponse,
+    summary="Ad-hoc Gherkin scenario generation for arbitrary requirement text",
+)
+def generate_adhoc_gherkin(request: GherkinGenerationRequest):
+    result = generate_gherkin(
+        requirement_text=request.requirement_text,
+        classification_label=request.classification_label,
+        requirement_id=request.requirement_id,
+    )
+    return GherkinGenerationResponse(**result)
+

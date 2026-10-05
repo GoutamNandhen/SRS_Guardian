@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SRS Guardian Runtime Architecture",
+    "output": ".archify/architecture-srs-guardian-20261005-084200/srs-guardian.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/GoutamNandhen/SRS_Guardian.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "43cd880ae7c519e1694006f82e353b969314d8c9"
+    },
+    "views": [
+      {
+        "id": "ingress",
+        "label": "1. Ingress & Upload",
+        "focus": ["engineer", "frontend", "api"],
+        "note": "Requirements engineer uploads SRS document via Next.js UI to FastAPI gateway."
+      },
+      {
+        "id": "extraction",
+        "label": "2. Extraction",
+        "focus": ["api", "extractor"],
+        "note": "PyMuPDF and regex extract structured requirement statements."
+      },
+      {
+        "id": "analysis",
+        "label": "3. Verification",
+        "focus": ["classifier", "ambiguity", "duplicates", "contradiction", "standards"],
+        "note": "Requirements run through classification, ambiguity, duplicates, contradiction, and ISO checks."
+      },
+      {
+        "id": "scoring",
+        "label": "4. Scoring",
+        "focus": ["standards", "scoring"],
+        "note": "Deductions are applied through a deterministic 0-100 quality scoring waterfall."
+      },
+      {
+        "id": "persistence",
+        "label": "5. Storage",
+        "focus": ["scoring", "db"],
+        "note": "Persists issues and quality scores for human-in-the-loop review and report generation."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "engineer",
+      "type": "external",
+      "label": "Requirements Engineer",
+      "sublabel": "Web Browser",
+      "icon": "person",
+      "pos": [50, 50],
+      "size": [150, 60]
+    },
+    {
+      "id": "frontend",
+      "type": "frontend",
+      "label": "Next.js Web UI",
+      "sublabel": "App Router :3000",
+      "icon": "frontend",
+      "pos": [290, 50],
+      "size": [150, 60],
+      "sources": [
+        { "path": "frontend/services/api.ts", "line": 22, "end_line": 25, "label": "API Client" },
+        { "path": "frontend/app/page.tsx", "line": 23, "end_line": 29, "label": "Dashboard UI" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI REST Gateway",
+      "sublabel": "Uvicorn :8000",
+      "icon": "backend",
+      "pos": [530, 50],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/main.py", "line": 11, "end_line": 28, "label": "FastAPI App & CORS" },
+        { "path": "backend/app/api/documents.py", "line": 510, "end_line": 525, "label": "Analysis Router" }
+      ]
+    },
+    {
+      "id": "extractor",
+      "type": "backend",
+      "label": "Extraction Engine",
+      "sublabel": "PyMuPDF Ingestion",
+      "icon": "briefcase",
+      "pos": [770, 50],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/nlp/requirement_extractor.py", "line": 19, "end_line": 30, "label": "Layered Extractor" }
+      ]
+    },
+    {
+      "id": "classifier",
+      "type": "backend",
+      "label": "Classification & SHAP",
+      "sublabel": "TF-IDF + LogReg",
+      "icon": "backend",
+      "pos": [770, 190],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/ml/classifier.py", "line": 20, "end_line": 30, "label": "Classifier Pipeline" }
+      ]
+    },
+    {
+      "id": "ambiguity",
+      "type": "backend",
+      "label": "Ambiguity Engine",
+      "sublabel": "6 Rules + textstat",
+      "icon": "backend",
+      "pos": [530, 190],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/nlp/ambiguity.py", "line": 18, "end_line": 30, "label": "Ambiguity Rules" }
+      ]
+    },
+    {
+      "id": "duplicates",
+      "type": "backend",
+      "label": "Duplicate Detection",
+      "sublabel": "MiniLM-L6-v2 Embed",
+      "icon": "backend",
+      "pos": [290, 190],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/ml/duplicates.py", "line": 22, "end_line": 35, "label": "Key Phrase Alignment" }
+      ]
+    },
+    {
+      "id": "contradiction",
+      "type": "backend",
+      "label": "Contradiction Engine",
+      "sublabel": "Intervals + MNLI",
+      "icon": "backend",
+      "pos": [50, 190],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/nlp/numeric_constraints.py", "line": 1, "end_line": 15, "label": "Numeric Interval Algebra" }
+      ]
+    },
+    {
+      "id": "standards",
+      "type": "backend",
+      "label": "EARS & ISO 29148",
+      "sublabel": "6 EARS + 7 ISO Rules",
+      "icon": "backend",
+      "pos": [50, 330],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/nlp/iso_checks.py", "line": 1, "end_line": 20, "label": "ISO Characteristics" }
+      ]
+    },
+    {
+      "id": "scoring",
+      "type": "backend",
+      "label": "Quality Scoring",
+      "sublabel": "0-100 Waterfall",
+      "icon": "backend",
+      "pos": [290, 330],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/nlp/scoring.py", "line": 15, "end_line": 30, "label": "Score Weights & Waterfall" }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Relational Database",
+      "sublabel": "SQLite / PostgreSQL",
+      "icon": "database",
+      "pos": [530, 330],
+      "size": [150, 60],
+      "sources": [
+        { "path": "backend/app/core/database.py", "line": 11, "end_line": 23, "label": "SQLAlchemy Engine" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "SRS Guardian System Environment",
+      "wraps": ["frontend", "api", "extractor", "classifier", "ambiguity", "duplicates", "contradiction", "standards", "scoring", "db"]
+    },
+    {
+      "kind": "security-group",
+      "label": "NLP & ML Verification Pipeline",
+      "wraps": ["classifier", "ambiguity", "duplicates", "contradiction", "standards", "scoring"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-engineer-frontend",
+      "from": "engineer",
+      "to": "frontend",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-frontend-api",
+      "from": "frontend",
+      "to": "api",
+      "label": "REST API",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-api-extractor",
+      "from": "api",
+      "to": "extractor",
+      "label": "extract",
+      "variant": "emphasis"
+    },
+    {
+      "id": "conn-extractor-classifier",
+      "from": "extractor",
+      "to": "classifier",
+      "label": "parse reqs",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "conn-classifier-ambiguity",
+      "from": "classifier",
+      "to": "ambiguity",
+      "label": "FR / NFR",
+      "variant": "emphasis",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "conn-ambiguity-duplicates",
+      "from": "ambiguity",
+      "to": "duplicates",
+      "label": "findings",
+      "variant": "emphasis",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "conn-duplicates-contradiction",
+      "from": "duplicates",
+      "to": "contradiction",
+      "label": "clusters",
+      "variant": "emphasis",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "conn-contradiction-standards",
+      "from": "contradiction",
+      "to": "standards",
+      "label": "intervals",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "conn-standards-scoring",
+      "from": "standards",
+      "to": "scoring",
+      "label": "ISO checks",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "conn-scoring-db",
+      "from": "scoring",
+      "to": "db",
+      "label": "commit",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Document Ingestion & Extraction",
+      "items": [
+        "Multi-format ingestion parses PDF, DOCX, and TXT files via PyMuPDF and python-docx",
+        "Layered extraction cascades from explicit IDs (REQ-xxx) to structural cues and modal verbs"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Deterministic & ML Analysis Engines",
+      "items": [
+        "Classification: TF-IDF + Logistic Regression with SHAP token attribution",
+        "Ambiguity: 6 rule checks (weak terms, vague pronouns, passive voice) + Flesch/Fog readability",
+        "Semantic Duplicates: all-MiniLM-L6-v2 cosine similarity with content lemma blocking",
+        "Contradictions: Numeric interval algebra + zero-cost DeBERTa MNLI on-demand",
+        "Standards: EARS 6-template syntactic matching + 7 ISO/IEC/IEEE 29148 checks"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Quality Scoring & Human Review",
+      "items": [
+        "Quality Scoring: 0-100 deterministic score with a step-by-step penalty waterfall trace",
+        "Human-in-the-Loop: Reviewer accepts, rejects, or edits AI findings before final report export"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Trust Boundaries & Performance",
+      "items": [
+        "100% Offline CPU Inference: Zero third-party LLM leakage for sensitive requirement documents",
+        "Model Disk Cache: SHA-256 caching for sentence embeddings and NLI pairs prevents recomputation",
+        "Audit Trail: Immutable review history and versioning stored in SQLite / PostgreSQL"
+      ]
+    }
+  ]
+}

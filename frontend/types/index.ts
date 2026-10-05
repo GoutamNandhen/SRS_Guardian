@@ -255,3 +255,24 @@ export interface ContradictionExplainResponse {
   finding_id: string;
   tokens: { token: string; attribution: number }[];
 }
+
+export interface RewriteSuggestionResponse {
+  enabled: boolean;
+  cached: boolean;
+  original_text: string;
+  suggested_text?: string | null;
+  rationale?: string | null;
+  changes_made: string[];
+  conforms_to_ears: boolean;
+  error?: string | null;
+}
+
+export interface GherkinGenerationResponse {
+  enabled: boolean;
+  cached: boolean;
+  requirement_id?: number | null;
+  requirement_text: string;
+  gherkin_scenarios?: string | null;
+  error?: string | null;
+}
+

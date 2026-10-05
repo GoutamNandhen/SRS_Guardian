@@ -6,11 +6,14 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_MB: int = 10
     LLM_ENABLED: bool = False
+    LLM_PROVIDER: str = "gemini"
+    GEMINI_API_KEY: str = ""
+    LLM_MODEL: str = "gemini-2.5-flash"
+    LLM_CACHE_PATH: str = "data/cache/llm_cache.json"
     DUPLICATE_SIMILARITY_THRESHOLD: float = 0.80
 
-
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "backend/.env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )

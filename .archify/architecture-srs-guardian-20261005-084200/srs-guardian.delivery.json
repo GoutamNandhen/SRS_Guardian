@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "5b2247a1-84a0-43f9-b57b-e6e7ab21809d",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "F:\\projects\\srs\\.archify\\architecture-srs-guardian-20261005-084200\\candidate.json",
+  "output": "F:\\projects\\srs\\.archify\\architecture-srs-guardian-20261005-084200\\srs-guardian.html",
+  "specification": {
+    "sha256": "6b0b947162bab86a7d6c1bb2d1dad0c3324708bf21ddb1a9af2f70a623836cc2",
+    "bytes": 9587
+  },
+  "artifact": {
+    "sha256": "a7feeb70561e323da170517039c0306097d82acc408b423e0b07b6d96c45f2d6",
+    "bytes": 771862
+  }
+}
