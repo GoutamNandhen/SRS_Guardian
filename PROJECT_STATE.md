@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 16 (Testing and Evaluation)
-- **Phase Status**: NOT_STARTED (Phase 15 Complete: 15A, 15B, 15C verified)
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing)
-- **Current Task**: Phase 15 (Tier 3 Advanced Features) Complete! Next: Phase 16 Testing and Evaluation (curating labeled test sets, running evaluation scripts for classification, ambiguity, duplicates, and contradictions, generating docs/EVALUATION.md).
+- **Current Phase**: Phase 17 (Packaging and Documentation)
+- **Phase Status**: NOT_STARTED (Phase 16 Complete: Empirical evaluation & test suite verified)
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation)
+- **Current Task**: Phase 16 Complete! Implemented benchmark evaluation suite in backend/evaluation/run_evaluation.py, curated 4 labeled test datasets in data/test/, generated comprehensive docs/EVALUATION.md, and verified with 4/4 passing tests in backend/tests/test_evaluation.py. Next: Phase 17 Packaging, Documentation, and Final Presentation Readiness.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -100,16 +100,15 @@
 - Rule 7 Enforced: Permanent SHA-256 disk caching prevents any duplicate API calls or embedding recomputation.
 
 ## Exact Next Step
-- Phase 16: Testing and Evaluation.
-  - Curate labeled evaluation datasets in `data/test/` for classification (held-out PROMISE split), ambiguity (hand-labeled ambiguous vs clear), duplicates (labeled pairs/non-pairs), and contradictions (numeric vs NLI pairs).
-  - Implement `backend/evaluation/run_evaluation.py` producing honest metrics (accuracy, precision, recall, F1, threshold sweeps 0.70-0.95, numeric vs NLI breakdown).
-  - Generate `docs/EVALUATION.md` reporting true experimental results and engineering limitations (Rule 10).
 - Phase 17: Packaging, Documentation, and Final Presentation Readiness.
+  - Docker packaging: `docker/Dockerfile.backend` (FastAPI + Python 3.11), `docker/Dockerfile.frontend` (Next.js standalone), root `docker-compose.yml` (multi-container orchestration with PostgreSQL option).
+  - Comprehensive `README.md` covering system overview, screenshots, architecture diagram reference, setup, run instructions, and limitations.
+  - Final project documentation guide for academic report defense.
 
 ## Last Verification Performed
+- `pytest backend/tests/test_evaluation.py -v`: 4/4 passed on 2026-10-05 in 34.17s.
+- `python -m backend.evaluation.run_evaluation`: Full empirical benchmarking passed across all 4 capabilities, saved to `data/test/evaluation_results.json` and `docs/EVALUATION.md`.
 - `pytest backend/tests/test_version_comparison.py -v`: 3/3 passed on 2026-10-05 in 32.11s.
-- `pytest backend/tests/test_clustering.py -v`: 5/5 passed on 2026-10-05.
-- `pytest backend/tests/test_gherkin.py -v`: 8/8 passed on 2026-10-05.
 - `npm run build`: 11/11 pages compiled with zero errors on 2026-10-05.
 
 ## Remote Repository
@@ -118,7 +117,7 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-10-05 21:02:00
-- **Last Commit Hash**: 547f855
+- **Last Updated**: 2026-10-05 21:08:00
+- **Last Commit Hash**: c162b52
 
 

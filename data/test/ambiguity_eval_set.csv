@@ -1,0 +1,41 @@
+id,text,is_ambiguous,defect_type
+1,"The system shall authenticate user credentials against the LDAP server within 500 milliseconds.",0,clear
+2,"The application shall export audit logs in CSV format upon administrator request.",0,clear
+3,"The system shall store database backups in an AES-256 encrypted S3 bucket daily at 02:00 UTC.",0,clear
+4,"The user interface shall allow filtering transaction history by date range and account ID.",0,clear
+5,"The payment gateway shall process Visa and Mastercard credit transactions using TLS 1.3.",0,clear
+6,"The system shall maintain a maximum memory utilization of 75% under standard operational load.",0,clear
+7,"The application shall support English and Spanish language localization.",0,clear
+8,"When a user submits a valid contact form, the system shall dispatch a notification to the support queue within 2 seconds.",0,clear
+9,"The database shall reject transactions if the available disk space falls below 5 gigabytes.",0,clear
+10,"The session token shall expire automatically after 15 minutes of user inactivity.",0,clear
+11,"The system shall generate invoices with sequential 8-digit identification numbers.",0,clear
+12,"The password reset link shall remain valid for exactly 60 minutes from time of generation.",0,clear
+13,"The API shall return HTTP 429 when client requests exceed 100 calls per minute.",0,clear
+14,"The system shall compress PDF attachments larger than 10 megabytes before archival.",0,clear
+15,"The cache server shall invalidate session keys upon explicit user logout.",0,clear
+16,"The system shall provide a user-friendly and intuitive checkout experience.",1,weak_term
+17,"The server should respond quickly when the client queries the transaction ledger.",1,weak_term
+18,"The application shall be highly scalable to accommodate growing user traffic.",1,weak_term
+19,"The administrative portal should ideally offer modern styling and smooth responsiveness.",1,weak_term
+20,"The background job shall execute in a timely and efficient manner.",1,weak_term
+21,"The system should consider caching frequent database queries to improve speed.",1,weak_modal
+22,"Users could choose to verify their identity using SMS or email tokens.",1,weak_modal
+23,"The software might notify supervisors when an order value exceeds typical thresholds.",1,weak_modal
+24,"Administrators may perhaps adjust rate limits depending on network conditions.",1,weak_modal
+25,"The system ought to support high availability across multiple availability zones.",1,weak_modal
+26,"The server shall handle high volume without degrading significantly.",1,missing_metric
+27,"The reporting subsystem shall generate executive summaries with minimal delay.",1,missing_metric
+28,"The mobile application shall consume low battery power during background synchronization.",1,missing_metric
+29,"The search engine shall deliver relevant results within an acceptable duration.",1,missing_metric
+30,"The file uploader shall accept reasonably sized documents.",1,missing_metric
+31,"When the administrator rejects a pending transaction, this will send an alert to the accounting team.",1,vague_pronoun
+32,"If the verification code matches, it shall unlock the profile settings.",1,vague_pronoun
+33,"The service shall forward the payload to the ingestion worker, which must process this promptly.",1,vague_pronoun
+34,"After the customer signs the digital contract, that shall trigger the onboarding sequence.",1,vague_pronoun
+35,"The system shall authenticate the user and validate the permissions and fetch the profile and render the dashboard.",1,compound_clause
+36,"The microservice shall parse incoming telemetry and clean invalid records and compute rolling averages and store aggregates.",1,compound_clause
+37,"The system shall notify the buyer and update the inventory ledger and charge the credit card and generate a receipt.",1,compound_clause
+38,"The system configuration shall be modified every evening.",1,passive_voice
+39,"Error messages shall be logged whenever exceptions occur.",1,passive_voice
+40,"Access privileges shall be reviewed periodically.",1,passive_voice

@@ -1,0 +1,236 @@
+{
+  "timestamp": "2026-10-05 15:36:51 UTC",
+  "classification": {
+    "dataset": "data/test/promise_test_split.csv",
+    "sample_count": 194,
+    "accuracy": 0.8505,
+    "macro_precision": 0.8675,
+    "macro_recall": 0.8414,
+    "macro_f1": 0.8455,
+    "avg_latency_ms": 3.19,
+    "per_class": {
+      "Functional": {
+        "precision": 0.9286,
+        "recall": 0.7303,
+        "f1_score": 0.8176,
+        "support": 89
+      },
+      "Non-Functional": {
+        "precision": 0.8065,
+        "recall": 0.9524,
+        "f1_score": 0.8734,
+        "support": 105
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "Functional",
+        "Non-Functional"
+      ],
+      "matrix": [
+        [
+          65,
+          24
+        ],
+        [
+          5,
+          100
+        ]
+      ]
+    }
+  },
+  "ambiguity": {
+    "dataset": "data/test/ambiguity_eval_set.csv",
+    "sample_count": 40,
+    "accuracy": 0.725,
+    "precision": 0.8889,
+    "recall": 0.64,
+    "f1_score": 0.7442,
+    "avg_latency_ms": 22.34,
+    "category_breakdown": {
+      "clear": {
+        "total": 15,
+        "detected": 2
+      },
+      "weak_term": {
+        "total": 5,
+        "detected": 4
+      },
+      "weak_modal": {
+        "total": 5,
+        "detected": 5
+      },
+      "missing_metric": {
+        "total": 5,
+        "detected": 1
+      },
+      "vague_pronoun": {
+        "total": 4,
+        "detected": 1
+      },
+      "compound_clause": {
+        "total": 3,
+        "detected": 2
+      },
+      "passive_voice": {
+        "total": 3,
+        "detected": 3
+      }
+    },
+    "false_positives": [
+      {
+        "text": "The system shall store database backups in an AES-256 encrypted S3 bucket daily at 02:00 UTC.",
+        "rules": "CHECK_E_COMPOUND_ACTIONS"
+      },
+      {
+        "text": "The system shall maintain a maximum memory utilization of 75% under standard operational load.",
+        "rules": "CHECK_A_WEAK_TERM"
+      }
+    ],
+    "false_negatives": [
+      {
+        "text": "The background job shall execute in a timely and efficient manner.",
+        "expected_type": "weak_term"
+      },
+      {
+        "text": "The server shall handle high volume without degrading significantly.",
+        "expected_type": "missing_metric"
+      },
+      {
+        "text": "The mobile application shall consume low battery power during background synchronization.",
+        "expected_type": "missing_metric"
+      },
+      {
+        "text": "The search engine shall deliver relevant results within an acceptable duration.",
+        "expected_type": "missing_metric"
+      },
+      {
+        "text": "The file uploader shall accept reasonably sized documents.",
+        "expected_type": "missing_metric"
+      },
+      {
+        "text": "When the administrator rejects a pending transaction, this will send an alert to the accounting team.",
+        "expected_type": "vague_pronoun"
+      },
+      {
+        "text": "If the verification code matches, it shall unlock the profile settings.",
+        "expected_type": "vague_pronoun"
+      },
+      {
+        "text": "After the customer signs the digital contract, that shall trigger the onboarding sequence.",
+        "expected_type": "vague_pronoun"
+      },
+      {
+        "text": "The microservice shall parse incoming telemetry and clean invalid records and compute rolling averages and store aggregates.",
+        "expected_type": "compound_clause"
+      }
+    ]
+  },
+  "duplicates": {
+    "dataset": "data/test/duplicates_eval_set.csv",
+    "pair_count": 36,
+    "positive_pairs": 16,
+    "negative_pairs": 20,
+    "optimal_threshold": 0.7,
+    "optimal_f1": 0.8667,
+    "sweep": [
+      {
+        "threshold": 0.7,
+        "precision": 0.9286,
+        "recall": 0.8125,
+        "f1_score": 0.8667,
+        "accuracy": 0.8889,
+        "fpr": 0.05,
+        "tp": 13,
+        "fp": 1,
+        "tn": 19,
+        "fn": 3
+      },
+      {
+        "threshold": 0.75,
+        "precision": 0.9,
+        "recall": 0.5625,
+        "f1_score": 0.6923,
+        "accuracy": 0.7778,
+        "fpr": 0.05,
+        "tp": 9,
+        "fp": 1,
+        "tn": 19,
+        "fn": 7
+      },
+      {
+        "threshold": 0.8,
+        "precision": 0.875,
+        "recall": 0.4375,
+        "f1_score": 0.5833,
+        "accuracy": 0.7222,
+        "fpr": 0.05,
+        "tp": 7,
+        "fp": 1,
+        "tn": 19,
+        "fn": 9
+      },
+      {
+        "threshold": 0.85,
+        "precision": 0.5,
+        "recall": 0.0625,
+        "f1_score": 0.1111,
+        "accuracy": 0.5556,
+        "fpr": 0.05,
+        "tp": 1,
+        "fp": 1,
+        "tn": 19,
+        "fn": 15
+      },
+      {
+        "threshold": 0.9,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "accuracy": 0.5556,
+        "fpr": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "tn": 20,
+        "fn": 16
+      },
+      {
+        "threshold": 0.95,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "accuracy": 0.5556,
+        "fpr": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "tn": 20,
+        "fn": 16
+      }
+    ]
+  },
+  "contradictions": {
+    "dataset": "data/test/contradictions_eval_set.csv",
+    "total_pairs": 32,
+    "numeric_layer": {
+      "pairs_evaluated": 16,
+      "precision": 1.0,
+      "recall": 0.375,
+      "f1_score": 0.5455,
+      "accuracy": 0.6875
+    },
+    "nli_layer": {
+      "pairs_evaluated": 16,
+      "precision": 0.7,
+      "recall": 0.875,
+      "f1_score": 0.7778,
+      "accuracy": 0.75
+    },
+    "combined_pipeline": {
+      "pairs_evaluated": 32,
+      "precision": 0.6,
+      "recall": 0.9375,
+      "f1_score": 0.7317,
+      "accuracy": 0.6562
+    }
+  }
+}

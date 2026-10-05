@@ -1,0 +1,37 @@
+pair_id,req1,req2,is_duplicate,category
+1,"The system shall allow users to reset their password using their registered email.","Users must recover forgotten passwords using their registered email address.",1,synonym_paraphrase
+2,"The application shall export audit logs in CSV format upon administrator request.","Administrators must be able to download the audit logs as a CSV file.",1,active_passive_paraphrase
+3,"The system shall send a verification code to the customer mobile phone via SMS.","A text message containing a verification token shall be dispatched to the user phone.",1,synonym_paraphrase
+4,"The payment service shall validate credit card numbers using the Luhn algorithm.","The system must check credit card account numbers against the Luhn checksum formula.",1,synonym_paraphrase
+5,"Users shall be able to download their monthly billing statements in PDF format.","The system shall provide monthly billing invoices for users to save as PDF documents.",1,synonym_paraphrase
+6,"The system shall automatically terminate user sessions after 15 minutes of inactivity.","After 15 minutes of idle time, the platform shall log out the active user session.",1,reordered_paraphrase
+7,"The search engine shall index new catalog products within 60 seconds of publication.","New catalog merchandise shall be indexed by the search subsystem within 1 minute of being posted.",1,synonym_paraphrase
+8,"The application shall allow operators to cancel pending shipments prior to dispatch.","Operators must be capable of aborting scheduled orders before they are shipped out.",1,synonym_paraphrase
+9,"The database shall maintain encrypted backups of all customer transaction records.","Backups of every user financial transaction shall be encrypted and stored in the database.",1,active_passive_paraphrase
+10,"The system shall require multi-factor authentication for all administrative logins.","All administrative accounts must verify their identity using two-factor authentication upon sign in.",1,synonym_paraphrase
+11,"The system shall allow users to reset their password using their registered email.","The system shall allow users to update their profile picture on the account dashboard.",0,topical_overlap
+12,"The password must contain at least 8 characters.","The password must contain at least one uppercase letter.",0,topical_overlap
+13,"The system shall allow users to download their transaction history.","The system shall allow users to dispute a fraudulent transaction.",0,topical_overlap
+14,"The application shall export audit logs in CSV format upon administrator request.","The application shall delete audit logs older than 90 days upon administrator approval.",0,topical_overlap
+15,"The system shall send a verification code to the customer mobile phone via SMS.","The system shall send an order confirmation receipt to the customer email address.",0,topical_overlap
+16,"The user interface shall allow filtering transaction history by date range.","The user interface shall sort search results by item price in ascending order.",0,topical_overlap
+17,"The system shall require multi-factor authentication for all administrative logins.","The system shall enforce role-based access control for administrative permission groups.",0,topical_overlap
+18,"The session token shall expire automatically after 15 minutes of user inactivity.","The user password shall be forced to change every 90 days.",0,topical_overlap
+19,"The database shall reject transactions if the available disk space falls below 5 gigabytes.","The database shall replicate all write operations across three physical cluster nodes.",0,topical_overlap
+20,"The system shall generate invoices with sequential 8-digit identification numbers.","The accounting module shall calculate value-added tax for all generated invoices.",0,topical_overlap
+21,"The system shall authenticate user credentials against the LDAP server within 500 milliseconds.","The file uploader shall compress images exceeding 5 megabytes in size.",0,unrelated
+22,"The application shall support English and Spanish language localization.","The database connection pool shall maintain a minimum of 10 persistent worker threads.",0,unrelated
+23,"When streaming a movie, the buffering time should take no longer than 10 seconds.","The password reset link shall remain valid for exactly 60 minutes from time of generation.",0,unrelated
+24,"The API shall return HTTP 429 when client requests exceed 100 calls per minute.","The user profile page shall display the member registration date and loyalty tier.",0,unrelated
+25,"The caching layer shall store product inventory counts in Redis.","The customer service desk shall open a ticket when an unhandled complaint is lodged.",0,unrelated
+26,"The notification service shall alert engineers if API latency exceeds 2 seconds.","The frontend application shall render breadcrumb navigation across all subpages.",0,unrelated
+27,"The payment gateway shall process Visa and Mastercard credit transactions using TLS 1.3.","The customer shopping cart shall retain selected items for up to 30 days.",0,unrelated
+28,"The system shall generate an XML manifest for each exported video asset.","The login dialog shall lock the user account after 5 consecutive failed attempts.",0,unrelated
+29,"The web server shall redirect all HTTP traffic to secure HTTPS endpoints.","The search filter shall support fuzzy keyword matching across product descriptions.",0,unrelated
+30,"The application shall allow users to bookmark frequently visited report views.","The database schema migration shall execute during maintenance windows without downtime.",0,unrelated
+31,"The system shall notify account owners when suspicious login attempts are detected.","When an anomalous sign-in occurs, the system must send an alert message to the account holder.",1,synonym_paraphrase
+32,"The application shall generate daily sales summaries every midnight.","Daily sales reports shall be compiled automatically by the system at 00:00 every day.",1,synonym_paraphrase
+33,"Users can submit feedback reviews with ratings from 1 to 5 stars.","The application shall permit customers to provide service feedback accompanied by a star rating between 1 and 5.",1,synonym_paraphrase
+34,"The system shall archive inactive accounts after twelve months of dormancy.","Accounts that remain inactive for one year shall be automatically archived by the platform.",1,synonym_paraphrase
+35,"The system shall verify email address syntax before sending registration emails.","Before dispatching a welcome message, the software must validate the formatting of the user email.",1,synonym_paraphrase
+36,"The file uploader shall reject attachments with extensions other than PDF and PNG.","Only documents in PNG and PDF formats shall be accepted by the file upload tool.",1,active_passive_paraphrase

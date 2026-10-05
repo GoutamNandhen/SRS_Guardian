@@ -1,0 +1,33 @@
+pair_id,req1,req2,is_contradiction,expected_layer,category
+1,"The password must contain at least 8 characters.","The password must contain exactly 6 characters.",1,numeric,numeric_disjoint
+2,"The database timeout shall be at most 30 seconds.","The database timeout shall be at least 45 seconds.",1,numeric,numeric_disjoint
+3,"The system shall retain logs for a minimum of 90 days.","The system shall retain logs for no more than 60 days.",1,numeric,numeric_disjoint
+4,"The maximum file upload size shall be 10 megabytes.","The file uploader shall accept files up to 25 megabytes.",1,numeric,numeric_disjoint
+5,"The system shall support at least 500 concurrent sessions.","The system shall support a maximum of 200 concurrent sessions.",1,numeric,numeric_disjoint
+6,"The session token shall expire after 15 minutes of user inactivity.","The session token shall expire after exactly 60 minutes of user inactivity.",1,numeric,numeric_disjoint
+7,"The batch processor shall retry failed tasks 3 times.","The batch processor shall retry failed tasks 5 times.",1,numeric,numeric_disjoint
+8,"The API rate limit shall be at most 100 requests per minute.","The API rate limit shall allow at least 250 requests per minute.",1,numeric,numeric_disjoint
+9,"The password must contain at least 8 characters.","The password must contain at least 10 characters.",0,numeric,numeric_compatible
+10,"The system shall store at least 100 backups.","The system shall store at least 50 backups.",0,numeric,numeric_compatible
+11,"The response time shall be under 500 milliseconds.","The response time shall be under 200 milliseconds.",0,numeric,numeric_compatible
+12,"The API shall accept payloads up to 10 megabytes.","The API shall accept payloads up to 15 megabytes.",0,numeric,numeric_compatible
+13,"The database connection pool shall have at least 5 workers.","The database connection pool shall have at least 10 workers.",0,numeric,numeric_compatible
+14,"Users shall enter a password between 8 and 32 characters.","The password shall be at least 8 characters.",0,numeric,numeric_compatible
+15,"The system shall retain user audit logs for at least 30 days.","The system shall keep user audit logs for at least 60 days.",0,numeric,numeric_compatible
+16,"The application shall support up to 50 active streams.","The application shall support up to 10 active streams.",0,numeric,numeric_compatible
+17,"The system shall permanently retain all customer account records.","The system shall automatically delete customer account records upon request.",1,nli,semantic_contradiction
+18,"All system users shall have permission to view financial audit reports.","Only system administrators shall be authorized to view financial audit reports.",1,nli,semantic_contradiction
+19,"The application shall operate strictly in offline mode without network connectivity.","The application shall require an active internet connection for real-time synchronization.",1,nli,semantic_contradiction
+20,"The mobile app shall require users to sign in every time the app opens.","The mobile app shall keep users signed in across application restarts.",1,nli,semantic_contradiction
+21,"The system shall support anonymous order checkout without creating an account.","All customers must register an account before completing a purchase.",1,nli,semantic_contradiction
+22,"The platform shall encrypt all stored database records.","The database shall store records in unencrypted plain text for rapid querying.",1,nli,semantic_contradiction
+23,"The search service shall return case-sensitive query matches.","All search queries shall be processed in a case-insensitive manner.",1,nli,semantic_contradiction
+24,"The system shall allow users to cancel orders after shipment.","Orders that have already been shipped shall not be eligible for cancellation.",1,nli,semantic_contradiction
+25,"The system shall hash passwords using bcrypt.","The system shall generate a random salt for every user password.",0,nli,semantic_compatible
+26,"The website shall support Google Chrome and Mozilla Firefox browsers.","The website shall support Apple Safari and Microsoft Edge browsers.",0,nli,semantic_compatible
+27,"The mobile app shall support iOS devices.","The mobile app shall support Android devices.",0,nli,semantic_compatible
+28,"The platform shall dispatch email receipts after successful payment.","The platform shall log payment transaction IDs to the audit database.",0,nli,semantic_compatible
+29,"Administrators shall be able to reset user passwords.","Users shall receive an email notification when their password is reset.",0,nli,semantic_compatible
+30,"The search engine shall highlight matched keywords in results.","The search engine shall sort results by publication date.",0,nli,semantic_compatible
+31,"The database shall maintain weekly automated snapshots.","The system shall store backups in geographically redundant datacenters.",0,nli,semantic_compatible
+32,"The API shall return responses in JSON format.","The API shall compress responses using gzip encoding.",0,nli,semantic_compatible
