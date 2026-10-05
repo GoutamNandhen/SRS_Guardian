@@ -529,6 +529,35 @@
 - **Known limitations**:
   - Free-tier rate limits apply if disk cache is bypassed with novel requirements; production deployments should consider dedicated quotas or local Ollama models.
 
+## Phase 15A: Rule-Based Gherkin Test Skeletons via EARS (Tier 3)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/nlp/gherkin.py`:
+    - Deterministic Gherkin test skeleton generator prioritizing rule-based extraction from EARS syntax patterns (`analyze_ears`).
+    - Direct clause mapping for all standard EARS patterns:
+      - Event-driven: `Given <system> is operational -> When <trigger> -> Then <system> <modal> <response>`.
+      - State-driven: `Given <system> is active and <state> -> When a functional request occurs -> Then <system> <modal> <response>`.
+      - Unwanted behavior: `Given <system> is operating -> When <condition> -> Then <system> <modal> <response>`.
+      - Optional feature: `Given feature '<feature>' is enabled -> When caller invokes <system> -> Then <system> <modal> <response>`.
+      - Ubiquitous: `Given <system> is initialized and ready -> When the function is requested -> Then <system> <modal> <response>`.
+      - Complex: Combinations of state, feature, and triggers.
+    - Non-conforming fallback: Delegates to generative LLM only if `settings.LLM_ENABLED` is true; otherwise produces structured deterministic fallback skeleton.
+  - API Integration:
+    - Updated `POST /api/requirements/{id}/generate-gherkin` and ad-hoc `POST /api/requirements/generate-gherkin` to return `source` (`ears_rule`, `llm`, `fallback_rule`) and `ears_pattern`.
+  - Frontend:
+    - `frontend/app/requirements/page.tsx`: Added badges indicating `EARS Rule-Based` (emerald), `LLM Generated` (indigo), and the specific EARS pattern tag.
+  - Automated Tests:
+    - `backend/tests/test_gherkin.py`: 8 unit and integration tests covering all 5 EARS patterns, fallback mode, ad-hoc API, and requirement detail API (100% pass rate).
+- **Key decisions**:
+  - Rule-first generation eliminates external LLM API dependency and costs for all conforming requirements.
+  - Preserved existing LLM generation logic as fallback.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_gherkin.py -v`
+  - Query API: `curl -X POST http://127.0.0.1:8000/api/requirements/generate-gherkin -H "Content-Type: application/json" -d "{\"requirement_text\": \"The system shall allow users to download their transaction history.\"}"`
+- **Known limitations**:
+  - Rule-based skeletons produce template steps; domain-specific edge test cases require human reviewer refinement or optional LLM augmentation.
+
+
 
 
 

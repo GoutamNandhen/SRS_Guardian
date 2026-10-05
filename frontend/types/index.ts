@@ -270,6 +270,8 @@ export interface RewriteSuggestionResponse {
 export interface GherkinGenerationResponse {
   enabled: boolean;
   cached: boolean;
+  source?: "ears_rule" | "llm" | "fallback_rule" | string | null;
+  ears_pattern?: string | null;
   requirement_id?: number | null;
   requirement_text: string;
   gherkin_scenarios?: string | null;

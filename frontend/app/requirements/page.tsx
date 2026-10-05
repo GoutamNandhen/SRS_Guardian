@@ -721,6 +721,21 @@ function RequirementViewerContent() {
                           <span className="font-semibold text-on-surface">Gherkin Test Scenarios</span>
                         </div>
                         <div className="flex items-center gap-1.5">
+                          {gherkinResult.source === "ears_rule" && (
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              EARS Rule-Based
+                            </span>
+                          )}
+                          {gherkinResult.source === "llm" && (
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-300">
+                              LLM Generated
+                            </span>
+                          )}
+                          {gherkinResult.ears_pattern && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/40">
+                              {gherkinResult.ears_pattern}
+                            </span>
+                          )}
                           {gherkinResult.cached && (
                             <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container text-outline border border-outline-variant/50">
                               Cached

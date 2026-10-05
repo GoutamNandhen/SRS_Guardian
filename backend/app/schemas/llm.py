@@ -27,8 +27,10 @@ class GherkinGenerationRequest(BaseModel):
 
 
 class GherkinGenerationResponse(BaseModel):
-    enabled: bool = Field(..., description="Whether LLM service is enabled")
+    enabled: bool = Field(..., description="Whether generation service is enabled")
     cached: bool = Field(default=False, description="Whether result was retrieved from local disk cache")
+    source: str | None = Field(default="ears_rule", description="Source of generation: ears_rule, llm, or fallback_rule")
+    ears_pattern: str | None = Field(None, description="Matched EARS syntactic pattern name")
     requirement_id: int | None = None
     requirement_text: str
     gherkin_scenarios: str | None = None

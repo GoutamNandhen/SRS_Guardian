@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: Phase 14 (AI Rewrite Suggestions & Gherkin Generation - Tier 2)
-- **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation)
-- **Current Task**: Phase 14 Complete! Centralized LLM gateway in backend/app/services/llm.py, global switch settings.LLM_ENABLED, SHA-256 disk caching in data/cache/llm_cache.json, rewrite suggestion with EARS conformance, Gherkin scenario generator, REST API endpoints, 6 unit/integration tests (100% passing), and frontend AI assistance UI verified.
+- **Current Phase**: Phase 15 (Tier 3 Advanced Features)
+- **Phase Status**: IN_PROGRESS (Phase 15A Complete; starting Phase 15B)
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS)
+- **Current Task**: Phase 15A Complete! Deterministic rule-based Given/When/Then generator in backend/app/nlp/gherkin.py, 8 unit/integration tests (100% passing), API response schema enriched with source and ears_pattern, frontend badges integrated, sample requirements verified. Next: Phase 15B Requirement Clustering.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -65,14 +65,22 @@
   - `GET /api/documents/{id}/standards`: Returns document-level ISO 29148 conformance statistics and per-requirement reports.
   - UI integration: EARS syntax and ISO checklist cards in Requirement Viewer (`frontend/app/requirements/page.tsx`) and `ISO 29148 Checks` category tab in Analysis page (`frontend/app/analysis/page.tsx`).
 
+- Rule-Based Gherkin Test Skeletons via EARS (Phase 15A):
+  - `backend/app/nlp/gherkin.py`: Deterministic Given/When/Then scenario generator mapping from EARS parsed elements (Event-driven, State-driven, Unwanted, Optional, Ubiquitous, Complex) with fallback to LLM or deterministic template.
+  - REST endpoints `POST /api/requirements/{id}/generate-gherkin` and ad-hoc `POST /api/requirements/generate-gherkin` return `source` (`ears_rule`, `llm`, `fallback_rule`) and `ears_pattern`.
+  - Frontend badges in `frontend/app/requirements/page.tsx` display `EARS Rule-Based` (emerald) and pattern tag.
+
 ## What Has Actually Been Verified
-- `pytest backend/tests/ -v`: 67/67 backend unit and integration tests pass with 100% pass rate in 59.37s.
+- `pytest backend/tests/test_gherkin.py -v`: 8/8 unit and integration tests pass with 100% pass rate in 14.70s.
 - `npm run build`: 11/11 Next.js pages cleanly compiled with zero TypeScript or lint errors.
 - Live execution on sample document (`data/test/sample_srs.txt`):
-  - REQ-001: Detected as Event-driven, non-normative modal flagged (`should`), verifiability flagged for lacking numeric response time threshold, waterfall score reflects deductions (60.0/100).
-  - REQ-002 & REQ-003: Detected terminology drift (`reset` vs `recover`).
-  - REQ-004 & REQ-005: Ubiquitous pattern, 7/7 ISO checks passed.
-  - REQ-006: Ubiquitous pattern, fully conforming (100.0/100).
+  - REQ-001: Event-driven Gherkin generated (`When The user checks the account balance -> Then the system should respond quickly`).
+  - REQ-002: Ubiquitous Gherkin generated (`Then the system shall allow users to reset their password using their registered email`).
+  - REQ-003: Ubiquitous Gherkin generated (`Then Users must recover forgotten passwords using their registered email address`).
+  - REQ-004: Ubiquitous Gherkin generated (`Then the password must contain at least 8 characters`).
+  - REQ-005: Ubiquitous Gherkin generated (`Then the password must contain exactly 6 characters`).
+  - REQ-006: Ubiquitous Gherkin generated (`Then the system shall allow users to download their transaction history`).
+  - 100% generated via rule engine (`source: ears_rule`) with zero LLM API calls and zero credit cost.
 
 ## Known Issues
 - None.
@@ -83,20 +91,20 @@
 - Avoided double-penalization between Phase 5 ambiguity checks and ISO checks.
 - All contradiction and quality findings labeled "potential".
 - Live Runtime Architecture Mapping: Added Archify skill (`.agents/skills/archify`) and generated verified standalone HTML diagram (`architecture.html` and `docs/architecture.html`) with verified commit line references.
-- Rule 6 Enforced: Generative LLM (Google Gemini Flash) is strictly quarantined to Phase 14 rewrite suggestions and Gherkin generation. All core classification, ambiguity detection, duplication checks, contradiction detection, and quality scoring remain 100% functional offline with zero LLM dependence.
+- Rule 6 Enforced: Generative LLM is strictly quarantined to Phase 14 rewrite suggestions and fallback Gherkin generation. All core classification, ambiguity detection, duplication checks, contradiction detection, and quality scoring remain 100% functional offline with zero LLM dependence.
 - Rule 7 Enforced: Permanent SHA-256 disk caching prevents any duplicate API calls.
 
 ## Exact Next Step
-- Phase 15: Docker Containerization and Deployment Packaging.
-  - Multi-stage Dockerfile for FastAPI backend.
-  - Standalone Dockerfile for Next.js frontend.
-  - `docker-compose.yml` orchestrating backend, frontend, and persistent volumes for database and model cache.
+- Phase 15B: Requirement Clustering.
+  - KMeans or Agglomerative clustering over cached embeddings (`backend/app/ml/embeddings.py`).
+  - Auto-label each cluster using its most distinctive terms (TF-IDF per cluster).
+  - Return cluster sizes, centroids, and assigned requirements via `GET /api/documents/{id}/clusters`.
+  - Frontend visual cluster view or badges.
 
 ## Last Verification Performed
-- `pytest backend/tests/test_llm.py -v`: 6/6 passed on 2026-10-05.
+- `pytest backend/tests/test_gherkin.py -v`: 8/8 passed on 2026-10-05.
 - `npm run build`: 11/11 pages compiled with zero errors on 2026-10-05.
-- Live sample execution verified on REQ-001 with cached repeat hit on 2026-10-05.
-- `node .agents/skills/archify/bin/archify.mjs finalize`: 4/4 gates passed (`validate`, `deliver`, `check`, `browser-check`) on 2026-10-05.
+- Live sample execution verified on REQ-001 to REQ-006 on 2026-10-05.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -104,7 +112,7 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-10-05 15:05:00
-- **Last Commit Hash**: d86cc41
+- **Last Updated**: 2026-10-05 20:45:00
+- **Last Commit Hash**: a03a78b
 
 

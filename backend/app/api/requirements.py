@@ -23,6 +23,7 @@ from backend.app.schemas.llm import (
     GherkinGenerationResponse,
 )
 from backend.app.services.llm import suggest_rewrite, generate_gherkin
+from backend.app.nlp.gherkin import generate_gherkin_skeleton
 
 
 router = APIRouter(prefix="/requirements", tags=["requirements"])
@@ -251,7 +252,7 @@ def generate_requirement_gherkin(
             detail=f"Requirement with ID {requirement_id} not found",
         )
 
-    result = generate_gherkin(
+    result = generate_gherkin_skeleton(
         requirement_text=req.text,
         classification_label=req.classification_label,
         requirement_id=req.id,
@@ -279,7 +280,7 @@ def suggest_adhoc_rewrite(request: RewriteSuggestionRequest):
     summary="Ad-hoc Gherkin scenario generation for arbitrary requirement text",
 )
 def generate_adhoc_gherkin(request: GherkinGenerationRequest):
-    result = generate_gherkin(
+    result = generate_gherkin_skeleton(
         requirement_text=request.requirement_text,
         classification_label=request.classification_label,
         requirement_id=request.requirement_id,
