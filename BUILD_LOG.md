@@ -386,8 +386,6 @@
   - **Frontend Real-Data Verification**: All 5 core feature pages (`/documents`, `/requirements`, `/`, `/analysis`, `/reports`) verified to load live data via `frontend/services/api.ts` with zero hardcoded analytical data.
   - **Database & Alembic Migrations**: Migration chain `58e6a70d176c -> 9f880cb9f8ed -> 3a4b5c6d7e8f (head)` verified.
   - **Architecture Integrity**: All locked technical decisions (Python 3.11, FastAPI, SQLite, Next.js, spaCy, scikit-learn TF-IDF + LR, all-MiniLM-L6-v2, pure Python xhtml2pdf, LLM disabled) preserved.
-- **Final Result**: READY FOR PHASE 12.
-
 ## Phase 12: Contradiction Detection
 - **Date**: 2026-09-17
 - **What was built**:
@@ -467,14 +465,246 @@
 - **Known limitations**:
   - Checks evaluate syntax and explicit terminology; semantic domain completeness requires stakeholder review.
 
+## Architecture Tooling: Archify Live Runtime Diagram
+- **Date**: 2026-10-05
+- **What was built**:
+  - Integrated Archify agent skill into the repository under `.agents/skills/archify`.
+  - Authored repository-backed architecture specification (`.archify/architecture-srs-guardian-20261005-084200/candidate.json`).
+  - Executed `archify finalize` to build verified interactive HTML architecture diagram:
+    - Target: `architecture.html` and `docs/architecture.html` (771 KB standalone interactive HTML).
+    - 11 core components mapped in exact runtime sequence:
+      1. Requirements Engineer (Browser client)
+      2. Next.js Web UI (`frontend/app/page.tsx`, `frontend/services/api.ts`)
+      3. FastAPI REST Gateway (`backend/app/main.py`, `backend/app/api/documents.py`)
+      4. Document Ingestion & Extraction (`backend/app/nlp/requirement_extractor.py`)
+      5. Classification & SHAP (`backend/app/ml/classifier.py`)
+      6. Ambiguity & Readability Engine (`backend/app/nlp/ambiguity.py`)
+      7. Semantic Duplicate Detection (`backend/app/ml/duplicates.py`)
+      8. Contradiction Detection Engine (`backend/app/nlp/numeric_constraints.py`)
+      9. EARS & ISO 29148 Engine (`backend/app/nlp/iso_checks.py`)
+      10. Deterministic Quality Scoring (`backend/app/nlp/scoring.py`)
+      11. Relational Database & Audit Store (`backend/app/core/database.py`)
+    - Trust Boundaries: "SRS Guardian System Environment" (system boundary) and "NLP & ML Verification Pipeline" (security group boundary).
+    - Live Runtime Mapping: Continuous serpentine primary path connecting all components in runtime order with 0 crossings and 0 bends.
+    - Verified Source Links: All components include verified line references pinned to commit `43cd880ae7c519e1694006f82e353b969314d8c9`.
+    - Guided Story (Press P): 5 presentation chapters covering Ingress, Extraction, Verification, Scoring, and Storage.
+- **Key decisions**:
+  - Followed Master Prompt guidelines: 11 core components (within 8-12 limit), 1 primary runtime path, trust boundaries, and cards for secondary details.
+  - Zero external cloud/LLM runtime dependency; diagram file is 100% self-contained and opens offline in any browser.
+- **How to run**:
+  - Open `architecture.html` or `docs/architecture.html` directly in any web browser (Chrome, Edge, Firefox).
+  - Re-generate / re-finalize: `node .agents/skills/archify/bin/archify.mjs finalize architecture <candidate.json> <output.html> --repo-root . --quality showcase --json`
+- **Known limitations**:
+  - Requires modern browser with JavaScript enabled for interactive filters, routing inspection, and story presentation.
 
+## Phase 14: AI Rewrite Suggestions and Gherkin Generation (Tier 2)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/services/llm.py`:
+    - Single centralized gateway for all generative LLM calls in compliance with Rule 6.
+    - Global on/off switch governed by `settings.LLM_ENABLED` (system remains 100% operational offline when disabled).
+    - Hard disk caching via SHA-256 in `data/cache/llm_cache.json` ensuring no prompt is ever sent twice (Rule 7).
+    - `suggest_rewrite`: Resolves flagged ambiguity and ISO defects while preserving domain intent and conforming to EARS templates.
+    - `generate_gherkin`: Converts requirements into standard Given-When-Then testable acceptance criteria.
+  - `backend/app/schemas/llm.py`:
+    - `RewriteSuggestionRequest`, `RewriteSuggestionResponse`, `GherkinGenerationRequest`, `GherkinGenerationResponse`.
+  - `backend/app/api/requirements.py`:
+    - `POST /api/requirements/{id}/suggest-rewrite`
+    - `POST /api/requirements/{id}/generate-gherkin`
+    - `POST /api/requirements/suggest-rewrite` (ad-hoc)
+    - `POST /api/requirements/generate-gherkin` (ad-hoc)
+  - `backend/tests/test_llm.py`:
+    - 6 unit and integration tests verifying disabled behavior, disk caching hits, ad-hoc endpoints, and requirement endpoints (100% passing).
+  - Frontend Integration:
+    - `frontend/services/api.ts` & `frontend/types/index.ts`: Typed API client methods and response models.
+    - `frontend/app/requirements/page.tsx`: Added AI Assistance panel with "Suggest Rewrite" and "Generate Gherkin" action buttons, cached badges, rationale breakdown, formatted Gherkin copy button, and "Use This Rewrite" human-in-the-loop edit injection.
+- **Key decisions**:
+  - Provider: Google Gemini API free-tier (`gemini-2.5-flash`) via official `google-genai` SDK.
+  - LLM usage strictly bounded to rewrite suggestions and Gherkin generation; all analytical core detection remains classical ML, rules, and embeddings.
+  - Human-in-the-loop guarantee: AI suggestions are never applied automatically; reviewer must explicitly accept or edit.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_llm.py -v`
+  - Query rewrite API: `curl -X POST http://127.0.0.1:8000/api/requirements/{id}/suggest-rewrite`
+  - Query Gherkin API: `curl -X POST http://127.0.0.1:8000/api/requirements/{id}/generate-gherkin`
+- **Known limitations**:
+  - Free-tier rate limits apply if disk cache is bypassed with novel requirements; production deployments should consider dedicated quotas or local Ollama models.
 
+## Phase 15A: Rule-Based Gherkin Test Skeletons via EARS (Tier 3)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/nlp/gherkin.py`:
+    - Deterministic Gherkin test skeleton generator prioritizing rule-based extraction from EARS syntax patterns (`analyze_ears`).
+    - Direct clause mapping for all standard EARS patterns:
+      - Event-driven: `Given <system> is operational -> When <trigger> -> Then <system> <modal> <response>`.
+      - State-driven: `Given <system> is active and <state> -> When a functional request occurs -> Then <system> <modal> <response>`.
+      - Unwanted behavior: `Given <system> is operating -> When <condition> -> Then <system> <modal> <response>`.
+      - Optional feature: `Given feature '<feature>' is enabled -> When caller invokes <system> -> Then <system> <modal> <response>`.
+      - Ubiquitous: `Given <system> is initialized and ready -> When the function is requested -> Then <system> <modal> <response>`.
+      - Complex: Combinations of state, feature, and triggers.
+    - Non-conforming fallback: Delegates to generative LLM only if `settings.LLM_ENABLED` is true; otherwise produces structured deterministic fallback skeleton.
+  - API Integration:
+    - Updated `POST /api/requirements/{id}/generate-gherkin` and ad-hoc `POST /api/requirements/generate-gherkin` to return `source` (`ears_rule`, `llm`, `fallback_rule`) and `ears_pattern`.
+  - Frontend:
+    - `frontend/app/requirements/page.tsx`: Added badges indicating `EARS Rule-Based` (emerald), `LLM Generated` (indigo), and the specific EARS pattern tag.
+  - Automated Tests:
+    - `backend/tests/test_gherkin.py`: 8 unit and integration tests covering all 5 EARS patterns, fallback mode, ad-hoc API, and requirement detail API (100% pass rate).
+- **Key decisions**:
+  - Rule-first generation eliminates external LLM API dependency and costs for all conforming requirements.
+  - Preserved existing LLM generation logic as fallback.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_gherkin.py -v`
+  - Query API: `curl -X POST http://127.0.0.1:8000/api/requirements/generate-gherkin -H "Content-Type: application/json" -d "{\"requirement_text\": \"The system shall allow users to download their transaction history.\"}"`
+- **Known limitations**:
+  - Rule-based skeletons produce template steps; domain-specific edge test cases require human reviewer refinement or optional LLM augmentation.
 
+## Phase 15B: Requirement Clustering & Thematic Topic Labeling (Tier 3)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/ml/clustering.py`:
+    - Reuses existing cached `all-MiniLM-L6-v2` embeddings from `backend.app.ml.embeddings` (Rule 7: zero recomputation).
+    - Adaptive cluster sizing $k$ scaled logarithmically to document size.
+    - Deterministic `AgglomerativeClustering` using cosine metric and average linkage.
+    - TF-IDF topic keyword extraction to auto-label clusters with top distinguishing terms (e.g. `Password / Contain / Characters`).
+  - `backend/app/schemas/clustering.py`:
+    - `ClusteredRequirementItem`, `ClusterGroup`, `DocumentClustersResponse`.
+  - REST API:
+    - `GET /api/documents/{id}/clusters?k=<optional>`: Fetches and clusters document requirements.
+  - Frontend:
+    - `frontend/services/api.ts` & `frontend/types/index.ts`: Typed methods and data structures.
+    - `frontend/app/analysis/page.tsx`: Added "Thematic Clusters" category tab displaying cluster groups, size badges, top keyword tags, and member requirements with links to requirement detail.
+  - Automated Tests:
+    - `backend/tests/test_clustering.py`: 5 unit and integration tests covering empty, single, sample requirements, and REST API (100% pass rate).
+- **Key decisions**:
+  - Zero recomputation: MiniLM embeddings are fetched from existing SQLite / file cache.
+  - TF-IDF cluster auto-labeling gives immediate human-readable topic summaries without calling generative LLMs.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_clustering.py -v`
+  - Query API: `curl http://127.0.0.1:8000/api/documents/{id}/clusters`
+- **Known limitations**:
+  - For very small documents (< 3 requirements), clusters collapse to 1 or 2 groups.
 
+## Phase 15C: Version Comparison & Semantic Diffing (Tier 3)
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/nlp/version_comparison.py`:
+    - Cross-version requirement alignment engine using a hybrid matching strategy:
+      1. Exact requirement key match (e.g. `REQ-001` <-> `REQ-001`).
+      2. High-confidence semantic similarity fallback using cached `all-MiniLM-L6-v2` embeddings (cosine similarity $\ge 0.70$).
+    - Requirement delta classification: `added`, `removed`, `modified`, `unchanged`.
+    - Fine-grained word-level diffing utilizing Python `difflib.SequenceMatcher` producing structured inline chunks (`[-deleted-]`, `[+added+]`, unchanged).
+    - Quality score delta tracking between base and target document requirements.
+    - Defect lifecycle tracking: identifies `resolved_issues` (present in base, resolved in target) and `new_issues` (introduced in target).
+  - `backend/app/schemas/comparison.py`:
+    - Pydantic models: `RequirementDiffItem`, `VersionComparisonSummary`, `VersionComparisonResponse`.
+  - REST API:
+    - Added `GET /api/documents/{id}/compare/{other_id}` in `backend/app/api/documents.py`.
+  - Frontend:
+    - Updated `frontend/services/api.ts` with `compareDocuments(id, otherId)`.
+    - Updated `frontend/types/index.ts` with version comparison types.
+    - `frontend/app/compare/page.tsx`: Implemented full side-by-side comparison page with document selectors, 6 KPI cards (Score Delta, Added, Removed, Modified, Resolved Issues, New Issues), filter tabs, inline diff viewing, and defect lifecycle badges.
+  - Automated Tests:
+    - `backend/tests/test_version_comparison.py`: 3 tests covering text diff generation, full version comparison lifecycle (modified requirement, defect resolution, score improvements), and 404 validation (100% pass rate).
+- **Key decisions**:
+  - Reused existing MiniLM embeddings disk cache for semantic matching of renumbered requirements.
+  - Inline word-level diffing makes requirement changes instantly clear without requiring external tools.
+- **How to run**:
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_version_comparison.py -v`
+  - Query API: `curl http://127.0.0.1:8000/api/documents/1/compare/2`
+- **Known limitations**:
+  - Re-ordering of paragraphs without textual changes is classified as unchanged based on key/embedding alignment.
 
+## Phase 16: Testing and Quantitative Evaluation
+- **Date**: 2026-10-05
+- **What was built**:
+  - Benchmark datasets curated in `data/test/`:
+    - `data/test/promise_test_split.csv`: 194 held-out requirements from the PROMISE dataset (89 Functional, 105 Non-Functional).
+    - `data/test/ambiguity_eval_set.csv`: 40 hand-labeled requirements (15 clear, 25 ambiguous across weak terms, weak modals, missing metrics, vague pronouns, compound clauses, passive voice).
+    - `data/test/duplicates_eval_set.csv`: 36 requirement pairs (16 duplicate pairs, 20 non-duplicate pairs covering topical overlap and unrelated statements).
+    - `data/test/contradictions_eval_set.csv`: 32 requirement pairs (16 contradictory, 16 compatible across quantitative intervals and semantic NLI).
+  - `backend/evaluation/run_evaluation.py`:
+    - Zero fabrication: executes real models, rules, and vector math against ground-truth sets.
+    - Classification: Accuracy (85.05%), Macro F1 (84.55%), confusion matrix, and CPU inference latency (3.19 ms/req).
+    - Ambiguity: Precision (88.89%), Recall (64.00%), F1 (74.42%), and per-defect category coverage.
+    - Duplicate Detection Threshold Sweep (0.70 to 0.95): Identifies optimal threshold ($\theta = 0.70$, F1: 86.67%) and quantifies trade-offs for default production setting ($\theta = 0.80$, Precision: 87.50%, FPR: 5.00%).
+    - Contradiction Detection: Reports separate metrics for Numeric Constraint Rules (100% precision, 37.50% recall, 54.55% F1) and NLI layer (70.00% precision, 87.50% recall, 77.78% F1), plus integrated cascaded pipeline (60.00% precision, 93.75% recall, 73.17% F1).
+    - Outputs machine-readable results to `data/test/evaluation_results.json`.
+  - `docs/EVALUATION.md`:
+    - Formal empirical evaluation report containing executive summary table, detailed methodology, confusion matrices, threshold sweep tables, layer breakdown, failure analysis, and honest engineering limitations (Rule 10).
+  - Automated Regression Tests:
+    - `backend/tests/test_evaluation.py`: 4 tests validating that all 4 evaluation pipelines run cleanly and exceed performance baselines (100% pass rate).
+- **Key decisions**:
+  - Complete honesty in metrics: no fabricated numbers, no cherry-picked demo results.
+  - Transparently documented failure cases (e.g. passive voice standard conventions, numeric interval changes scoring high cosine similarity).
+- **How to run**:
+  - Run evaluation: `.venv\Scripts\python.exe -m backend.evaluation.run_evaluation`
+  - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_evaluation.py -v`
+- **Known limitations**:
+  - Small NLI model (BART Large MNLI on CPU) requires candidate blocking filter to remain bounded; multi-conditional logic across multiple paragraphs remains an active area of requirement engineering research.
 
+## Phase 17: Packaging, Documentation, and Final Presentation Readiness
+- **Date**: 2026-10-05
+- **What was built**:
+  - Docker containerization suite:
+    - `docker/Dockerfile.backend`: Python 3.11-slim image with pre-downloaded spaCy model, scikit-learn, PyMuPDF, sentence-transformers, healthcheck on `/api/health`, and non-root execution support.
+    - `docker/Dockerfile.frontend`: Multi-stage Alpine Node 20 build producing an optimized standalone Next.js 14 production bundle.
+    - `docker-compose.yml`: Multi-service orchestration connecting frontend (`3000`), backend (`8000`), and optional PostgreSQL (`5432`) with health checks, environment flags, and persistent volume mounts.
+    - `frontend/next.config.mjs`: Enabled `output: "standalone"` and dynamic `BACKEND_URL` proxying for Docker networks.
+  - Root `README.md`:
+    - Comprehensive project manual detailing the core philosophy, interactive architecture diagram links, full feature inventory (extraction, classification, ambiguity, duplicates, contradictions, EARS/ISO checks, scoring, review, version comparison, Gherkin generation, reports), empirical evaluation scorecard from Phase 16, quickstart setup (local vs Docker), API reference, limitations, and license.
+  - Academic Final Report Guide (`docs/PROJECT_REPORT.md`):
+    - 20-chapter technical report reference containing abstract, problem statement, objectives, system architecture, NLP/ML/NLI methodologies, database design, REST specifications, 4 Mermaid UML diagrams (Use Case, Class, Sequence, Activity), real benchmark metrics, failure analysis, and academic references.
+    - Features required contribution phrasing: *"an integrated, explainable AI-assisted requirement review platform combining rule-based analysis, semantic similarity, NLI, standards-oriented checks, AI rewriting, human review, version comparison, and reporting."*
+  - Build & Production Verification:
+    - Frontend Next.js production build (`npm run build`) cleanly compiled all 11/11 static pages with standalone tracing enabled.
+- **Key decisions**:
+  - Maintained complete cost and privacy discipline: container stack is self-contained and operates offline without external API keys.
+  - Standardized on Docker Compose with SQLite default or PostgreSQL toggle for maximum deployment portability.
+- **How to run**:
+  - Run via Docker: `docker-compose up --build`
+  - Run locally: Backend `uvicorn backend.app.main:app --port 8000`, Frontend `cd frontend && npm run dev`
+- **Known limitations**:
+  - Docker build requires initial network access to download Python base packages and spaCy wheels; once built, the image runs completely offline.
 
-
-
-
-
+## Phase 18: Explainable Visual Review & Comprehensive Reporting
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/schemas/review_report.py`: Pydantic schemas for `FindingSpan`, `AnnotatedFinding`, `RequirementReviewItem`, `DocumentReviewReportResponse`, and confidence band categorizations (`high` >= 0.80, `medium` 0.60–0.79, `low` < 0.60, `unavailable`).
+  - `backend/app/templates/comprehensive_report.html`: Jinja2 template for the 19-section Comprehensive Analysis Report formatted for xhtml2pdf printing.
+  - `backend/app/services/review_report.py`:
+    - `build_review_report_data`: Compiles complete finding location metadata, exact text spans, and audit trails directly from stored analysis with zero expensive recomputation or LLM calls.
+    - `generate_annotated_srs_pdf`: Uses PyMuPDF (`fitz`) to produce an Annotated SRS PDF with color-coded highlight boxes, note popups, and an initial audit legend banner without modifying the original uploaded file.
+    - `generate_comprehensive_pdf_report`: Renders 19-section formal audit report to PDF via `xhtml2pdf`.
+    - `generate_comprehensive_docx_report`: Renders the complete 19-section formal audit report to Microsoft Word (`.docx`) format using `python-docx`.
+  - `backend/app/api/review_reports.py`: Dedicated API router registered under `/api/documents`:
+    - `GET /api/documents/{id}/review-report`: Returns explainable review JSON structure.
+    - `GET /api/documents/{id}/review-report/annotated-pdf`: Serves Annotated SRS PDF.
+    - `GET /api/documents/{id}/review-report/pdf`: Serves 19-section Comprehensive PDF Report.
+    - `GET /api/documents/{id}/review-report/docx`: Serves 19-section Comprehensive DOCX Report.
+  - Frontend Interactive Review Interface:
+    - `frontend/app/reports/review/page.tsx`: 3-pane Explainable Detailed Review Report with:
+      - Left Pane: Filterable requirement list (category filters, confidence bands, search, quality score badges).
+      - Center Pane: Interactive Source Inspection with exact highlight spans and click-to-inspect trigger.
+      - Right Pane: Contextual Finding & Explanation card (finding ID, detected text, confidence, severity, why highlighted, provenance, suggestion, pair details, and navigation links).
+    - `frontend/app/reports/review/[id]/page.tsx`: Route redirect supporting direct document ID access (`/reports/review/1` -> `/reports/review?doc=1`).
+    - `frontend/app/reports/page.tsx`: Added quick action link to Detailed Review Report without altering existing report generation.
+    - `frontend/services/api.ts` & `frontend/types/index.ts`: Typed API client methods and data models.
+  - Unit and Integration Tests:
+    - `backend/tests/test_review_report.py`: 6 tests validating confidence bands, span reconstruction, pair finding linkage, API endpoints, annotated PDF generation, comprehensive PDF generation, and DOCX generation (100% pass rate).
+- **Key decisions**:
+  - Additive reporting layer: Left existing HTML/CSV/PDF report endpoints and pages 100% untouched.
+  - Zero LLM usage in reporting: All summaries, findings, and explanations strictly consume stored deterministic data and provenance.
+  - Distinction between reporting formats:
+    - *Interactive Review Report*: A web-based 3-pane workbench for dynamic reviewer inspection, clicking spans, and verifying evidence.
+    - *Annotated SRS PDF*: Preserves the author's original document layout and visual appearance while overlaying highlighted rects and audit annotations.
+    - *Comprehensive Analysis Report (PDF & DOCX)*: A formal, 19-section executive and technical audit document complete with metrics, benchmarks, and rule catalogues.
+  - Separation of Confidence vs. Severity:
+    - *Severity*: Impact of the defect on requirement quality (Critical, Warning, Informational).
+    - *Confidence*: Algorithmic or statistical certainty of the detection (High, Medium, Low, Unavailable).
+  - Rule 10 Honesty: All detections explicitly labeled "potential"; standards checks declared as selected machine-checkable checks based on ISO/IEC/IEEE 29148 rather than compliance certification.
+- **How to run**:
+  - Run tests: `.venv\Scripts\python.exe -m pytest backend/tests/test_review_report.py -v`
+  - Run live verification: `.venv\Scripts\python.exe scratch/verify_phase18.py`
+  - Start app: Backend `uvicorn backend.app.main:app --port 8000`, Frontend `cd frontend && npm run dev`
+  - Access UI: Open browser at `http://localhost:3000/reports/review`
+- **Known limitations**:
+  - When source documents are uploaded as plain text (.txt), the Annotated SRS PDF renders a clean typographic page layout representation since native visual PDF pages do not exist in plain text.

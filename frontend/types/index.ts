@@ -341,5 +341,77 @@ export interface DocumentComparisonResponse {
   items: RequirementComparisonItem[];
 }
 
+export interface FindingSpan {
+  start: number;
+  end: number;
+  text: string;
+  weight: number;
+}
+
+export interface AnnotatedFinding {
+  finding_id: string;
+  issue_id?: number | null;
+  requirement_id: number;
+  req_key: string;
+  module: string;
+  type: string;
+  severity: "info" | "warning" | "critical";
+  confidence: number | null;
+  confidence_band: "high" | "medium" | "low" | "unavailable";
+  source_text: string;
+  spans: FindingSpan[];
+  has_sub_spans: boolean;
+  human_explanation: string;
+  suggestion?: string | null;
+  rule_provenance: string;
+  status: "ai_flagged" | "accepted" | "rejected" | "reviewed" | "edited";
+  is_pair_finding: boolean;
+  target_requirement_id?: number | null;
+  target_req_key?: string | null;
+  metadata?: Record<string, any>;
+}
+
+export interface RequirementReviewItem {
+  requirement_id: number;
+  req_key: string;
+  text: string;
+  char_start: number;
+  char_end: number;
+  section?: string | null;
+  source_layer: string;
+  confidence: number;
+  classification_label?: string | null;
+  classification_prob?: number | null;
+  quality_score: number;
+  sub_scores: Record<string, number>;
+  waterfall_steps: any[];
+  ears_pattern?: string | null;
+  is_valid_ears?: boolean | null;
+  findings: AnnotatedFinding[];
+  ai_rewrite?: any | null;
+  gherkin_scenario?: string | null;
+  review_status: string;
+}
+
+export interface DocumentReviewReport {
+  document_id: number;
+  filename: string;
+  file_type: string;
+  page_count: number;
+  uploaded_at: string;
+  status: string;
+  cleaned_text: string;
+  raw_text?: string | null;
+  total_requirements: number;
+  total_findings: number;
+  quality_summary: any;
+  findings_by_severity: Record<string, number>;
+  findings_by_module: Record<string, number>;
+  findings_by_confidence: Record<string, number>;
+  requirements: RequirementReviewItem[];
+  all_findings: AnnotatedFinding[];
+  system_evaluation?: any | null;
+}
+
 
 

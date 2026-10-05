@@ -20,6 +20,7 @@ import {
   GherkinGenerationResponse,
   DocumentClustersResponse,
   DocumentComparisonResponse,
+  DocumentReviewReport,
 } from "../types";
 
 
@@ -192,6 +193,23 @@ export const api = {
   // --- Reports Export URLs ---
   getReportUrl(documentId: number, format: "html" | "csv" | "pdf", type: "requirements" | "issues" = "requirements"): string {
     return `${API_BASE}/documents/${documentId}/report?format=${format}&type=${type}`;
+  },
+
+  // --- Phase 18: Explainable Review & Comprehensive Reporting ---
+  async getReviewReport(documentId: number): Promise<DocumentReviewReport> {
+    return fetchJson<DocumentReviewReport>(`${API_BASE}/documents/${documentId}/review-report`);
+  },
+
+  getAnnotatedPdfUrl(documentId: number): string {
+    return `${API_BASE}/documents/${documentId}/review-report/annotated-pdf`;
+  },
+
+  getComprehensivePdfUrl(documentId: number): string {
+    return `${API_BASE}/documents/${documentId}/review-report/pdf`;
+  },
+
+  getComprehensiveDocxUrl(documentId: number): string {
+    return `${API_BASE}/documents/${documentId}/review-report/docx`;
   },
 };
 

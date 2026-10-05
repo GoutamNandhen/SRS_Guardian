@@ -664,3 +664,47 @@
   - Run locally: Backend `uvicorn backend.app.main:app --port 8000`, Frontend `cd frontend && npm run dev`
 - **Known limitations**:
   - Docker build requires initial network access to download Python base packages and spaCy wheels; once built, the image runs completely offline.
+
+## Phase 18: Explainable Visual Review & Comprehensive Reporting
+- **Date**: 2026-10-05
+- **What was built**:
+  - `backend/app/schemas/review_report.py`: Pydantic schemas for `FindingSpan`, `AnnotatedFinding`, `RequirementReviewItem`, `DocumentReviewReportResponse`, and confidence band categorizations (`high` >= 0.80, `medium` 0.60–0.79, `low` < 0.60, `unavailable`).
+  - `backend/app/templates/comprehensive_report.html`: Jinja2 template for the 19-section Comprehensive Analysis Report formatted for xhtml2pdf printing.
+  - `backend/app/services/review_report.py`:
+    - `build_review_report_data`: Compiles complete finding location metadata, exact text spans, and audit trails directly from stored analysis with zero expensive recomputation or LLM calls.
+    - `generate_annotated_srs_pdf`: Uses PyMuPDF (`fitz`) to produce an Annotated SRS PDF with color-coded highlight boxes, note popups, and an initial audit legend banner without modifying the original uploaded file.
+    - `generate_comprehensive_pdf_report`: Renders 19-section formal audit report to PDF via `xhtml2pdf`.
+    - `generate_comprehensive_docx_report`: Renders the complete 19-section formal audit report to Microsoft Word (`.docx`) format using `python-docx`.
+  - `backend/app/api/review_reports.py`: Dedicated API router registered under `/api/documents`:
+    - `GET /api/documents/{id}/review-report`: Returns explainable review JSON structure.
+    - `GET /api/documents/{id}/review-report/annotated-pdf`: Serves Annotated SRS PDF.
+    - `GET /api/documents/{id}/review-report/pdf`: Serves 19-section Comprehensive PDF Report.
+    - `GET /api/documents/{id}/review-report/docx`: Serves 19-section Comprehensive DOCX Report.
+  - Frontend Interactive Review Interface:
+    - `frontend/app/reports/review/page.tsx`: 3-pane Explainable Detailed Review Report with:
+      - Left Pane: Filterable requirement list (category filters, confidence bands, search, quality score badges).
+      - Center Pane: Interactive Source Inspection with exact highlight spans and click-to-inspect trigger.
+      - Right Pane: Contextual Finding & Explanation card (finding ID, detected text, confidence, severity, why highlighted, provenance, suggestion, pair details, and navigation links).
+    - `frontend/app/reports/review/[id]/page.tsx`: Route redirect supporting direct document ID access (`/reports/review/1` -> `/reports/review?doc=1`).
+    - `frontend/app/reports/page.tsx`: Added quick action link to Detailed Review Report without altering existing report generation.
+    - `frontend/services/api.ts` & `frontend/types/index.ts`: Typed API client methods and data models.
+  - Unit and Integration Tests:
+    - `backend/tests/test_review_report.py`: 6 tests validating confidence bands, span reconstruction, pair finding linkage, API endpoints, annotated PDF generation, comprehensive PDF generation, and DOCX generation (100% pass rate).
+- **Key decisions**:
+  - Additive reporting layer: Left existing HTML/CSV/PDF report endpoints and pages 100% untouched.
+  - Zero LLM usage in reporting: All summaries, findings, and explanations strictly consume stored deterministic data and provenance.
+  - Distinction between reporting formats:
+    - *Interactive Review Report*: A web-based 3-pane workbench for dynamic reviewer inspection, clicking spans, and verifying evidence.
+    - *Annotated SRS PDF*: Preserves the author's original document layout and visual appearance while overlaying highlighted rects and audit annotations.
+    - *Comprehensive Analysis Report (PDF & DOCX)*: A formal, 19-section executive and technical audit document complete with metrics, benchmarks, and rule catalogues.
+  - Separation of Confidence vs. Severity:
+    - *Severity*: Impact of the defect on requirement quality (Critical, Warning, Informational).
+    - *Confidence*: Algorithmic or statistical certainty of the detection (High, Medium, Low, Unavailable).
+  - Rule 10 Honesty: All detections explicitly labeled "potential"; standards checks declared as selected machine-checkable checks based on ISO/IEC/IEEE 29148 rather than compliance certification.
+- **How to run**:
+  - Run tests: `.venv\Scripts\python.exe -m pytest backend/tests/test_review_report.py -v`
+  - Run live verification: `.venv\Scripts\python.exe scratch/verify_phase18.py`
+  - Start app: Backend `uvicorn backend.app.main:app --port 8000`, Frontend `cd frontend && npm run dev`
+  - Access UI: Open browser at `http://localhost:3000/reports/review`
+- **Known limitations**:
+  - When source documents are uploaded as plain text (.txt), the Annotated SRS PDF renders a clean typographic page layout representation since native visual PDF pages do not exist in plain text.

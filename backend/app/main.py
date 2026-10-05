@@ -5,6 +5,7 @@ from backend.app.api.documents import router as documents_router
 from backend.app.api.requirements import router as requirements_router
 from backend.app.api.issues import router as issues_router
 from backend.app.api.contradictions import router as contradictions_router
+from backend.app.api.review_reports import router as review_reports_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,6 +27,7 @@ app.include_router(documents_router, prefix="/api")
 app.include_router(requirements_router, prefix="/api")
 app.include_router(issues_router, prefix="/api")
 app.include_router(contradictions_router, prefix="/api")
+app.include_router(review_reports_router, prefix="/api")
 
 
 

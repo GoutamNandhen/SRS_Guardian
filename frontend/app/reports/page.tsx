@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   FileCheck,
   Award,
+  Eye,
 } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -145,6 +146,15 @@ function ReportsPageContent() {
 
           {selectedDocId && (
             <>
+              <Link
+                href={`/reports/review?doc=${selectedDocId}`}
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-secondary/10 border border-secondary/30 hover:bg-secondary/20 text-secondary text-xs font-semibold transition-colors shadow-xs"
+                title="Open Phase 18 Interactive Detailed Review Report"
+              >
+                <Eye className="w-3.5 h-3.5 text-secondary" />
+                <span>Detailed Review</span>
+              </Link>
+
               <a
                 href={htmlReportUrl}
                 target="_blank"
