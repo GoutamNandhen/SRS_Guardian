@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: srs_guardian_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: srs_user
+      POSTGRES_PASSWORD: srs_password
+      POSTGRES_DB: srs_guardian
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U srs_user -d srs_guardian"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: srs_guardian_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://srs_user:srs_password@db:5432/srs_guardian
+      - LLM_ENABLED=false
+      - UPLOAD_DIR=/app/uploads
+      - DUPLICATE_SIMILARITY_THRESHOLD=0.80
+    volumes:
+      - ./data:/app/data
+      - backend_uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: srs_guardian_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  backend_uploads:

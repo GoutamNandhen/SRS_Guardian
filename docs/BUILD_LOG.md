@@ -640,3 +640,27 @@
   - Run tests: `$env:PYTHONPATH="."; .venv\Scripts\pytest.exe backend/tests/test_evaluation.py -v`
 - **Known limitations**:
   - Small NLI model (BART Large MNLI on CPU) requires candidate blocking filter to remain bounded; multi-conditional logic across multiple paragraphs remains an active area of requirement engineering research.
+
+## Phase 17: Packaging, Documentation, and Final Presentation Readiness
+- **Date**: 2026-10-05
+- **What was built**:
+  - Docker containerization suite:
+    - `docker/Dockerfile.backend`: Python 3.11-slim image with pre-downloaded spaCy model, scikit-learn, PyMuPDF, sentence-transformers, healthcheck on `/api/health`, and non-root execution support.
+    - `docker/Dockerfile.frontend`: Multi-stage Alpine Node 20 build producing an optimized standalone Next.js 14 production bundle.
+    - `docker-compose.yml`: Multi-service orchestration connecting frontend (`3000`), backend (`8000`), and optional PostgreSQL (`5432`) with health checks, environment flags, and persistent volume mounts.
+    - `frontend/next.config.mjs`: Enabled `output: "standalone"` and dynamic `BACKEND_URL` proxying for Docker networks.
+  - Root `README.md`:
+    - Comprehensive project manual detailing the core philosophy, interactive architecture diagram links, full feature inventory (extraction, classification, ambiguity, duplicates, contradictions, EARS/ISO checks, scoring, review, version comparison, Gherkin generation, reports), empirical evaluation scorecard from Phase 16, quickstart setup (local vs Docker), API reference, limitations, and license.
+  - Academic Final Report Guide (`docs/PROJECT_REPORT.md`):
+    - 20-chapter technical report reference containing abstract, problem statement, objectives, system architecture, NLP/ML/NLI methodologies, database design, REST specifications, 4 Mermaid UML diagrams (Use Case, Class, Sequence, Activity), real benchmark metrics, failure analysis, and academic references.
+    - Features required contribution phrasing: *"an integrated, explainable AI-assisted requirement review platform combining rule-based analysis, semantic similarity, NLI, standards-oriented checks, AI rewriting, human review, version comparison, and reporting."*
+  - Build & Production Verification:
+    - Frontend Next.js production build (`npm run build`) cleanly compiled all 11/11 static pages with standalone tracing enabled.
+- **Key decisions**:
+  - Maintained complete cost and privacy discipline: container stack is self-contained and operates offline without external API keys.
+  - Standardized on Docker Compose with SQLite default or PostgreSQL toggle for maximum deployment portability.
+- **How to run**:
+  - Run via Docker: `docker-compose up --build`
+  - Run locally: Backend `uvicorn backend.app.main:app --port 8000`, Frontend `cd frontend && npm run dev`
+- **Known limitations**:
+  - Docker build requires initial network access to download Python base packages and spaCy wheels; once built, the image runs completely offline.

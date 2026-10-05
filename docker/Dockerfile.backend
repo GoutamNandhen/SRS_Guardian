@@ -1,0 +1,40 @@
+# =====================================================================
+# SRS Guardian - Backend Dockerfile
+# Python 3.11 FastAPI with spaCy, scikit-learn, and all-MiniLM-L6-v2
+# =====================================================================
+FROM python:3.11-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+WORKDIR /app
+
+# Install minimal build dependencies for C-extensions and curl for healthchecks
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python requirements
+COPY backend/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r /app/requirements.txt
+
+# Download spaCy small English pipeline
+RUN python -m spacy download en_core_web_sm
+
+# Copy backend application source and database migration configurations
+COPY backend /app/backend
+COPY data /app/data
+
+# Ensure data and cache directories exist with appropriate permissions
+RUN mkdir -p /app/data/cache /app/data/test /app/uploads
+
+EXPOSE 8000
+
+# Health check to ensure FastAPI REST gateway is live
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
