@@ -127,4 +127,5 @@ class DocumentReviewReportResponse(BaseModel):
     system_evaluation: Optional[Dict[str, Any]] = None
     shap_attributions: Optional[List[ShapRequirementAttribution]] = None
     dynamic_conclusion: Optional[str] = None
+    reviewer_profile: Optional[Dict[str, Any]] = None
 

@@ -744,3 +744,44 @@
 - **Known limitations**:
   - None. System is fully operational and verified end-to-end.
 
+## Phase 18.2: Final User Workflow & Personal Details
+- **Date**: 2026-10-06
+- **What was built**:
+  - **Authoritative Reviewer Profile Management**:
+    - `backend/app/models/user_profile.py`: SQLAlchemy `UserProfile` model storing `full_name`, `email`, `organization`, `role`, `phone`, and `updated_at`.
+    - `backend/app/schemas/user_profile.py`: Pydantic schemas `UserProfileBase`, `UserProfileUpdate`, and `UserProfileResponse`.
+    - `backend/app/api/profile.py`: Endpoints `GET /api/profile` and `PUT /api/profile` with database persistence.
+    - Integrated authoritative reviewer profile into `build_report_data` (`backend/app/services/reports.py`) and `build_review_report_data` (`backend/app/services/review_report.py`).
+  - **Placeholder Removal**:
+    - Removed all hardcoded personal identities (e.g. "Alex Chen", fake organizations) from templates, topbar, and sidebar.
+    - When details are not provided by the user, fields display as "Not provided" or omit the field, with blank lines for manual signature.
+  - **Real SRS Upload & Analysis Workflow**:
+    - `frontend/app/documents/page.tsx`:
+      - Drag-and-drop or file browser supporting PDF, DOCX, and TXT.
+      - Displays selected filename, file size, and `✓ File ready` state.
+      - Prominent `[ Analyze Requirements ]` button triggering real upload and analysis pipeline.
+      - Compact summary result card upon completion showing: `Analysis Complete ✓`, Document filename, Requirements analyzed, Needs attention, Critical, Warnings, No issues.
+      - Direct action buttons: `[ Review Requirements ]` (links to Executive Review), `[ View Annotated SRS ]`, `[ Generate Report ]`, and `[ Analyze Another SRS ]`.
+  - **Settings UI**:
+    - `frontend/app/settings/page.tsx`: Interactive personal details management with form validation, backend synchronization, reload/reset, and read-only inspection engine overview.
+  - **Dynamic Shell Integration**:
+    - `frontend/components/layout/topbar.tsx`: Dynamically reflects the authoritative reviewer name and role, linking to Settings.
+    - `frontend/components/layout/sidebar.tsx`: Dynamically reflects user's organization in the workspace switcher.
+  - **Backend Compact Breakdown Endpoint**:
+    - `backend/app/api/documents.py`: Updated `POST /api/documents/{id}/analyze` response to return `needs_attention_count`, `critical_count`, `warning_count`, `no_issues_count`, and `filename`.
+  - **Verification & Automated Tests**:
+    - `backend/tests/test_profile_and_workflow.py`: 3/3 automated integration tests passing (100% pass rate).
+    - `scratch/verify_phase18_2.py`: Multi-format verification test across TXT, DOCX, and PDF passed with 100% metric consistency and valid DOCX (40.5 KB) and PDF (29.1 KB) report generation.
+    - `npm run build`: 12/12 Next.js pages cleanly compiled with zero TypeScript or lint errors.
+- **Key decisions**:
+    - Reused existing Phase 1–18 analysis pipeline without creating a redundant second engine.
+    - Zero LLM calls; strictly rule-based, classical ML, and NLI.
+    - Zero fake identities; strict adherence to Rule 10 and prompt pack requirements.
+- **How to run**:
+  - Run backend tests: `.venv\Scripts\python.exe -m pytest backend/tests/test_profile_and_workflow.py -v`
+  - Run multi-format verification: `.venv\Scripts\python.exe scratch/verify_phase18_2.py`
+  - Access Documents: `http://localhost:3000/documents`
+  - Access Settings: `http://localhost:3000/settings`
+- **Known limitations**:
+  - None. All user workflow and personal profile requirements are complete and verified.
+

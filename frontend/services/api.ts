@@ -21,6 +21,7 @@ import {
   DocumentClustersResponse,
   DocumentComparisonResponse,
   DocumentReviewReport,
+  UserProfile,
 } from "../types";
 
 
@@ -210,6 +211,18 @@ export const api = {
 
   getComprehensiveDocxUrl(documentId: number): string {
     return `${API_BASE}/documents/${documentId}/review-report/docx`;
+  },
+
+  // --- Phase 18.2: User Profile ---
+  async getUserProfile(): Promise<UserProfile> {
+    return fetchJson<UserProfile>(`${API_BASE}/profile`);
+  },
+
+  async updateUserProfile(profile: Partial<UserProfile>): Promise<UserProfile> {
+    return fetchJson<UserProfile>(`${API_BASE}/profile`, {
+      method: "PUT",
+      body: JSON.stringify(profile),
+    });
   },
 };
 

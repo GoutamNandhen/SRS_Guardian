@@ -102,6 +102,9 @@ function DetailedReviewContent() {
         setDecisionSaved(false);
         const data = await api.getReviewReport(selectedDocId!);
         setReport(data);
+        if (data.reviewer_profile?.full_name && data.reviewer_profile.full_name !== "Not provided") {
+          setReviewerName(data.reviewer_profile.full_name);
+        }
         if (data.requirements && data.requirements.length > 0) {
           setSelectedReqId(data.requirements[0].requirement_id);
           if (data.requirements[0].findings && data.requirements[0].findings.length > 0) {

@@ -798,9 +798,23 @@ def analyze_document(
         ],
     )
 
+    # Calculate compact breakdown counts for Phase 18.2
+    all_doc_issues = (
+        db.query(Issue)
+        .filter(Issue.requirement_id.in_(req_ids))
+        .all()
+    ) if req_ids else []
+    req_ids_needing_attention = {
+        i.requirement_id for i in all_doc_issues if i.severity in ("critical", "warning")
+    }
+    needs_att_cnt = len(req_ids_needing_attention)
+    crit_cnt = sum(1 for i in all_doc_issues if i.severity == "critical")
+    warn_cnt = sum(1 for i in all_doc_issues if i.severity == "warning")
+    no_iss_cnt = max(0, len(reqs) - needs_att_cnt)
+
     logger.info(
         f"Document {document_id} analyzed: {len(new_issues)} new issues persisted, "
-        f"{total_issues} total issues recorded"
+        f"{total_issues} total issues recorded (critical: {crit_cnt}, warning: {warn_cnt})"
     )
 
     return DocumentAnalysisResponse(
@@ -809,6 +823,11 @@ def analyze_document(
         requirements_count=len(reqs),
         issues_count=total_issues,
         quality_summary=summary_response,
+        filename=doc.filename,
+        needs_attention_count=needs_att_cnt,
+        critical_count=crit_cnt,
+        warning_count=warn_cnt,
+        no_issues_count=no_iss_cnt,
     )
 
 

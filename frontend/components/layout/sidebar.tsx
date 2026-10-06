@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,6 +17,7 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/services/api";
 
 interface NavItem {
   name: string;
@@ -38,6 +39,24 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [organization, setOrganization] = useState<string>("SRS Guardian Workspace");
+
+  useEffect(() => {
+    let isMounted = true;
+    api
+      .getUserProfile()
+      .then((data) => {
+        if (isMounted && data.organization) {
+          setOrganization(data.organization);
+        }
+      })
+      .catch(() => {
+        // Fallback silently if offline or uninitialized
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none">
@@ -59,7 +78,11 @@ export function Sidebar() {
 
         {/* Workspace Selector */}
         <div className="p-2 border-b border-outline-variant/40">
-          <div className="px-2 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:bg-surface-container transition-colors">
+          <Link
+            href="/settings"
+            title="Configure organization in Settings"
+            className="px-2 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:bg-surface-container transition-colors"
+          >
             <div className="flex items-center gap-2 overflow-hidden">
               <Building2 className="w-4 h-4 text-outline flex-shrink-0" />
               <div className="truncate">
@@ -67,12 +90,12 @@ export function Sidebar() {
                   Workspace
                 </p>
                 <p className="text-xs font-medium text-on-surface truncate leading-tight mt-0.5">
-                  Avionics / FlightControl
+                  {organization}
                 </p>
               </div>
             </div>
             <ChevronsUpDown className="w-3.5 h-3.5 text-outline flex-shrink-0" />
-          </div>
+          </Link>
         </div>
 
         {/* Navigation Items */}

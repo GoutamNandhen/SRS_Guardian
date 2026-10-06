@@ -56,9 +56,17 @@ class IssueResponse(BaseModel):
         return v if isinstance(v, dict) else {}
 
 
+from typing import Optional
+
+
 class DocumentAnalysisResponse(BaseModel):
     document_id: int
     status: str
     requirements_count: int
     issues_count: int
     quality_summary: DocumentQualitySummaryResponse
+    filename: Optional[str] = None
+    needs_attention_count: Optional[int] = None
+    critical_count: Optional[int] = None
+    warning_count: Optional[int] = None
+    no_issues_count: Optional[int] = None

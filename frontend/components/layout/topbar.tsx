@@ -1,17 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Search,
-  Bell,
   Sun,
   Moon,
   User,
-  ShieldCheck,
 } from "lucide-react";
+import { api } from "@/services/api";
+import { UserProfile } from "@/types";
 
 export function Topbar() {
   const [isDark, setIsDark] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    api
+      .getUserProfile()
+      .then((data) => {
+        if (isMounted) setProfile(data);
+      })
+      .catch(() => {
+        // Fallback silently if offline or uninitialized
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -21,6 +38,9 @@ export function Topbar() {
       document.documentElement.classList.remove("dark");
     }
   };
+
+  const displayName = profile?.full_name || "Reviewer";
+  const displayRole = profile?.role || "Requirements Engineer";
 
   return (
     <header className="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest border-b border-outline-variant/40 z-40 flex items-center justify-between px-6 select-none">
@@ -69,15 +89,23 @@ export function Topbar() {
         </button>
 
         {/* User Chip */}
-        <div className="flex items-center gap-2 pl-1 border-l border-outline-variant/40">
+        <Link
+          href="/settings"
+          title="Manage reviewer profile in Settings"
+          className="flex items-center gap-2 pl-1 border-l border-outline-variant/40 hover:opacity-80 transition-opacity"
+        >
           <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
             <User className="w-3.5 h-3.5" />
           </div>
           <div className="hidden lg:flex flex-col text-left text-xs">
-            <span className="font-medium text-on-surface leading-tight">Alex Chen</span>
-            <span className="text-[10px] text-outline leading-tight">Lead Engineer</span>
+            <span className="font-medium text-on-surface leading-tight">
+              {displayName}
+            </span>
+            <span className="text-[10px] text-outline leading-tight">
+              {displayRole}
+            </span>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

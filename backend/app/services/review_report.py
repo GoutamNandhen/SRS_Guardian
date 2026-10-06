@@ -27,6 +27,7 @@ import re
 
 from backend.app.core.config import settings
 from backend.app.models.document import Document, Requirement, Issue, Review
+from backend.app.models.user_profile import UserProfile
 from backend.app.schemas.review_report import (
     FindingSpan,
     AnnotatedFinding,
@@ -682,6 +683,13 @@ def build_review_report_data(document_id: int, db: Session) -> Dict[str, Any]:
         "ai_suggestions": ai_suggestions_list,
         "review_stats": review_stats,
         "system_eval": system_eval,
+        "reviewer_profile": {
+            "full_name": (db.query(UserProfile).order_by(UserProfile.id.asc()).first().full_name if db.query(UserProfile).first() and db.query(UserProfile).first().full_name else "Not provided"),
+            "email": (db.query(UserProfile).order_by(UserProfile.id.asc()).first().email if db.query(UserProfile).first() and db.query(UserProfile).first().email else "Not provided"),
+            "organization": (db.query(UserProfile).order_by(UserProfile.id.asc()).first().organization if db.query(UserProfile).first() and db.query(UserProfile).first().organization else "Not provided"),
+            "role": (db.query(UserProfile).order_by(UserProfile.id.asc()).first().role if db.query(UserProfile).first() and db.query(UserProfile).first().role else "Not provided"),
+            "phone": (db.query(UserProfile).order_by(UserProfile.id.asc()).first().phone if db.query(UserProfile).first() and db.query(UserProfile).first().phone else "Not provided"),
+        },
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
         "mod_breakdown": {
             "ambiguity": "6 rule checks (weak terms, modals, metrics, pronouns, compound, passive)",
@@ -936,6 +944,10 @@ def generate_comprehensive_docx_report(document_id: int, db: Session) -> bytes:
     else:
         status_run.font.color.rgb = RGBColor(21, 128, 61)
 
+    rev_prof = data.get("reviewer_profile", {})
+    if rev_prof.get("full_name") and rev_prof["full_name"] != "Not provided":
+        p_meta.add_run(f"Reviewer: {rev_prof['full_name']} ({rev_prof.get('role', 'Reviewer')})  |  Organization: {rev_prof.get('organization', 'Not provided')}\n")
+
     p_meta.add_run(f"Mean Quality Score: {quality_summary.get('mean_score', 0):.1f} / 100  |  Generated: {data['generated_at']}")
 
     # 1. Executive Summary Table
@@ -1008,7 +1020,8 @@ def generate_comprehensive_docx_report(document_id: int, db: Session) -> bytes:
     add_sec_heading("4. Reviewer Decision & Sign-off")
     p_dec = doc.add_paragraph()
     p_dec.add_run("Decision:   [   ] Accept All      [   ] Accept with Edits      [   ] Reject / Needs Rework\n").bold = True
-    p_dec.add_run("Reviewer Name: _____________________________________      Date: ____________________\n\n")
+    rev_display_name = rev_prof.get("full_name", "") if rev_prof.get("full_name") != "Not provided" else "_____________________________________"
+    p_dec.add_run(f"Reviewer Name: {rev_display_name}      Date: ____________________\n\n")
     p_dec.add_run("Reviewer Comments / Sign-off Notes:\n")
     p_dec.add_run("_________________________________________________________________________________\n")
     p_dec.add_run("_________________________________________________________________________________")

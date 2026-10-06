@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: ALL PHASES COMPLETE (Phases 0 through 18.1)
+- **Current Phase**: ALL PHASES COMPLETE (Phases 0 through 18.2)
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation), Phase 17 (Packaging, Documentation, and Final Presentation Readiness), Phase 18 (Explainable Visual Review & Comprehensive Reporting), Phase 18.1 (Simplified Review Output & SHAP Appendix).
-- **Current Task**: All planned phases (0 to 18.1) are 100% complete, fully verified with automated test suites and live evaluation benchmarks, containerized via Docker and Docker Compose, and comprehensively documented for final-year project defense.
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation), Phase 17 (Packaging, Documentation, and Final Presentation Readiness), Phase 18 (Explainable Visual Review & Comprehensive Reporting), Phase 18.1 (Simplified Review Output & SHAP Appendix), Phase 18.2 (Final User Workflow & Personal Details).
+- **Current Task**: All planned phases (0 to 18.2) are 100% complete, fully verified with automated test suites and live evaluation benchmarks across TXT, DOCX, and PDF formats, containerized via Docker, and documented for final-year project defense.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -90,13 +90,21 @@
     - Primary output re-architected to prioritize human reviewer scannability: Page 1 Executive Summary Table (`Requirement | Status | Finding Summary | Suggested Action`), Important Findings cards, No Issue Detected list, and Reviewer Decision & Sign-off Block.
     - Section 6 / Final Section: Classifier Feature Attribution (SHAP) Appendix with real TF-IDF + Logistic Regression linear explainability via `backend.app.ml.explain_classifier.explain` (CPU real-time and cached, showing tokens, SHAP values, and plain-English interpretations).
     - Report integrity fixes: 100% scoring consistency (81.7/100 verified), target requirement resolution (`REQ-003`), pair finding deduplication, and contradiction prioritization over duplicates for quantitative conflicts.
-  - Frontend Interactive Detailed Review Page in `frontend/app/reports/review/page.tsx`:
-    - Tab Switcher: `[Executive Review]` (default executive report layout with decision block) and `[Interactive Workbench]` (3-pane span highlight and inspection interface).
-  - Dynamic redirect route `frontend/app/reports/review/[id]/page.tsx`.
+  - Phase 18.2 Final User Workflow & Personal Details:
+    - `backend/app/models/user_profile.py`: Authoritative `UserProfile` model for persistent reviewer details (full name, email, organization, role, phone).
+    - `backend/app/api/profile.py`: Dedicated `/api/profile` endpoints (GET and PUT) for storing and reloading reviewer identities.
+    - `backend/app/api/documents.py`: Updated `POST /api/documents/{id}/analyze` to return real compact breakdown fields: `filename`, `requirements_count`, `needs_attention_count`, `critical_count`, `warning_count`, `no_issues_count`.
+    - Report generators (`backend/app/services/reports.py` and `backend/app/services/review_report.py`): Injected authoritative reviewer profile into HTML, DOCX, and PDF headers and sign-off blocks.
+    - Placeholder Removal: Eliminated all hardcoded demo identities (no "Alex Chen" or fake organizations); missing profile fields cleanly default to `Not provided` / None.
+    - Frontend User Experience:
+      - `frontend/app/settings/page.tsx`: Full interactive personal details management with real backend synchronization.
+      - `frontend/app/documents/page.tsx`: Streamlined upload experience showing file format, size, `✓ File ready` state, real analysis execution, and compact summary card with direct links to Review Requirements, Annotated SRS, and Reports.
+      - `frontend/components/layout/topbar.tsx` & `sidebar.tsx`: Live profile and organization dynamic display.
 
 ## What Has Actually Been Verified
-- `pytest backend/tests/test_review_report.py -v`: 6/6 unit and integration tests pass with 100% pass rate in 39.97s (verifying score consistency, status determination, executive table structure, pair deduplication, and real SHAP attributions).
-- `python scratch/verify_phase18.py`: Live end-to-end demonstration on `data/test/sample_srs.txt` passed, verified REQ-001 ambiguity ('quickly'), REQ-002/003 duplicate, REQ-004/005 contradiction, REQ-006 acceptable (score 100), document score 81.7, and generated all 3 artifacts (`sample_srs_annotated.pdf`, `sample_srs_comprehensive_report.pdf`, `sample_srs_comprehensive_report.docx`).
+- `pytest backend/tests/test_profile_and_workflow.py -v`: 3/3 tests pass (100% pass rate) verifying profile CRUD, compact breakdown metrics, and report injection.
+- `pytest backend/tests/test_review_report.py -v`: 6/6 tests pass (100% pass rate).
+- `python scratch/verify_phase18_2.py`: Live end-to-end multi-format verification on TXT, DOCX, and PDF documents passed with 100% arithmetic breakdown consistency, zero placeholder leakage, and valid DOCX (40.5 KB) and PDF (29.1 KB) report generation.
 - `npm run build`: 12/12 Next.js pages cleanly compiled with zero TypeScript or lint errors.
 - Live execution on sample document (`data/test/sample_srs.txt`):
   - Clustered into 4 distinct functional groups:

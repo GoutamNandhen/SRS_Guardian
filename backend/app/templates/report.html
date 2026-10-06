@@ -176,6 +176,9 @@
     Document: <strong>{{ document.filename }}</strong> |
     Format: {{ document.file_type | upper }} |
     Status: {{ document.status | upper }} |
+    {% if reviewer_profile and reviewer_profile.full_name != 'Not provided' %}
+    Reviewer: <strong>{{ reviewer_profile.full_name }}</strong> ({{ reviewer_profile.role }}) |
+    {% endif %}
     Report Date: {{ generated_at }}
   </div>
 </div>

@@ -135,6 +135,12 @@
         <div class="main-title">SRS GUARDIAN — Software Requirement Review</div>
         <div class="meta-bar">
             <strong>Document:</strong> {{ document.filename }} &nbsp;|&nbsp;
+            {% if reviewer_profile and reviewer_profile.full_name != 'Not provided' %}
+            <strong>Reviewer:</strong> {{ reviewer_profile.full_name }} ({{ reviewer_profile.role }}) &nbsp;|&nbsp;
+            {% if reviewer_profile.organization != 'Not provided' %}
+            <strong>Org:</strong> {{ reviewer_profile.organization }} &nbsp;|&nbsp;
+            {% endif %}
+            {% endif %}
             <strong>Requirements Reviewed:</strong> {{ total_requirements }} &nbsp;|&nbsp;
             <strong>Overall Status:</strong>
             {% if overall_status == 'NEEDS ATTENTION' %}
@@ -230,7 +236,7 @@
     <h2>4. Reviewer Decision & Sign-off</h2>
     <div class="decision-box">
         <p><strong>Reviewer Action:</strong> &nbsp;&nbsp; [ &nbsp; ] Accept All &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Accept with Edits &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Reject / Needs Rework</p>
-        <p style="margin-top: 8px;"><strong>Reviewer Name:</strong> ____________________________________ &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> ____________________</p>
+        <p style="margin-top: 8px;"><strong>Reviewer Name:</strong> {% if reviewer_profile and reviewer_profile.full_name != 'Not provided' %}{{ reviewer_profile.full_name }} ({{ reviewer_profile.role }}){% else %}____________________________________{% endif %} &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> ____________________</p>
         <p style="margin-top: 8px;"><strong>Reviewer Comments / Sign-off Notes:</strong></p>
         <p style="color: #64748b; margin-top: 14px;">___________________________________________________________________________________________________</p>
     </div>

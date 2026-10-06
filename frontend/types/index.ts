@@ -177,6 +177,21 @@ export interface DocumentAnalysisResponse {
   requirements_count: number;
   issues_count: number;
   quality_summary: DocumentQualitySummary;
+  filename?: string;
+  needs_attention_count?: number;
+  critical_count?: number;
+  warning_count?: number;
+  no_issues_count?: number;
+}
+
+export interface UserProfile {
+  id?: number;
+  full_name?: string | null;
+  email?: string | null;
+  organization?: string | null;
+  role?: string | null;
+  phone?: string | null;
+  updated_at?: string | null;
 }
 
 export interface ReviewActionRequest {
@@ -445,6 +460,7 @@ export interface DocumentReviewReport {
   system_evaluation?: any | null;
   shap_attributions?: ShapRequirementAttribution[];
   dynamic_conclusion?: string | null;
+  reviewer_profile?: UserProfile | null;
 }
 
 

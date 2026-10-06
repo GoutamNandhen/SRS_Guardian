@@ -75,6 +75,7 @@ def get_review_report_data_endpoint(
             system_evaluation=report_dict.get("system_eval"),
             shap_attributions=report_dict.get("shap_attributions"),
             dynamic_conclusion=report_dict.get("dynamic_conclusion"),
+            reviewer_profile=report_dict.get("reviewer_profile"),
         )
     except Exception as e:
         logger.error(f"Error compiling review report for document {document_id}: {e}")

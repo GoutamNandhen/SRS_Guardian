@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from xhtml2pdf import pisa
 
 from backend.app.models.document import Document, Requirement, Issue, Review
+from backend.app.models.user_profile import UserProfile
 from backend.app.nlp.ambiguity import analyze_ambiguity
 from backend.app.nlp.readability import analyze_readability
 from backend.app.nlp.scoring import score_document, score_requirement
@@ -199,6 +200,15 @@ def build_report_data(document_id: int, db: Session) -> Dict[str, Any]:
         "issues_by_status": issues_by_status,
     }
 
+    user_prof = db.query(UserProfile).order_by(UserProfile.id.asc()).first()
+    reviewer_profile = {
+        "full_name": user_prof.full_name if (user_prof and user_prof.full_name) else "Not provided",
+        "email": user_prof.email if (user_prof and user_prof.email) else "Not provided",
+        "organization": user_prof.organization if (user_prof and user_prof.organization) else "Not provided",
+        "role": user_prof.role if (user_prof and user_prof.role) else "Not provided",
+        "phone": user_prof.phone if (user_prof and user_prof.phone) else "Not provided",
+    }
+
     return {
         "document": {
             "id": doc.id,
@@ -211,6 +221,7 @@ def build_report_data(document_id: int, db: Session) -> Dict[str, Any]:
             else "",
         },
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "reviewer_profile": reviewer_profile,
         "summary": summary,
         "requirements": formatted_requirements,
         "raw_issues": all_issues,
