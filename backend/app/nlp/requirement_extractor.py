@@ -203,53 +203,69 @@ def extract_requirements(text: str) -> list[Requirement]:
         if idx not in claimed_line_indices and is_eligible(line, idx)
     ]
 
-    for idx, line in unclaimed_lines:
-        doc = nlp(line)
-        for sent in doc.sents:
-            sent_text = sent.text.strip()
-            if len(sent_text.split()) < 4:
-                continue
+    MODAL_HINT_PATTERN = re.compile(
+        r"\b(shall|must|should|will|required\s+to|needs\s+to)\b",
+        re.IGNORECASE,
+    )
+    candidate_unclaimed = [
+        (idx, line)
+        for idx, line in unclaimed_lines
+        if MODAL_HINT_PATTERN.search(line)
+    ]
 
-            has_modal = False
-            has_subject = False
+    if candidate_unclaimed:
+        candidate_texts = [line for _, line in candidate_unclaimed]
+        pipe_kwargs = {"batch_size": 256}
+        if nlp.has_pipe("ner"):
+            pipe_kwargs["disable"] = ["ner"]
 
-            # Check tokens using spaCy parsing
-            for token in sent:
-                lemma = token.lemma_.lower()
-                text_lower = token.text.lower()
+        docs = nlp.pipe(candidate_texts, **pipe_kwargs)
 
-                # Modal check
-                if text_lower in MODAL_WORDS or (
-                    token.pos_ == "AUX" and text_lower in {"shall", "must", "should", "will"}
-                ):
-                    has_modal = True
+        for (idx, line), doc in zip(candidate_unclaimed, docs):
+            for sent in doc.sents:
+                sent_text = sent.text.strip()
+                if len(sent_text.split()) < 4:
+                    continue
 
-                # Check multi-word modals ("is required to", "needs to")
-                if "required to" in sent_text.lower() or "needs to" in sent_text.lower():
-                    has_modal = True
+                has_modal = False
+                has_subject = False
 
-                # Subject check
-                if token.dep_ in ("nsubj", "nsubjpass", "csubj", "csubjpass"):
-                    has_subject = True
+                # Check tokens using spaCy parsing
+                for token in sent:
+                    text_lower = token.text.lower()
 
-            # If sent has modal and subject (or fallback modal check if parser isn't loaded)
-            if has_modal and (has_subject or not nlp.has_pipe("parser")):
-                start_c, end_c = find_offsets(text, sent_text, search_cursor)
-                search_cursor = max(search_cursor, end_c)
-                req_key = f"REQ-MOD-{layer3_counter:03d}"
-                layer3_counter += 1
-                requirements.append(
-                    Requirement(
-                        req_id=req_key,
-                        text=sent_text,
-                        source_layer="layer_3_modal_verb",
-                        confidence=0.70,
-                        char_start=start_c,
-                        char_end=end_c,
-                        section=sections_per_line[idx],
+                    # Modal check
+                    if text_lower in MODAL_WORDS or (
+                        token.pos_ == "AUX" and text_lower in {"shall", "must", "should", "will"}
+                    ):
+                        has_modal = True
+
+                    # Check multi-word modals ("is required to", "needs to")
+                    if "required to" in sent_text.lower() or "needs to" in sent_text.lower():
+                        has_modal = True
+
+                    # Subject check
+                    if token.dep_ in ("nsubj", "nsubjpass", "csubj", "csubjpass"):
+                        has_subject = True
+
+                # If sent has modal and subject (or fallback modal check if parser isn't loaded)
+                if has_modal and (has_subject or not nlp.has_pipe("parser")):
+                    start_c, end_c = find_offsets(text, sent_text, search_cursor)
+                    search_cursor = max(search_cursor, end_c)
+                    req_key = f"REQ-MOD-{layer3_counter:03d}"
+                    layer3_counter += 1
+                    requirements.append(
+                        Requirement(
+                            req_id=req_key,
+                            text=sent_text,
+                            source_layer="layer_3_modal_verb",
+                            confidence=0.70,
+                            char_start=start_c,
+                            char_end=end_c,
+                            section=sections_per_line[idx],
+                        )
                     )
-                )
-                claimed_line_indices.add(idx)
+                    claimed_line_indices.add(idx)
 
     # LAYER 4 - Fallback: If no requirements extracted by Layers 1-3
     if not requirements:

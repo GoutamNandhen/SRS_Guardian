@@ -24,9 +24,9 @@ def get_spacy_nlp() -> Language:
         try:
             _NLP = spacy.load("en_core_web_sm")
         except Exception:
-            import spacy.cli
-            spacy.cli.download("en_core_web_sm")
-            _NLP = spacy.load("en_core_web_sm")
+            _NLP = spacy.blank("en")
+            if "sentencizer" not in _NLP.pipe_names:
+                _NLP.add_pipe("sentencizer")
     return _NLP
 
 

@@ -1,9 +1,9 @@
 # PROJECT_STATE.md — Current State Snapshot
 
-- **Current Phase**: ALL PHASES COMPLETE (Phases 0 through 18.2)
+- **Current Phase**: ALL PHASES COMPLETE (Phases 0 through 18.3B)
 - **Phase Status**: COMPLETE
-- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation), Phase 17 (Packaging, Documentation, and Final Presentation Readiness), Phase 18 (Explainable Visual Review & Comprehensive Reporting), Phase 18.1 (Simplified Review Output & SHAP Appendix), Phase 18.2 (Final User Workflow & Personal Details).
-- **Current Task**: All planned phases (0 to 18.2) are 100% complete, fully verified with automated test suites and live evaluation benchmarks across TXT, DOCX, and PDF formats, containerized via Docker, and documented for final-year project defense.
+- **Completed Phases**: Phase 0 (Project Setup), Phase 1 (Document Ingestion and Text Extraction), Phase 2 (Requirement Extraction), Phase 3 (Database and API for Documents and Requirements), Phase 4 (Requirement Classification with SHAP Explainability), Phase 5 (Ambiguity Detection and Readability Analysis), Phase 6 (Semantic Duplicate Detection with Similarity Attribution), Phase 7 (Requirement Quality Score and Explanation Aggregation), Phase 8 (Human-in-the-Loop Review and MVP API Surface), Phase 9 (Report Generation), Phase 10 (Frontend Foundation), Phase 11 (MVP Core Feature Pages), Phase 12 (Contradiction Detection), Phase 13 (EARS Syntax Validation and ISO 29148 Checks), Phase 14 (AI Rewrite Suggestions and Gherkin Generation), Phase 15A (Rule-Based Gherkin Test Skeletons via EARS), Phase 15B (Requirement Clustering & Thematic Topic Labeling), Phase 15C (Version Comparison & Semantic Diffing), Phase 16 (Testing and Quantitative Evaluation), Phase 17 (Packaging, Documentation, and Final Presentation Readiness), Phase 18 (Explainable Visual Review & Comprehensive Reporting), Phase 18.1 (Simplified Review Output & SHAP Appendix), Phase 18.2 (Final User Workflow & Personal Details), Phase 18.3A (Fix Confirmed Performance Bottlenecks), Phase 18.3B (On-Demand NLI Contradiction Analysis).
+- **Current Task**: Phase 18.3B On-Demand NLI Contradiction Analysis complete: Fast initial analysis (56.24s for 1,421 reqs) provides immediate reviewability without waiting for ~8.5 min NLI; candidate pairs stored for on-demand verification individually (with loading state) or in batch ([Verify Selected]), backed by SHA-256 disk cache and content hash invalidation; zero regression on numeric conflicts or duplicates; 21/21 backend tests passing; 100% clean Next.js production build.
 
 ## What Is Actually Implemented
 - Standard project structure (`backend/app/{api,core,models,schemas,services,nlp,ml,utils}`, `frontend/`, `data/`, `docs/`, `docker/`).
@@ -134,10 +134,19 @@
   - Author formal thesis report chapters referencing `docs/PROJECT_REPORT.md`.
 
 ## Last Verification Performed
-- Full Backend Test Suite: 18 test modules passing in `backend/tests/`.
-- `python -m backend.evaluation.run_evaluation`: Full empirical benchmarking passed across all 4 capabilities, saved to `data/test/evaluation_results.json` and `docs/EVALUATION.md`.
-- `npm run build`: 11/11 Next.js pages cleanly compiled with standalone Docker runtime output.
-- Docker configuration verified (`docker-compose.yml`, `docker/Dockerfile.backend`, `docker/Dockerfile.frontend`).
+- Phase 18.3B On-Demand NLI Contradiction Analysis Verification:
+  - Fast Initial Analysis (NASA 389-page document, 1,421 reqs): 56.24s total execution time. All extraction, classification, ambiguity, readability, duplicates (175 confirmed), numeric contradictions (0), candidate generation (1,906 pairs), EARS, ISO, and quality scoring completed.
+  - On-Demand Verification Performance:
+    - Single candidate verification: 7.418s (cold model load) / ~0.35s warm.
+    - Batch candidate verification (5 selected candidates): 1.802s (~0.36s / pair).
+    - Batch candidate verification (10 selected candidates): 2.120s (~0.21s / pair).
+    - Cache hit verification (10 candidates): 0.0002s (0.2 ms).
+  - Small SRS Regression (6-req banking sample):
+    - REQ-004 vs REQ-005: Immediately flagged as CRITICAL `NUMERIC_CONSTRAINT_CONFLICT`.
+    - REQ-002 vs REQ-003: Accurately identified as WARNING `SEMANTIC_DUPLICATE`.
+    - Analysis time: 3.48s.
+  - Test Suite: 21/21 passing tests across `test_on_demand_contradictions.py`, `test_contradictions.py`, and `test_review_report.py`.
+  - Frontend Build: `npm run build` compiled 12/12 Next.js routes with 0 errors.
 
 ## Remote Repository
 - **URL**: https://github.com/GoutamNandhen/SRS_Guardian.git
@@ -145,7 +154,7 @@
 - **Rule**: Automatically commit and push to `origin main` after each phase is completed and verified.
 
 ## Metadata
-- **Last Updated**: 2026-10-06 00:49:00
-- **Last Commit Hash**: aa3c2b6
+- **Last Updated**: 2026-10-06 15:54:00
+- **Last Commit Hash**: 6bb3c7d
 
 

@@ -6,7 +6,12 @@ from backend.app.core.database import get_db
 from backend.app.core.logging import logger
 from backend.app.models.document import Issue
 from backend.app.ml.contradictions import explain_semantic_contradiction
-from backend.app.schemas.contradiction import ContradictionExplainResponse
+from backend.app.schemas.contradiction import (
+    ContradictionExplainResponse,
+    ContradictionVerifyRequest,
+    ContradictionVerifyResponse,
+    ContradictionVerifyResult,
+)
 
 router = APIRouter(prefix="/contradictions", tags=["contradictions"])
 
@@ -62,4 +67,57 @@ def explain_contradiction(
         issue_id=issue.id,
         finding_id=finding_id,
         tokens=tokens,
+    )
+
+
+@router.post(
+    "/verify",
+    response_model=ContradictionVerifyResponse,
+    summary="Verify candidate requirement pairs for semantic contradiction on-demand",
+)
+def verify_contradictions_endpoint(
+    request: ContradictionVerifyRequest,
+    db: Session = Depends(get_db),
+):
+    if request.document_id:
+        from backend.app.api.documents import verify_document_contradictions
+        return verify_document_contradictions(request.document_id, request, db=db)
+
+    from backend.app.ml.contradictions import verify_candidate_pairs
+    pairs_data = [
+        {
+            "finding_id": p.finding_id or f"SEMANTIC_CONTRADICTION_{p.req_key_1}_{p.req_key_2}",
+            "req_key_1": p.req_key_1,
+            "req_key_2": p.req_key_2,
+            "requirement_id_1": p.requirement_id_1,
+            "requirement_id_2": p.requirement_id_2,
+            "text_1": p.text_1,
+            "text_2": p.text_2,
+        }
+        for p in request.pairs
+    ]
+    verified_results = verify_candidate_pairs(pairs_data, confidence_threshold=0.70, batch_size=8)
+    results = [
+        ContradictionVerifyResult(
+            finding_id=vr["finding_id"],
+            req_key_1=vr["req_key_1"],
+            req_key_2=vr["req_key_2"],
+            requirement_id_1=vr["requirement_id_1"],
+            requirement_id_2=vr["requirement_id_2"],
+            classification=vr["nli_classification"],
+            confidence=vr["confidence"],
+            probabilities=vr.get("nli_probabilities", {}),
+            is_contradiction=vr["is_contradiction"],
+            verification_status=vr["verification_status"],
+            cached=vr["cached"],
+            human_explanation=vr["human_explanation"],
+            suggestion=vr["suggestion"],
+            issue_id=None,
+        )
+        for vr in verified_results
+    ]
+    return ContradictionVerifyResponse(
+        total_verified=len(results),
+        contradictions_found=sum(1 for r in results if r.is_contradiction),
+        results=results,
     )

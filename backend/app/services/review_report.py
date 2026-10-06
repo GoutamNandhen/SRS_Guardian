@@ -38,6 +38,7 @@ from backend.app.schemas.review_report import (
     ShapFeatureItem,
     compute_confidence_band,
 )
+from backend.app.ml.contradictions import load_document_candidates
 from backend.app.nlp.scoring import score_requirement, score_document
 from backend.app.nlp.ears import analyze_ears
 from backend.app.ml.explain_classifier import explain
@@ -678,6 +679,7 @@ def build_review_report_data(document_id: int, db: Session) -> Dict[str, Any]:
         "iso_stats": iso_stats,
         "duplicate_findings": [d.model_dump() for d in deduped_duplicate_findings],
         "contradiction_findings": [c.model_dump() for c in deduped_contradiction_findings],
+        "unverified_candidates_count": sum(1 for c in load_document_candidates(document_id) if c.get("verification_status") == "unverified"),
         "shap_attributions": shap_attributions,
         "dynamic_conclusion": dynamic_conclusion,
         "ai_suggestions": ai_suggestions_list,
@@ -1108,6 +1110,14 @@ def generate_comprehensive_docx_report(document_id: int, db: Session) -> bytes:
             row.cells[3].paragraphs[0].add_run(c.get("suggestion") or "Resolve constraint conflict")
     else:
         doc.add_paragraph("No contradiction pairs detected.")
+
+    if data.get("unverified_candidates_count", 0) > 0:
+        c_cnt = data["unverified_candidates_count"]
+        p_c_note = doc.add_paragraph()
+        p_c_note.add_run(
+            f"Notice: {c_cnt} additional semantic contradiction candidate{'s' if c_cnt > 1 else ''} "
+            f"require on-demand verification in the review interface."
+        ).italic = True
 
     doc.add_paragraph()
 

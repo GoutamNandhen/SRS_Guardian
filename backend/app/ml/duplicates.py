@@ -19,8 +19,14 @@ class KeyPhrase:
     phrase_type: str  # "noun_chunk", "verb_phrase", or "token"
 
 
+_PHRASE_CACHE: dict[str, list[KeyPhrase]] = {}
+
+
 def extract_key_phrases(text: str) -> list[KeyPhrase]:
     """Extracts informative noun chunks and verb-object action phrases from text."""
+    if text in _PHRASE_CACHE:
+        return _PHRASE_CACHE[text]
+
     doc = nlp(text)
     phrases: list[KeyPhrase] = []
     seen_spans: set[tuple[int, int]] = set()
@@ -78,6 +84,7 @@ def extract_key_phrases(text: str) -> list[KeyPhrase]:
                     )
                 )
 
+    _PHRASE_CACHE[text] = phrases
     return phrases
 
 
@@ -190,6 +197,32 @@ def extract_content_lemmas(text: str) -> set[str]:
     }
 
 
+def batch_extract_content_lemmas(texts: list[str]) -> list[set[str]]:
+    """Batched extraction of content lemmas using spaCy nlp.pipe with parser/ner disabled."""
+    if not texts:
+        return []
+    pipe_kwargs = {"batch_size": 256}
+    disabled = []
+    if nlp.has_pipe("ner"):
+        disabled.append("ner")
+    if nlp.has_pipe("parser"):
+        disabled.append("parser")
+    if disabled:
+        pipe_kwargs["disable"] = disabled
+
+    results: list[set[str]] = []
+    for doc in nlp.pipe(texts, **pipe_kwargs):
+        lemmas = {
+            token.lemma_.lower()
+            for token in doc
+            if token.pos_ in ("NOUN", "PROPN", "VERB")
+            and not token.is_stop
+            and len(token.text) > 2
+        }
+        results.append(lemmas)
+    return results
+
+
 def find_duplicates(
     requirements: list[dict[str, Any]],
     threshold: float | None = None,
@@ -216,69 +249,91 @@ def find_duplicates(
 
     # 2. Candidate pair selection (blocking for >50 requirements)
     use_blocking = n > 50
-    lemma_sets = [extract_content_lemmas(t) for t in texts] if use_blocking else []
+    lemma_sets = batch_extract_content_lemmas(texts) if use_blocking else []
 
-    candidate_pairs: list[tuple[int, int]] = []
-    for i in range(n):
-        for j in range(i + 1, n):
-            if use_blocking:
-                if not lemma_sets[i].intersection(lemma_sets[j]):
-                    continue
-            candidate_pairs.append((i, j))
+    candidate_i: list[int] = []
+    candidate_j: list[int] = []
 
-    total_pairs_checked = len(candidate_pairs)
+    if use_blocking:
+        for i in range(n):
+            l1 = lemma_sets[i]
+            for j in range(i + 1, n):
+                if l1.intersection(lemma_sets[j]):
+                    candidate_i.append(i)
+                    candidate_j.append(j)
+    else:
+        for i in range(n):
+            for j in range(i + 1, n):
+                candidate_i.append(i)
+                candidate_j.append(j)
+
+    total_pairs_checked = len(candidate_i)
+    if total_pairs_checked == 0:
+        return [], 0
+
+    # 3. Vectorized similarity calculation across all candidates in one shot
+    i_arr = np.array(candidate_i, dtype=np.int32)
+    j_arr = np.array(candidate_j, dtype=np.int32)
+    # Cosine similarity for normalized embeddings: dot product of row pairs
+    sims = np.sum(embeddings[i_arr] * embeddings[j_arr], axis=1)
+
+    # 4. Filter only pairs exceeding threshold
+    match_mask = sims >= threshold
+    matching_indices = np.where(match_mask)[0]
+
     duplicate_results: list[dict[str, Any]] = []
 
-    # 3. Evaluate candidate pairs
-    for i, j in candidate_pairs:
-        sim = float(np.dot(embeddings[i], embeddings[j]))
-        if sim >= threshold:
-            r1 = requirements[i]
-            r2 = requirements[j]
+    for idx in matching_indices:
+        i = candidate_i[idx]
+        j = candidate_j[idx]
+        sim = float(sims[idx])
 
-            # Perform similarity attribution
-            aligned_pairs, spans, factors = attribute_similarity(
-                r1["text"], r2["text"]
-            )
+        r1 = requirements[i]
+        r2 = requirements[j]
 
-            matched_phrases_summary = ", ".join(
-                f"'{p['phrase_1']}' <-> '{p['phrase_2']}'"
-                for p in aligned_pairs[:2]
-            ) or "overall semantic meaning"
+        # Perform similarity attribution
+        aligned_pairs, spans, factors = attribute_similarity(
+            r1["text"], r2["text"]
+        )
 
-            explanation = {
-                "finding_id": f"DUP-{r1['id']}-{r2['id']}",
-                "module": "duplicates",
-                "method": "embedding_similarity",
-                "rule_id": "SEMANTIC_DUPLICATE",
-                "spans": spans,
-                "factors": factors,
-                "human_explanation": (
-                    f"POTENTIAL duplicate detected between {r1['req_key']} and "
-                    f"{r2['req_key']} with semantic similarity of {sim * 100:.1f}%. "
-                    f"Aligned concepts: {matched_phrases_summary}."
-                ),
-                "suggestion": (
-                    "Review both requirements to consolidate duplicate "
-                    "functionality or clearly differentiate their scope."
-                ),
-                "confidence": round(sim, 4),
+        matched_phrases_summary = ", ".join(
+            f"'{p['phrase_1']}' <-> '{p['phrase_2']}'"
+            for p in aligned_pairs[:2]
+        ) or "overall semantic meaning"
+
+        explanation = {
+            "finding_id": f"DUP-{r1['id']}-{r2['id']}",
+            "module": "duplicates",
+            "method": "embedding_similarity",
+            "rule_id": "SEMANTIC_DUPLICATE",
+            "spans": spans,
+            "factors": factors,
+            "human_explanation": (
+                f"POTENTIAL duplicate detected between {r1['req_key']} and "
+                f"{r2['req_key']} with semantic similarity of {sim * 100:.1f}%. "
+                f"Aligned concepts: {matched_phrases_summary}."
+            ),
+            "suggestion": (
+                "Review both requirements to consolidate duplicate "
+                "functionality or clearly differentiate their scope."
+            ),
+            "confidence": round(sim, 4),
+        }
+
+        duplicate_results.append(
+            {
+                "requirement_id_1": r1["id"],
+                "req_key_1": r1["req_key"],
+                "text_1": r1["text"],
+                "requirement_id_2": r2["id"],
+                "req_key_2": r2["req_key"],
+                "text_2": r2["text"],
+                "similarity_score": round(sim, 4),
+                "is_potential_duplicate": True,
+                "aligned_phrases": aligned_pairs,
+                "explanation": explanation,
             }
-
-            duplicate_results.append(
-                {
-                    "requirement_id_1": r1["id"],
-                    "req_key_1": r1["req_key"],
-                    "text_1": r1["text"],
-                    "requirement_id_2": r2["id"],
-                    "req_key_2": r2["req_key"],
-                    "text_2": r2["text"],
-                    "similarity_score": round(sim, 4),
-                    "is_potential_duplicate": True,
-                    "aligned_phrases": aligned_pairs,
-                    "explanation": explanation,
-                }
-            )
+        )
 
     duplicate_results.sort(key=lambda x: x["similarity_score"], reverse=True)
     return duplicate_results, total_pairs_checked

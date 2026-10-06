@@ -182,6 +182,8 @@ export interface DocumentAnalysisResponse {
   critical_count?: number;
   warning_count?: number;
   no_issues_count?: number;
+  contradiction_candidates_count?: number;
+  contradiction_verification_mode?: string;
 }
 
 export interface UserProfile {
@@ -255,6 +257,9 @@ export interface ContradictionItem {
   human_explanation: string;
   suggestion: string;
   status: "ai_flagged" | "accepted" | "rejected" | "reviewed" | "edited";
+  verification_status?: "verified" | "unverified" | "no_contradiction";
+  nli_classification?: "contradiction" | "neutral" | "entailment" | string | null;
+  cached?: boolean;
 }
 
 export interface DocumentContradictionsResponse {
@@ -262,6 +267,7 @@ export interface DocumentContradictionsResponse {
   total_contradictions_count: number;
   numeric_conflicts_count: number;
   semantic_contradictions_count: number;
+  candidates_count?: number;
   contradictions: ContradictionItem[];
 }
 
@@ -269,6 +275,44 @@ export interface ContradictionExplainResponse {
   issue_id: number;
   finding_id: string;
   tokens: { token: string; attribution: number }[];
+}
+
+export interface ContradictionVerifyPairInput {
+  req_key_1: string;
+  req_key_2: string;
+  text_1?: string;
+  text_2?: string;
+  requirement_id_1?: number | null;
+  requirement_id_2?: number | null;
+  finding_id?: string;
+}
+
+export interface ContradictionVerifyRequest {
+  document_id?: number;
+  pairs: ContradictionVerifyPairInput[];
+  confidence_threshold?: number;
+}
+
+export interface ContradictionVerifyResult {
+  finding_id: string;
+  req_key_1: string;
+  req_key_2: string;
+  requirement_id_1?: number | null;
+  requirement_id_2?: number | null;
+  classification: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+  is_contradiction: boolean;
+  cached: boolean;
+  human_explanation: string;
+  suggestion: string;
+  issue_id?: number | null;
+}
+
+export interface ContradictionVerifyResponse {
+  total_verified: number;
+  contradictions_found: number;
+  results: ContradictionVerifyResult[];
 }
 
 export interface RewriteSuggestionResponse {

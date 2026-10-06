@@ -13,6 +13,8 @@ import {
   DocumentDuplicatesResponse,
   DocumentContradictionsResponse,
   ContradictionExplainResponse,
+  ContradictionVerifyPairInput,
+  ContradictionVerifyResponse,
   DocumentStandardsResponse,
   Issue,
   ReviewActionRequest,
@@ -152,6 +154,21 @@ export const api = {
 
   async explainContradiction(issueId: number): Promise<ContradictionExplainResponse> {
     return fetchJson<ContradictionExplainResponse>(`${API_BASE}/contradictions/${issueId}/explain`);
+  },
+
+  async verifyDocumentContradictions(
+    documentId: number,
+    pairs: ContradictionVerifyPairInput[],
+    confidenceThreshold?: number,
+  ): Promise<ContradictionVerifyResponse> {
+    return fetchJson<ContradictionVerifyResponse>(`${API_BASE}/documents/${documentId}/contradictions/verify`, {
+      method: "POST",
+      body: JSON.stringify({
+        document_id: documentId,
+        pairs,
+        confidence_threshold: confidenceThreshold ?? 0.7,
+      }),
+    });
   },
 
   async getDocumentStandards(documentId: number): Promise<DocumentStandardsResponse> {

@@ -22,6 +22,9 @@ import {
   GitCompare,
   BookOpen,
   Sparkles,
+  Loader2,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -128,6 +131,150 @@ function AnalysisPageContent() {
       console.error("Failed to fetch contradiction attribution:", err);
     } finally {
       setExplainingIssueId(null);
+    }
+  };
+
+  // Phase 18.3B: On-demand contradiction verification state
+  const [verifyingFindingIds, setVerifyingFindingIds] = useState<Record<string, boolean>>({});
+  const [selectedCandidateFindingIds, setSelectedCandidateFindingIds] = useState<string[]>([]);
+  const [isVerifyingBatch, setIsVerifyingBatch] = useState(false);
+  const [verificationFeedback, setVerificationFeedback] = useState<Record<string, string>>({});
+
+  const handleToggleSelectCandidate = (findingId: string) => {
+    setSelectedCandidateFindingIds((prev) =>
+      prev.includes(findingId) ? prev.filter((id) => id !== findingId) : [...prev, findingId]
+    );
+  };
+
+  const handleToggleSelectAllCandidates = () => {
+    const unverifiedIds = contradictions
+      .filter((c) => c.verification_status === "unverified")
+      .map((c) => c.finding_id);
+    if (selectedCandidateFindingIds.length === unverifiedIds.length) {
+      setSelectedCandidateFindingIds([]);
+    } else {
+      setSelectedCandidateFindingIds(unverifiedIds);
+    }
+  };
+
+  const handleVerifySingle = async (item: ContradictionItem) => {
+    if (!selectedDocId) return;
+    const fid = item.finding_id;
+    setVerifyingFindingIds((prev) => ({ ...prev, [fid]: true }));
+    setVerificationFeedback((prev) => {
+      const next = { ...prev };
+      delete next[fid];
+      return next;
+    });
+
+    try {
+      const pair = {
+        req_key_1: item.req_key_1,
+        req_key_2: item.req_key_2,
+        text_1: item.text_1,
+        text_2: item.text_2,
+        requirement_id_1: item.requirement_id_1,
+        requirement_id_2: item.requirement_id_2,
+        finding_id: item.finding_id,
+      };
+      const res = await api.verifyDocumentContradictions(selectedDocId, [pair]);
+      if (res.results && res.results.length > 0) {
+        const r = res.results[0];
+        setContradictions((prev) =>
+          prev.map((c) => {
+            if (c.finding_id === fid) {
+              return {
+                ...c,
+                verification_status: r.is_contradiction ? "verified" : "no_contradiction",
+                nli_classification: r.classification,
+                confidence: r.confidence,
+                cached: r.cached,
+                severity: r.is_contradiction ? "critical" : "info",
+                issue_id: r.issue_id || c.issue_id,
+                human_explanation: r.human_explanation || c.human_explanation,
+                suggestion: r.suggestion || c.suggestion,
+              };
+            }
+            return c;
+          })
+        );
+        setVerificationFeedback((prev) => ({
+          ...prev,
+          [fid]: r.is_contradiction
+            ? `Contradiction verified (${Math.round(r.confidence * 100)}% confidence${r.cached ? ", cached" : ""})`
+            : `No semantic contradiction detected (${r.classification}, ${Math.round(r.confidence * 100)}% confidence${r.cached ? ", cached" : ""})`,
+        }));
+      }
+    } catch {
+      setVerificationFeedback((prev) => ({
+        ...prev,
+        [fid]: "Contradiction verification could not be completed. Please try again.",
+      }));
+    } finally {
+      setVerifyingFindingIds((prev) => {
+        const next = { ...prev };
+        delete next[fid];
+        return next;
+      });
+    }
+  };
+
+  const handleVerifySelected = async () => {
+    if (!selectedDocId || selectedCandidateFindingIds.length === 0) return;
+    setIsVerifyingBatch(true);
+
+    const itemsToVerify = contradictions.filter((c) =>
+      selectedCandidateFindingIds.includes(c.finding_id)
+    );
+    const pairs = itemsToVerify.map((item) => ({
+      req_key_1: item.req_key_1,
+      req_key_2: item.req_key_2,
+      text_1: item.text_1,
+      text_2: item.text_2,
+      requirement_id_1: item.requirement_id_1,
+      requirement_id_2: item.requirement_id_2,
+      finding_id: item.finding_id,
+    }));
+
+    try {
+      const res = await api.verifyDocumentContradictions(selectedDocId, pairs);
+      const resultMap = new Map(res.results.map((r) => [r.finding_id, r]));
+
+      setContradictions((prev) =>
+        prev.map((c) => {
+          const r = resultMap.get(c.finding_id);
+          if (r) {
+            return {
+              ...c,
+              verification_status: r.is_contradiction ? "verified" : "no_contradiction",
+              nli_classification: r.classification,
+              confidence: r.confidence,
+              cached: r.cached,
+              severity: r.is_contradiction ? "critical" : "info",
+              issue_id: r.issue_id || c.issue_id,
+              human_explanation: r.human_explanation || c.human_explanation,
+              suggestion: r.suggestion || c.suggestion,
+            };
+          }
+          return c;
+        })
+      );
+
+      const newFeedback: Record<string, string> = {};
+      res.results.forEach((r) => {
+        newFeedback[r.finding_id] = r.is_contradiction
+          ? `Contradiction verified (${Math.round(r.confidence * 100)}% confidence${r.cached ? ", cached" : ""})`
+          : `No semantic contradiction detected (${r.classification}, ${Math.round(r.confidence * 100)}% confidence${r.cached ? ", cached" : ""})`;
+      });
+      setVerificationFeedback((prev) => ({ ...prev, ...newFeedback }));
+      setSelectedCandidateFindingIds([]);
+    } catch {
+      setActionNotice({
+        type: "error",
+        message: "Contradiction verification could not be completed. Please try again.",
+      });
+    } finally {
+      setIsVerifyingBatch(false);
     }
   };
 
@@ -399,7 +546,12 @@ function AnalysisPageContent() {
           <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
           <span>Contradictions</span>
           <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 border border-rose-200">
-            {contradictions.length}
+            {contradictions.filter((c) => c.verification_status === "verified" || (!c.verification_status && c.mechanism === "numeric")).length}
+            {contradictions.some((c) => c.verification_status === "unverified") && (
+              <span className="ml-1 text-sky-700">
+                (+{contradictions.filter((c) => c.verification_status === "unverified").length} cand)
+              </span>
+            )}
           </span>
         </button>
 
@@ -626,44 +778,203 @@ function AnalysisPageContent() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-on-surface flex items-center justify-between">
+            {/* Phase 18.3B: Summary Banner & Batch Verification Toolbar */}
+            <div className="p-3.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600" />
-                <span>
-                  Detected <strong>{contradictions.length} potential contradiction{contradictions.length > 1 ? "s" : ""}</strong> (
-                  {contradictions.filter((c) => c.mechanism === "numeric").length} numeric constraint conflicts,{" "}
-                  {contradictions.filter((c) => c.mechanism === "semantic").length} semantic contradictions). Every detection requires human engineer review.
+                <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <span className="text-on-surface">
+                  <strong>
+                    {contradictions.filter((c) => c.verification_status === "verified" || (!c.verification_status && c.mechanism === "numeric")).length} confirmed contradiction{contradictions.filter((c) => c.verification_status === "verified" || (!c.verification_status && c.mechanism === "numeric")).length === 1 ? "" : "s"}
+                  </strong>{" "}
+                  ({contradictions.filter((c) => c.mechanism === "numeric").length} numeric conflict{contradictions.filter((c) => c.mechanism === "numeric").length === 1 ? "" : "s"},{" "}
+                  {contradictions.filter((c) => c.mechanism === "semantic" && c.verification_status === "verified").length} verified semantic).
+                  {contradictions.some((c) => c.verification_status === "unverified") && (
+                    <span className="ml-1 text-sky-800 dark:text-sky-300 font-semibold">
+                      {contradictions.filter((c) => c.verification_status === "unverified").length} candidate pair{contradictions.filter((c) => c.verification_status === "unverified").length === 1 ? "" : "s"} awaiting on-demand verification.
+                    </span>
+                  )}
                 </span>
               </div>
+
+              {contradictions.some((c) => c.verification_status === "unverified") && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleToggleSelectAllCandidates}
+                    className="px-2.5 py-1 text-xs font-medium rounded-lg border border-outline-variant/60 bg-surface-container hover:bg-surface-container-high transition-colors flex items-center gap-1.5"
+                  >
+                    {selectedCandidateFindingIds.length === contradictions.filter((c) => c.verification_status === "unverified").length &&
+                    contradictions.some((c) => c.verification_status === "unverified") ? (
+                      <CheckSquare className="w-3.5 h-3.5 text-secondary" />
+                    ) : (
+                      <Square className="w-3.5 h-3.5 text-outline" />
+                    )}
+                    <span>
+                      Select All ({contradictions.filter((c) => c.verification_status === "unverified").length})
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={selectedCandidateFindingIds.length === 0 || isVerifyingBatch}
+                    onClick={handleVerifySelected}
+                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-xs"
+                  >
+                    {isVerifyingBatch ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Verifying ({selectedCandidateFindingIds.length})...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Verify Selected ({selectedCandidateFindingIds.length})</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-4">
               {contradictions.map((c, idx) => (
                 <div
                   key={c.finding_id || idx}
-                  className="p-4 rounded-xl border border-rose-200 bg-surface-container-lowest shadow-xs flex flex-col gap-3"
+                  className={`p-4 rounded-xl border bg-surface-container-lowest shadow-xs flex flex-col gap-3 ${
+                    c.verification_status === "no_contradiction"
+                      ? "border-emerald-200"
+                      : c.verification_status === "unverified"
+                      ? "border-sky-200"
+                      : "border-rose-200"
+                  }`}
                 >
                   {/* Contradiction Header */}
                   <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-outline-variant/40">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-rose-100 text-rose-800 border border-rose-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
-                        POTENTIAL CONTRADICTION
+                      {c.verification_status === "unverified" && (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSelectCandidate(c.finding_id)}
+                          className="p-1 -ml-1 text-outline hover:text-on-surface"
+                          title="Select for batch verification"
+                        >
+                          {selectedCandidateFindingIds.includes(c.finding_id) ? (
+                            <CheckSquare className="w-4 h-4 text-secondary" />
+                          ) : (
+                            <Square className="w-4 h-4 text-outline" />
+                          )}
+                        </button>
+                      )}
+
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono font-medium border ${
+                          c.verification_status === "no_contradiction"
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                            : c.verification_status === "unverified"
+                            ? "bg-sky-100 text-sky-800 border-sky-200"
+                            : "bg-rose-100 text-rose-800 border-rose-200"
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            c.verification_status === "no_contradiction"
+                              ? "bg-emerald-600"
+                              : c.verification_status === "unverified"
+                              ? "bg-sky-600"
+                              : "bg-rose-600"
+                          }`}
+                        ></span>
+                        {c.verification_status === "no_contradiction"
+                          ? "NO CONTRADICTION"
+                          : c.verification_status === "unverified"
+                          ? "POTENTIAL CONTRADICTION (CANDIDATE)"
+                          : "CONFIRMED CONTRADICTION"}
                       </span>
+
                       <span className="text-xs font-bold font-mono text-on-surface">
                         {c.rule_id}
                       </span>
+
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-low text-on-surface border border-outline-variant/40">
                         {c.mechanism === "numeric"
                           ? "Mechanism 1: Rule-Based (100% confidence)"
-                          : `Mechanism 2: NLI (${Math.round(c.confidence * 100)}% confidence)`}
+                          : c.verification_status === "unverified"
+                          ? `Mechanism 2: Embedding Similarity (${Math.round(c.confidence * 100)}%)`
+                          : `Mechanism 2: NLI ${c.nli_classification || "contradiction"} (${Math.round(c.confidence * 100)}% confidence)`}
                       </span>
+
+                      {c.cached && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-container-high text-outline border border-outline-variant/50">
+                          Cached
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
+                          c.verification_status === "unverified"
+                            ? "bg-amber-100 text-amber-800 border border-amber-200"
+                            : c.verification_status === "no_contradiction"
+                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            : "bg-rose-100 text-rose-800 border border-rose-200"
+                        }`}
+                      >
+                        {c.verification_status === "unverified"
+                          ? "Status: Not yet verified"
+                          : c.verification_status === "no_contradiction"
+                          ? `Status: Verified (${c.nli_classification || "Neutral"})`
+                          : "Status: Verified Contradiction"}
+                      </span>
                       {getStatusBadge(c.status)}
                     </div>
                   </div>
+
+                  {/* On-Demand Verification Action Banner for Candidates */}
+                  {c.verification_status === "unverified" && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                        <span className="text-sky-900 dark:text-sky-200">
+                          Semantic verification required. Run NLI transformer inference on-demand.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={verifyingFindingIds[c.finding_id] || isVerifyingBatch}
+                        onClick={() => handleVerifySingle(c)}
+                        className="px-3 py-1 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 self-start sm:self-auto shadow-xs"
+                      >
+                        {verifyingFindingIds[c.finding_id] ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Verify Contradiction</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Verification Result Feedback */}
+                  {verificationFeedback[c.finding_id] && (
+                    <div
+                      className={`p-2.5 rounded-lg border text-xs font-medium ${
+                        verificationFeedback[c.finding_id].includes("verified") &&
+                        !verificationFeedback[c.finding_id].includes("No semantic")
+                          ? "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-800 dark:text-rose-200"
+                          : verificationFeedback[c.finding_id].includes("No semantic")
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-200"
+                          : "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200"
+                      }`}
+                    >
+                      {verificationFeedback[c.finding_id]}
+                    </div>
+                  )}
 
                   {/* Side-by-Side Comparison Box */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

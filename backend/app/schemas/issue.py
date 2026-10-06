@@ -70,3 +70,5 @@ class DocumentAnalysisResponse(BaseModel):
     critical_count: Optional[int] = None
     warning_count: Optional[int] = None
     no_issues_count: Optional[int] = None
+    contradiction_candidates_count: Optional[int] = 0
+    contradiction_verification_mode: Optional[str] = "on_demand"

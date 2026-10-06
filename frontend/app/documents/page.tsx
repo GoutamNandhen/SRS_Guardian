@@ -431,6 +431,28 @@ export default function DocumentsPage() {
               </div>
             </div>
 
+            {/* Phase 18.3B: Semantic Contradiction On-Demand Strip */}
+            {analysisResult.contradiction_candidates_count !== undefined && analysisResult.contradiction_candidates_count > 0 && (
+              <div className="mb-4 p-3 rounded-xl border border-sky-200 bg-sky-50/60 dark:bg-sky-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                  <span className="font-semibold text-sky-900 dark:text-sky-300">
+                    Semantic contradiction candidates: <strong>{analysisResult.contradiction_candidates_count.toLocaleString()}</strong>
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200 font-bold uppercase">
+                    Verification: ON DEMAND
+                  </span>
+                </div>
+                <Link
+                  href={`/analysis?doc=${analysisResult.document_id}`}
+                  className="text-xs font-semibold text-sky-700 hover:text-sky-900 dark:text-sky-400 hover:underline flex items-center gap-1 self-start sm:self-auto"
+                >
+                  <span>Review Candidates in Analysis</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            )}
+
             {/* Action Buttons as specified in Phase 18.2 Prompt Pack */}
             <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-outline-variant/30">
               {/* 1. Review Requirements */}

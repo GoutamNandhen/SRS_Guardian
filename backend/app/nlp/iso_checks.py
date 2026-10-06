@@ -86,11 +86,12 @@ class RequirementIsoReport:
         }
 
 
-def check_singular(text: str) -> IsoCheckItem:
+def check_singular(text: str, doc: Any = None) -> IsoCheckItem:
     """
     ISO-SINGULAR: Evaluates if requirement contains multiple conjoined requirements or actions.
     """
-    doc = nlp(text)
+    if doc is None:
+        doc = nlp(text)
 
     # 1. Multiple normative modal verbs ("shall ... and shall ...", "must ... and must ...")
     modals = [tok for tok in doc if tok.text.lower() in ("shall", "must", "should", "will")]
@@ -239,11 +240,12 @@ def check_verifiable(text: str) -> IsoCheckItem:
     )
 
 
-def check_complete(text: str) -> IsoCheckItem:
+def check_complete(text: str, doc: Any = None) -> IsoCheckItem:
     """
     ISO-COMPLETE: Evaluates syntactic presence of Actor, Modal Verb, Main Action Verb, and Target/Object.
     """
-    doc = nlp(text)
+    if doc is None:
+        doc = nlp(text)
     subjects = [tok for tok in doc if tok.dep_ in ("nsubj", "nsubjpass")]
     aux_modals = [tok for tok in doc if tok.dep_ in ("aux", "auxpass") and tok.text.lower() in ("shall", "must", "should", "will", "may", "can")]
     root_verbs = [tok for tok in doc if tok.pos_ == "VERB" or tok.dep_ == "ROOT"]
@@ -278,36 +280,75 @@ def check_complete(text: str) -> IsoCheckItem:
     )
 
 
+# Compiled regex patterns for synonym groups
+SYNONYM_PATTERNS = [
+    {word: re.compile(rf"\b{re.escape(word)}\b", re.IGNORECASE) for word in group}
+    for group in SYNONYM_GROUPS
+]
+
+
+def build_synonym_index(
+    all_reqs: list[dict[str, Any]],
+) -> tuple[dict[Any, dict[int, list[str]]], dict[int, dict[str, list[dict[str, Any]]]]]:
+    """Pre-indexes synonym occurrences across all requirements in O(N) time.
+
+    Returns:
+        req_matches: map of req_id -> {group_idx: [words_found_in_req]}
+        doc_usage: map of group_idx -> {word: [req_dict, ...]}
+    """
+    req_matches: dict[Any, dict[int, list[str]]] = {}
+    doc_usage: dict[int, dict[str, list[dict[str, Any]]]] = {
+        g_idx: {} for g_idx in range(len(SYNONYM_GROUPS))
+    }
+
+    for req in all_reqs:
+        r_id = req.get("id", req.get("req_key", id(req)))
+        r_text = req.get("text", "")
+        req_matches[r_id] = {}
+
+        for g_idx, patterns in enumerate(SYNONYM_PATTERNS):
+            matched = [word for word, pat in patterns.items() if pat.search(r_text)]
+            if matched:
+                req_matches[r_id][g_idx] = matched
+                for w in matched:
+                    doc_usage[g_idx].setdefault(w, []).append(req)
+
+    return req_matches, doc_usage
+
+
 def check_consistent(
     req_dict: dict[str, Any],
     all_reqs: list[dict[str, Any]],
+    synonym_index: tuple | None = None,
 ) -> IsoCheckItem:
     """
     ISO-CONSISTENT: Checks for terminology drift across the document.
     Detects when different synonyms are used across requirements to refer to the same concept.
     """
-    current_text = req_dict["text"].lower()
+    if synonym_index is None:
+        synonym_index = build_synonym_index(all_reqs)
+
+    req_matches, doc_usage = synonym_index
+    r_id = req_dict.get("id", req_dict.get("req_key", id(req_dict)))
+    current_matches = req_matches.get(r_id, {})
+
     inconsistencies: list[str] = []
     spans: list[dict[str, Any]] = []
 
-    for other_req in all_reqs:
-        if other_req["id"] == req_dict["id"]:
-            continue
-        other_text = other_req["text"].lower()
-
-        # Check against defined synonym groups
-        for group in SYNONYM_GROUPS:
-            current_matches = [word for word in group if re.search(rf"\b{re.escape(word)}\b", current_text)]
-            other_matches = [word for word in group if re.search(rf"\b{re.escape(word)}\b", other_text)]
-
-            # If both requirements reference terms from the same synonym family, but differ in word choice
-            if current_matches and other_matches:
-                diff = set(current_matches).symmetric_difference(set(other_matches))
-                if diff:
-                    m = re.search(rf"\b{re.escape(current_matches[0])}\b", req_dict["text"], re.IGNORECASE)
-                    if m and not any(s["text"].lower() == current_matches[0] for s in spans):
+    for g_idx, matched_words in current_matches.items():
+        primary_word = matched_words[0]
+        # Check if other requirements used a different word from this same synonym group
+        for other_word, other_reqs in doc_usage[g_idx].items():
+            if other_word not in matched_words:
+                # Find the first other requirement that isn't this requirement
+                other_req = next((r for r in other_reqs if r.get("id") != req_dict.get("id")), None)
+                if other_req:
+                    # Find span in current requirement
+                    pat = SYNONYM_PATTERNS[g_idx][primary_word]
+                    m = pat.search(req_dict.get("text", ""))
+                    if m and not any(s["text"].lower() == primary_word.lower() for s in spans):
                         spans.append({"start": m.start(), "end": m.end(), "text": m.group(0)})
-                    note = f"'{current_matches[0]}' in {req_dict.get('req_key', 'this req')} vs '{other_matches[0]}' in {other_req.get('req_key', 'another req')}"
+                    note = f"'{primary_word}' in {req_dict.get('req_key', 'this req')} vs '{other_word}' in {other_req.get('req_key', 'another req')}"
                     if note not in inconsistencies:
                         inconsistencies.append(note)
 
@@ -400,6 +441,8 @@ def analyze_iso_checks(
     req_dict: dict[str, Any],
     all_reqs: list[dict[str, Any]] | None = None,
     ambiguity_findings: list[Finding] | None = None,
+    synonym_index: tuple | None = None,
+    doc: Any = None,
 ) -> RequirementIsoReport:
     """
     Runs all 7 machine-checkable ISO 29148 checks on a requirement.
@@ -409,13 +452,16 @@ def analyze_iso_checks(
     if all_reqs is None:
         all_reqs = [req_dict]
 
+    if doc is None:
+        doc = nlp(text)
+
     ears_result = analyze_ears(text)
 
-    c_singular = check_singular(text)
+    c_singular = check_singular(text, doc=doc)
     c_unambiguous = check_unambiguous(text, ambiguity_findings)
     c_verifiable = check_verifiable(text)
-    c_complete = check_complete(text)
-    c_consistent = check_consistent(req_dict, all_reqs)
+    c_complete = check_complete(text, doc=doc)
+    c_consistent = check_consistent(req_dict, all_reqs, synonym_index=synonym_index)
     c_traceable = check_traceable(req_dict)
     c_structure = check_structure(text, ears_result)
 
@@ -445,3 +491,38 @@ def analyze_iso_checks(
         total_iso_deductions=round(total_deductions, 1),
         conformance_summary=summary,
     )
+
+
+def batch_analyze_iso_checks(
+    req_dicts: list[dict[str, Any]],
+    all_reqs: list[dict[str, Any]] | None = None,
+    ambiguity_findings_map: dict[Any, list[Finding]] | None = None,
+) -> list[RequirementIsoReport]:
+    """Batched ISO checks across multiple requirements using nlp.pipe for high throughput."""
+    if not req_dicts:
+        return []
+    if all_reqs is None:
+        all_reqs = req_dicts
+    if ambiguity_findings_map is None:
+        ambiguity_findings_map = {}
+
+    synonym_index = build_synonym_index(all_reqs)
+    texts = [r.get("text", "") for r in req_dicts]
+    pipe_kwargs = {"batch_size": 256}
+    if nlp.has_pipe("ner"):
+        pipe_kwargs["disable"] = ["ner"]
+
+    docs = list(nlp.pipe(texts, **pipe_kwargs))
+    reports = []
+    for r, d in zip(req_dicts, docs):
+        r_id = r.get("id", r.get("req_key"))
+        amb_f = ambiguity_findings_map.get(r_id) or ambiguity_findings_map.get(r.get("req_key"))
+        report = analyze_iso_checks(
+            r,
+            all_reqs=all_reqs,
+            ambiguity_findings=amb_f,
+            synonym_index=synonym_index,
+            doc=d,
+        )
+        reports.append(report)
+    return reports

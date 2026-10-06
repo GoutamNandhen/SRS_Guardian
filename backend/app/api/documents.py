@@ -1,5 +1,6 @@
 import json
 import shutil
+import time
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Response
 from sqlalchemy.orm import Session
@@ -48,13 +49,24 @@ from backend.app.ml.classifier import classify
 from backend.app.ml.explain_classifier import explain
 from backend.app.ml.duplicates import find_duplicates
 from backend.app.nlp.numeric_constraints import detect_numeric_conflicts
-from backend.app.ml.contradictions import detect_semantic_contradictions
+from backend.app.ml.contradictions import (
+    detect_semantic_contradictions,
+    select_candidate_pairs,
+    candidate_tuples_to_dicts,
+    save_document_candidates,
+    load_document_candidates,
+    verify_candidate_pairs,
+    SemanticContradictionFinding,
+)
 from backend.app.schemas.contradiction import (
     DocumentContradictionsResponse,
     ContradictionItem,
     ContradictionConstraintSchema,
+    ContradictionVerifyRequest,
+    ContradictionVerifyResponse,
+    ContradictionVerifyResult,
 )
-from backend.app.nlp.iso_checks import analyze_iso_checks
+from backend.app.nlp.iso_checks import analyze_iso_checks, build_synonym_index
 from backend.app.schemas.iso_checks import (
     EarsResultSchema,
     IsoCheckItemSchema,
@@ -426,6 +438,7 @@ def get_document_quality(
                 "similarity_score": d["similarity_score"],
             }
 
+    synonym_index = build_synonym_index(req_dicts)
     scored_reqs = []
     for r in reqs:
         ambiguity_findings = analyze_ambiguity(r.text)
@@ -443,6 +456,7 @@ def get_document_quality(
             req_dict,
             all_reqs=req_dicts,
             ambiguity_findings=ambiguity_findings,
+            synonym_index=synonym_index,
         )
 
         score_res = score_requirement(
@@ -534,6 +548,8 @@ def analyze_document(
             detail=f"Document with ID {document_id} not found",
         )
 
+    t_start = time.perf_counter()
+
     # 1. Ensure requirements are extracted
     reqs = (
         db.query(Requirement)
@@ -541,6 +557,7 @@ def analyze_document(
         .order_by(Requirement.id.asc())
         .all()
     )
+    t_ext_start = time.perf_counter()
     if not reqs:
         extracted_reqs = extract_requirements(doc.cleaned_text)
         reqs = []
@@ -576,10 +593,15 @@ def analyze_document(
                 r.classification_prob = prob
                 r.classification_explanation = json.dumps(exp_data)
         db.commit()
+    t_ext = time.perf_counter() - t_ext_start
+    logger.info(f"[Perf: doc {document_id}] Requirements extraction/classification: {len(reqs)} reqs in {t_ext:.2f}s")
 
     # 2. Run Duplicate Detection across all requirements
+    t_dup_start = time.perf_counter()
     req_dicts = [{"id": r.id, "req_key": r.req_key, "text": r.text} for r in reqs]
-    duplicates, _ = find_duplicates(req_dicts)
+    duplicates, total_pairs = find_duplicates(req_dicts)
+    t_dup = time.perf_counter() - t_dup_start
+    logger.info(f"[Perf: doc {document_id}] Duplicate detection: {len(duplicates)} duplicates from {total_pairs} pairs checked in {t_dup:.2f}s")
 
     duplicate_map: dict[int, dict[str, Any]] = {}
     for d in duplicates:
@@ -598,13 +620,40 @@ def analyze_document(
                 "explanation": d["explanation"],
             }
 
-    # 2b. Run Contradiction Detection across all requirements (Phase 12)
-    # Mechanism 1: Deterministic numeric constraint conflict engine
+    # 2b. Run Contradiction Detection across all requirements (Phase 12 / 18.3B On-Demand)
+    t_contra_start = time.perf_counter()
+    # Mechanism 1: Deterministic numeric constraint conflict engine (immediate, critical)
     numeric_findings = detect_numeric_conflicts(req_dicts)
     excluded_pairs = {(f.req_key_1, f.req_key_2) for f in numeric_findings}
 
-    # Mechanism 2: Candidate-blocked NLI semantic contradiction engine
-    semantic_findings = detect_semantic_contradictions(req_dicts, excluded_pairs=excluded_pairs)
+    # Mechanism 2: Candidate generation (fast blocking; unverified candidates saved for on-demand NLI)
+    raw_candidates = select_candidate_pairs(req_dicts, excluded_pairs=excluded_pairs)
+    candidate_records = candidate_tuples_to_dicts(raw_candidates)
+    save_document_candidates(doc.id, candidate_records)
+
+    # Any candidates that were ALREADY verified in cache as contradictions are included
+    semantic_findings: list[SemanticContradictionFinding] = []
+    for cand in candidate_records:
+        if cand.get("verification_status") == "verified" and cand.get("nli_classification") == "contradiction":
+            sf = SemanticContradictionFinding(
+                finding_id=f"SEMANTIC_CONTRADICTION_{cand['req_key_1']}_{cand['req_key_2']}",
+                req_key_1=cand["req_key_1"],
+                req_key_2=cand["req_key_2"],
+                premise_text=cand["text_1"],
+                hypothesis_text=cand["text_2"],
+                confidence=cand["confidence"],
+                human_explanation=cand["human_explanation"],
+                suggestion=cand["suggestion"],
+                requirement_id_1=cand.get("requirement_id_1"),
+                requirement_id_2=cand.get("requirement_id_2"),
+            )
+            semantic_findings.append(sf)
+
+    t_contra = time.perf_counter() - t_contra_start
+    logger.info(
+        f"[Perf: doc {document_id}] Contradictions: {len(numeric_findings)} numeric conflicts, "
+        f"{len(raw_candidates)} candidates generated ({len(semantic_findings)} cached verified) in {t_contra:.2f}s"
+    )
 
     contradiction_map: dict[int, list[dict[str, Any]]] = {}
     for nf in numeric_findings:
@@ -646,6 +695,7 @@ def analyze_document(
     # 4. Generate & persist issues and calculate scores
     new_issues: list[Issue] = []
     scored_reqs = []
+    synonym_index = build_synonym_index(req_dicts)
 
     for r in reqs:
         ambiguity_findings = analyze_ambiguity(r.text)
@@ -703,6 +753,7 @@ def analyze_document(
             req_dict,
             all_reqs=req_dicts,
             ambiguity_findings=ambiguity_findings,
+            synonym_index=synonym_index,
         )
 
         # Persist standards / ISO check issues (Phase 13)
@@ -735,6 +786,9 @@ def analyze_document(
     db.add_all(new_issues)
     doc.status = "analyzed"
     db.commit()
+
+    t_total = time.perf_counter() - t_start
+    logger.info(f"[Perf: doc {document_id}] Total analysis completed in {t_total:.2f}s")
 
     # Calculate document quality summary
     doc_summary = score_document(scored_reqs, document_id=doc.id)
@@ -828,6 +882,8 @@ def analyze_document(
         critical_count=crit_cnt,
         warning_count=warn_cnt,
         no_issues_count=no_iss_cnt,
+        contradiction_candidates_count=len(raw_candidates),
+        contradiction_verification_mode="on_demand",
     )
 
 
@@ -1055,15 +1111,199 @@ def get_document_contradictions(
             )
         )
 
+    # Load candidate records generated during analysis
+    candidates = load_document_candidates(document_id)
+    seen_pairs = set()
+
+    for it in items:
+        seen_pairs.add((it.req_key_1, it.req_key_2))
+        seen_pairs.add((it.req_key_2, it.req_key_1))
+
+    for cand in candidates:
+        k1 = cand.get("req_key_1", "")
+        k2 = cand.get("req_key_2", "")
+        if (k1, k2) in seen_pairs or (k2, k1) in seen_pairs:
+            continue
+        seen_pairs.add((k1, k2))
+        seen_pairs.add((k2, k1))
+
+        r1 = req_key_map.get(k1)
+        r2 = req_key_map.get(k2)
+
+        items.append(
+            ContradictionItem(
+                finding_id=cand.get("finding_id", f"CANDIDATE_CONTRADICTION_{k1}_{k2}"),
+                issue_id=None,
+                mechanism="semantic",
+                rule_id=cand.get("rule_id", "SEMANTIC_CONTRADICTION_CANDIDATE"),
+                severity=cand.get("severity", "warning"),
+                confidence=float(cand.get("confidence", 0.0)),
+                requirement_id_1=r1.id if r1 else cand.get("requirement_id_1"),
+                req_key_1=k1,
+                text_1=r1.text if r1 else cand.get("text_1", ""),
+                constraint_1=None,
+                requirement_id_2=r2.id if r2 else cand.get("requirement_id_2"),
+                req_key_2=k2,
+                text_2=r2.text if r2 else cand.get("text_2", ""),
+                constraint_2=None,
+                human_explanation=cand.get("human_explanation", ""),
+                suggestion=cand.get("suggestion", ""),
+                status="ai_flagged",
+                verification_status=cand.get("verification_status", "unverified"),
+                nli_classification=cand.get("nli_classification"),
+                cached=cand.get("cached", False),
+            )
+        )
+
     num_count = sum(1 for it in items if it.mechanism == "numeric")
-    sem_count = sum(1 for it in items if it.mechanism == "semantic")
+    sem_verified_count = sum(1 for it in items if it.mechanism == "semantic" and it.verification_status == "verified")
+    unverified_count = sum(1 for it in items if it.verification_status == "unverified")
 
     return DocumentContradictionsResponse(
         document_id=document_id,
-        total_contradictions_count=len(items),
+        total_contradictions_count=num_count + sem_verified_count,
         numeric_conflicts_count=num_count,
-        semantic_contradictions_count=sem_count,
+        semantic_contradictions_count=sem_verified_count,
+        candidates_count=unverified_count,
         contradictions=items,
+    )
+
+
+@router.post(
+    "/{document_id}/contradictions/verify",
+    response_model=ContradictionVerifyResponse,
+    summary="Verify one or more semantic contradiction candidate pairs on-demand using NLI",
+)
+def verify_document_contradictions(
+    document_id: int,
+    request: ContradictionVerifyRequest,
+    db: Session = Depends(get_db),
+):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found",
+        )
+
+    reqs = (
+        db.query(Requirement)
+        .filter(Requirement.document_id == document_id)
+        .all()
+    )
+    req_map = {r.req_key: r for r in reqs}
+
+    pairs_to_verify = []
+    for p in request.pairs:
+        r1 = req_map.get(p.req_key_1)
+        r2 = req_map.get(p.req_key_2)
+        text1 = p.text_1 or (r1.text if r1 else "")
+        text2 = p.text_2 or (r2.text if r2 else "")
+        pairs_to_verify.append({
+            "finding_id": p.finding_id or f"SEMANTIC_CONTRADICTION_{p.req_key_1}_{p.req_key_2}",
+            "req_key_1": p.req_key_1,
+            "req_key_2": p.req_key_2,
+            "requirement_id_1": r1.id if r1 else p.requirement_id_1,
+            "requirement_id_2": r2.id if r2 else p.requirement_id_2,
+            "text_1": text1,
+            "text_2": text2,
+        })
+
+    verified_results = verify_candidate_pairs(
+        pairs_to_verify,
+        confidence_threshold=0.70,
+        batch_size=8,
+    )
+
+    candidates = load_document_candidates(document_id)
+    cand_map = {(c.get("req_key_1"), c.get("req_key_2")): c for c in candidates}
+
+    response_items: list[ContradictionVerifyResult] = []
+    contradictions_found = 0
+
+    for vr in verified_results:
+        k1 = vr["req_key_1"]
+        k2 = vr["req_key_2"]
+        r1 = req_map.get(k1)
+        r2 = req_map.get(k2)
+
+        target_cand = cand_map.get((k1, k2)) or cand_map.get((k2, k1))
+        if target_cand:
+            target_cand["verification_status"] = vr["verification_status"]
+            target_cand["nli_classification"] = vr["nli_classification"]
+            target_cand["confidence"] = vr["confidence"]
+            target_cand["cached"] = vr["cached"]
+            target_cand["severity"] = vr["severity"]
+            target_cand["human_explanation"] = vr["human_explanation"]
+            target_cand["suggestion"] = vr["suggestion"]
+
+        issue_id = None
+        if vr["is_contradiction"] and r1 and r2:
+            contradictions_found += 1
+            finding_data = {
+                "finding_id": vr["finding_id"],
+                "rule_id": "SEMANTIC_CONTRADICTION",
+                "req_key_1": k1,
+                "req_key_2": k2,
+                "premise_text": vr["text_1"],
+                "hypothesis_text": vr["text_2"],
+                "confidence": vr["confidence"],
+                "nli_classification": vr["nli_classification"],
+                "human_explanation": vr["human_explanation"],
+                "suggestion": vr["suggestion"],
+                "cached": vr["cached"],
+            }
+            existing_issue = (
+                db.query(Issue)
+                .filter(
+                    Issue.requirement_id == r1.id,
+                    Issue.module == "contradiction",
+                    Issue.type == "SEMANTIC_CONTRADICTION",
+                )
+                .first()
+            )
+            if not existing_issue:
+                new_issue = Issue(
+                    requirement_id=r1.id,
+                    module="contradiction",
+                    type="SEMANTIC_CONTRADICTION",
+                    severity="critical",
+                    explanation_json=json.dumps(finding_data),
+                    status="ai_flagged",
+                )
+                db.add(new_issue)
+                db.flush()
+                issue_id = new_issue.id
+            else:
+                existing_issue.explanation_json = json.dumps(finding_data)
+                issue_id = existing_issue.id
+            db.commit()
+
+        response_items.append(
+            ContradictionVerifyResult(
+                finding_id=vr["finding_id"],
+                req_key_1=k1,
+                req_key_2=k2,
+                requirement_id_1=r1.id if r1 else None,
+                requirement_id_2=r2.id if r2 else None,
+                classification=vr["nli_classification"],
+                confidence=vr["confidence"],
+                probabilities=vr.get("nli_probabilities", {}),
+                is_contradiction=vr["is_contradiction"],
+                verification_status=vr["verification_status"],
+                cached=vr["cached"],
+                human_explanation=vr["human_explanation"],
+                suggestion=vr["suggestion"],
+                issue_id=issue_id,
+            )
+        )
+
+    save_document_candidates(document_id, candidates)
+
+    return ContradictionVerifyResponse(
+        total_verified=len(response_items),
+        contradictions_found=contradictions_found,
+        results=response_items,
     )
 
 

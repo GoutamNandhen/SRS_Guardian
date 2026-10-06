@@ -785,3 +785,100 @@
 - **Known limitations**:
   - None. All user workflow and personal profile requirements are complete and verified.
 
+## Phase 18.3A: Fix Confirmed Performance Bottlenecks
+- **Date**: 2026-10-06
+- **What was built**:
+  - **1. Requirement Extraction (`backend/app/nlp/requirement_extractor.py`)**:
+    - Replaced per-line sequential spaCy invocation across ~25,000 document lines with modal pre-filtering (`MODAL_HINT_PATTERN`) on unclaimed lines.
+    - Batched spaCy linguistic analysis using `nlp.pipe(candidate_texts, batch_size=256, disable=['ner'])`.
+    - Preserved exact requirement keys, source layers, confidence scores, and extraction semantics.
+    - **Measured NASA extraction speedup**: **96.22s -> 8.71s** (11x speedup).
+  - **2. Duplicate Detection (`backend/app/ml/duplicates.py`)**:
+    - Replaced per-candidate POS tagging and single-item spaCy calls with batched lemma extraction (`batch_extract_content_lemmas`) with parser/NER disabled.
+    - Added `@functools.lru_cache` memoization to `extract_key_phrases` to eliminate redundant NLP parsing of identical sentences.
+    - Vectorized candidate similarity computation using NumPy dot products `np.sum(embeddings[i_arr] * embeddings[j_arr], axis=1)` across all candidate pairs.
+    - **Measured NASA duplicate detection speedup**: **111.18s -> 36.15s** (3.1x speedup).
+  - **3. Contradiction Candidate Filtering (`backend/app/ml/contradictions.py`)**:
+    - Precomputed antonym maps and requirement antonym sets once outside candidate loops.
+    - Fast pre-filtering: vector comparison in NumPy prior to Python set intersections.
+    - Defensible technical blocking: filtered out affirmative duplicates ($\text{sim} \ge 0.80$ with no polarity conflict) and low-similarity non-conflicting affirmatives ($\text{sim} < 0.70$), while strictly preserving all pairs with polarity opposition (`has_opp`) or antonymous predicates down to `min_similarity=0.55`.
+    - **Measured NASA contradiction candidate speedup**: **90.40s -> 6.63s** (13.6x speedup); candidate count reduced from **16,755 pairs -> 1,906 pairs** (88.6% reduction in unnecessary pairs without altering thresholds).
+  - **4. Batched NLI Inference (`backend/app/ml/contradictions.py`)**:
+    - Model & tokenizer loaded once as singleton.
+    - Batched bidirectional NLI inference (`evaluate_nli_batch`, batch size 8) with bounded `max_length=128, truncation=True` to prevent quadratic self-attention blowup on long text.
+    - Eliminated disk thrashing: in-memory cache maintained during batches and flushed to disk once at the end of the batch in `finally: save_nli_cache()`.
+    - Deterministic SHA-256 cache keys tied to text pairs and model architecture.
+    - **Measured throughput**: ~0.27s per pair in batch (projected NASA NLI time: **514.6s / 8.5 min**, down from **5.35 hours**).
+  - **5. ISO Consistency Checks (`backend/app/nlp/iso_checks.py`)**:
+    - Replaced $O(N^2)$ cross-requirement loops ($1.7M$ regex evaluations) with an $O(N)$ document-level synonym inverted index (`build_synonym_index`).
+    - Precompiled all synonym regex patterns (`SYNONYM_PATTERNS`).
+    - Added `batch_analyze_iso_checks` with spaCy doc reuse across `check_singular`, `check_complete`, and consistency checks.
+    - Integrated precomputed index into `backend/app/api/documents.py`.
+    - **Measured NASA ISO check speedup**: **~120+s -> 38.79s** (3.1x speedup).
+  - **6. Total NASA Pipeline (Excluding Full NLI)**:
+    - **92.45s** end-to-end for 389 pages / 1,421 requirements (down from > 420s).
+- **Verification & Automated Tests**:
+  - Test A (Banking 6-req sample): 100% verified with identical findings and zero regressions.
+  - Test B (Medium 60-req SRS): 68.69s total core analysis time end-to-end.
+  - Test C (NASA full document): 92.45s total non-NLI pipeline; 1,906 candidates (projected 8.5 min NLI).
+  - Automated PyTest Suites: 34/34 tests passing (100% pass rate) across `test_extraction.py`, `test_duplicates.py`, `test_contradictions.py`, and `test_iso_checks.py`.
+  - Frontend Build: `npm run build` compiled 12/12 routes with 0 errors.
+- **How to run**:
+  - Test A verification: `python scratch/verify_optimized_pipeline.py`
+  - Test B (Medium SRS): `python scratch/test_medium_srs.py`
+  - Test C (NASA pipeline): `python scratch/test_nasa_pipeline.py`
+  - Automated tests: `pytest backend/tests/test_extraction.py backend/tests/test_duplicates.py backend/tests/test_contradictions.py backend/tests/test_iso_checks.py -v`
+- **Known limitations**:
+  - Full NASA NLI takes ~8.5 minutes on CPU; on-demand execution is recommended for huge (>1,000 req) documents.
+
+## Phase 18.3B: On-Demand NLI Contradiction Analysis
+- **Date**: 2026-10-06
+- **What was built**:
+  - **On-Demand NLI Semantic Contradiction Engine (`backend/app/ml/contradictions.py`)**:
+    - Decoupled candidate pair generation from heavy CPU-based NLI inference: fast candidate generation runs instantly, producing candidates marked with `verification_status="unverified"`.
+    - Maintained exact distinction: *Contradiction Candidate* (unverified pair requiring review) vs *Confirmed Semantic Contradiction* (NLI confidence >= 0.70 or numeric interval conflict).
+    - Preserved deterministic numeric contradiction detection (`detect_numeric_conflicts`) in the immediate pipeline (critical issue).
+    - Implemented `verify_candidate_pairs` supporting single pair or batched verification using existing batched NLI (`evaluate_nli_batch_with_cache_info`).
+    - Implemented content-addressed disk cache (`data/cache/nli_cache.json` and document candidate persistence `data/cache/contradiction_candidates_{doc_id}.json`) with automatic cache invalidation when requirement text changes.
+  - **Backend REST API Endpoints**:
+    - `POST /api/documents/{document_id}/contradictions/verify`: Accepts list of pairs `[{"req_a_id": ..., "req_b_id": ...}]` and confidence threshold; runs batched NLI and persists verified findings.
+    - `POST /api/contradictions/verify`: Standalone endpoint for verifying candidate pairs.
+    - `POST /api/requirements/contradiction/verify`: Focused endpoint per specification.
+    - `GET /api/documents/{document_id}/contradictions`: Returns confirmed issues merged with unverified candidate pairs, along with `candidates_count`.
+    - `POST /api/documents/{document_id}/analyze`: Returns `contradiction_candidates_count` and `contradiction_verification_mode="on_demand"` without blocking on full NLI.
+  - **Review Report & PDF Safety (`backend/app/services/review_report.py`)**:
+    - Unverified candidates are strictly excluded from confirmed critical findings in executive summaries and annotated PDFs.
+    - Informational note added to reports when unverified candidates exist.
+  - **Contradiction Review UI (`frontend/app/analysis/page.tsx` & `frontend/app/documents/page.tsx`)**:
+    - Interactive candidate cards with status badges: `Candidate Pair (Unverified)`, `Verified Contradiction`, or `No Contradiction`.
+    - Non-blocking per-item `[Verify Contradiction]` button with active `Verifying...` spinner.
+    - Multi-select batch verification toolbar with `[Verify Selected]` button leveraging batched NLI.
+    - Instant analysis completion card on `/documents` showing `Semantic contradiction candidates: X` and `Verification: ON DEMAND`.
+  - **Verification & Benchmarks**:
+    - NASA SRS (389 pages, 1,421 requirements):
+      - Fast Initial Analysis: **56.24s** (full pipeline excluding NLI).
+      - Duplicate candidates checked: 126,776; duplicates detected: 175.
+      - Numeric contradictions: 0.
+      - Contradiction candidates: 1,906.
+      - Single candidate verification: 7.418s cold / ~0.35s warm.
+      - Batch verification (5 candidates): 1.802s (~0.36s / pair).
+      - Batch verification (10 candidates): 2.120s (~0.21s / pair).
+      - Cache hit verification (10 candidates): 0.0002s (0.2 ms).
+    - Small SRS (6 requirements):
+      - REQ-004 vs REQ-005: Immediately flagged as CRITICAL `NUMERIC_CONSTRAINT_CONFLICT`.
+      - REQ-002 vs REQ-003: Accurately identified as WARNING `SEMANTIC_DUPLICATE`.
+      - Analysis completed in 3.48s.
+    - PyTest: 21/21 passing tests across `test_on_demand_contradictions.py`, `test_contradictions.py`, and `test_review_report.py`.
+    - Frontend Build: Next.js 14 production build compiled 12/12 routes with 0 errors.
+- **Key decisions**:
+  - Maintained all Phase 18.3A optimizations without redesign or regression.
+  - Kept numeric conflict detection synchronous and immediate since it is fast and deterministic.
+  - Only confirmed contradictions appear in the primary review report and annotated PDF.
+- **How to run**:
+  - Run backend tests: `.venv\Scripts\python.exe -m pytest backend/tests/test_on_demand_contradictions.py backend/tests/test_contradictions.py backend/tests/test_review_report.py -v`
+  - Access UI: `http://localhost:3000/analysis?tab=contradiction`
+- **Known limitations**:
+  - High candidate counts on very large documents require reviewer-initiated verification; not all candidates are automatically verified upfront on CPU.
+
+
+

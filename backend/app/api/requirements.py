@@ -22,6 +22,10 @@ from backend.app.schemas.llm import (
     GherkinGenerationRequest,
     GherkinGenerationResponse,
 )
+from backend.app.schemas.contradiction import (
+    ContradictionVerifyRequest,
+    ContradictionVerifyResponse,
+)
 from backend.app.services.llm import suggest_rewrite, generate_gherkin
 from backend.app.nlp.gherkin import generate_gherkin_skeleton
 
@@ -286,4 +290,18 @@ def generate_adhoc_gherkin(request: GherkinGenerationRequest):
         requirement_id=request.requirement_id,
     )
     return GherkinGenerationResponse(**result)
+
+
+@router.post(
+    "/contradiction/verify",
+    response_model=ContradictionVerifyResponse,
+    summary="Verify requirement pairs for semantic contradiction on-demand",
+)
+def verify_requirement_contradiction(
+    request: ContradictionVerifyRequest,
+    db: Session = Depends(get_db),
+):
+    from backend.app.api.contradictions import verify_contradictions_endpoint
+    return verify_contradictions_endpoint(request, db=db)
+
 
