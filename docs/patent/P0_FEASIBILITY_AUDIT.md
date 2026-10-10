@@ -2,7 +2,7 @@
 
 **Status:** PRELIMINARY / NOT A PATENTABILITY OPINION  
 **Date:** 10 October 2026  
-**Repository branch:** \`research/p0-patent-feasibility\`  
+**Repository branch:** `research/p0-patent-feasibility`  
 **Decision:** **CONDITIONAL GO for a controlled feasibility prototype; NO-GO for immediate patent filing.**
 
 > CONFIDENTIALITY: This is a working internal research note in a private repository. Do not publish proposed claim details, source code, screenshots, or an enabling description before institutional IP guidance.
@@ -14,11 +14,11 @@ The baseline system already implements:
 - Multi-format requirement extraction and classification (TF-IDF + Logistic Regression).
 - Ambiguity, readability, EARS and selected ISO/IEC/IEEE 29148-derived checks.
 - Semantic duplicates using all-MiniLM-L6-v2, with content-hash embeddings cache.
-- Numeric 5-tuple constraint extraction and interval-conflict analysis, plus \`facebook/bart-large-mnli\` candidate verification.
+- Numeric 5-tuple constraint extraction and interval-conflict analysis, plus `facebook/bart-large-mnli` candidate verification.
 - SHA-256 cached NLI and on-demand verification.
 - Document version comparison, review decisions, annotated output, and Gherkin test skeletons.
 
-Relevant existing code: \`backend/app/nlp/numeric_constraints.py\`, \`backend/app/ml/contradictions.py\`, \`backend/app/ml/embeddings.py\`, \`backend/app/ml/duplicates.py\`, \`PROJECT_STATE.md\`, and \`docs/EVALUATION.md\`.
+Relevant existing code: `backend/app/nlp/numeric_constraints.py`, `backend/app/ml/contradictions.py`, `backend/app/ml/embeddings.py`, `backend/app/ml/duplicates.py`, `PROJECT_STATE.md`, and `docs/EVALUATION.md`.
 
 **Do not claim as invention:** embedding caching, requirement classification, numeric interval checking, NLI-on-demand, traceability in general, Z3, SMT/unsat cores, impact graphs in general, or the concept of incremental verification.
 
@@ -66,7 +66,7 @@ Proposed *testable* distinctions, NOT established novelty:
 
 ### Versioned data model
 
-\`\`\`
+```
 RequirementRevision:
   req_id, revision_id, source_hash, text_span
   interpreted_scope_ids, interpretation_id, interpretation_confidence
@@ -79,11 +79,11 @@ VerificationRecord:
   verdict (consistent | inconsistent | unknown)
   conflict_evidence / solver core (if supported)
   validity_status (valid | invalid | needs-review)
-\`\`\`
+```
 
 ### Conservative invalidation pseudocode
 
-\`\`\`
+```
 on_document_revision(old_state, new_state):
   changed = changed/added/deleted requirements AND changed models/policies/assumptions
   scopes = union(old_scope, new_scope) for each changed requirement
@@ -92,7 +92,7 @@ on_document_revision(old_state, new_state):
   invalidate every record dependent on affected sources/scopes/assumptions
   recompute affected records; compare with full verifier in validation experiments
   do not label output “verified” if natural-language constraint interpretation is unreviewed
-\`\`\`
+```
 
 **Key failure modes to test:** a sentence moves scope; hidden shared variables; a newly added requirement introduces a previously unknown conflict pair; cross-scope implicit dependencies; model-version changes; deleted source rows; false confidence from an incorrect parser; contradictory constraints under alternate units or conditions.
 
