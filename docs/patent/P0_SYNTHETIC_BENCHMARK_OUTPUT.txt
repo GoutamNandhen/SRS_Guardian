@@ -1,0 +1,14 @@
+SRS GUARDIAN P0 SYNTHETIC FEASIBILITY BENCHMARK
+requirements=8000; independent scopes=2000
+PASS value edit introduces conflict: full_checks=2000, incremental_checks=1, same_evidence=True
+PASS requirement added: full_checks=2000, incremental_checks=1, same_evidence=True
+PASS requirement deleted: full_checks=2000, incremental_checks=1, same_evidence=True
+PASS requirement moves scope: full_checks=2000, incremental_checks=2, same_evidence=True
+PASS meaning-preserving rewording (conservative): full_checks=2000, incremental_checks=1, same_evidence=True
+PASS parser/interpretation update: full_checks=2000, incremental_checks=2000, same_evidence=True
+PASS solver version update: full_checks=2000, incremental_checks=2000, same_evidence=True
+PASS unknown cross-scope dependencies: full_checks=2000, incremental_checks=2000, same_evidence=True
+PASS 120 seeded random single-requirement edits (evidence identical)
+median_full_ms=17.87
+median_incremental_ms=10.74
+LIMITATION: no real SRS parsing, NLI, SMT, patent novelty, or cross-document validation.
