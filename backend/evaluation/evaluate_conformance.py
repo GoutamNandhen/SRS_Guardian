@@ -190,6 +190,7 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
 
     # Pairwise link evaluation across all adjudicated candidate pairs.
     link_tp = link_fp = link_fn = link_tn = link_abstain = 0
+    link_reference_mismatch = 0
     for r in rows:
         p = preds.get(r["case_id"], {})
         pred_link = p.get("predicted_link")
@@ -198,7 +199,16 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
             if r["gold_link"]:
                 link_fn += 1
         elif pred_link is True and r["gold_link"]:
-            link_tp += 1
+            # A claimed link to the WRONG symbol/revision is not a true
+            # positive for the gold candidate pair. Previously the scorer
+            # counted any predicted_link=true as a TP, even when its
+            # candidate_code_ref/source_commit pointed elsewhere.
+            if (p.get("candidate_code_ref") == r["candidate_code_ref"]
+                    and p.get("source_commit") == r["source_commit"]):
+                link_tp += 1
+            else:
+                link_fn += 1
+                link_reference_mismatch += 1
         elif pred_link is True and not r["gold_link"]:
             link_fp += 1
         elif r["gold_link"]:
@@ -251,7 +261,14 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
                      and test_projects >= minimum_projects
                      and all(categories[c] >= minimum_per_class for c in OUTCOMES)
                      and sum(not r["gold_link"] for r in rows) >= minimum_per_class)
+    link_precision = _prf(link_tp, link_fp, link_fn)["precision"]
+    link_recall = _prf(link_tp, link_fp, link_fn)["recall"]
+    # Conformance accuracy alone must not certify a requirement-to-CODE
+    # verifier whose trace links are unreliable. A method could otherwise
+    # pass while predicting a link for every unlinked candidate pair.
     meets = (eligible_gate and accuracy is not None and accuracy >= 0.95
+             and link_precision is not None and link_precision >= 0.95
+             and link_recall is not None and link_recall >= 0.95
              and violation_precision is not None and violation_precision >= 0.95
              and violation_recall is not None and violation_recall >= 0.90
              and _ratio(decided, len(eligible)) is not None and _ratio(decided, len(eligible)) >= 0.70)
@@ -266,7 +283,8 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
         "class_distribution": dict(categories),
         "dataset_real_adjudicated": all_real,
         "link_pairwise": {**_prf(link_tp, link_fp, link_fn), "tp": link_tp, "fp": link_fp, "fn": link_fn, "tn": link_tn,
-                            "abstained": link_abstain, "coverage": _ratio(len(rows) - link_abstain, len(rows))},
+                            "abstained": link_abstain, "reference_mismatch_count": link_reference_mismatch,
+                            "coverage": _ratio(len(rows) - link_abstain, len(rows))},
         "conformance": {
             "accuracy_full_denominator_abstentions_wrong": accuracy,
             "accuracy_wilson_95_interval": _wilson(correct, len(eligible)),
@@ -287,7 +305,8 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
             "eligible": eligible_gate,
             "passed": bool(meets),
             "status": "PASSED" if meets else "NOT_MET" if eligible_gate else "NOT_ELIGIBLE",
-            "targets": {"full_accuracy": 0.95, "violation_precision": 0.95,
+            "targets": {"full_accuracy": 0.95, "link_precision": 0.95, "link_recall": 0.95,
+                        "violation_precision": 0.95,
                         "violation_recall": 0.90, "coverage": 0.70,
                         "minimum_conformance_cases": minimum_cases, "minimum_projects": minimum_projects,
                         "minimum_cases_per_conformance_class": minimum_per_class,
@@ -298,6 +317,7 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
             "The evidence artifact is not cryptographically authenticated; an independent test runner and audit are required.",
             "An acceptance pass is a benchmark result on the stated scope, not proof of correctness for arbitrary software.",
             "Synthetic fixtures, non-test splits, missing evidence and small samples cannot satisfy the acceptance gate.",
+            "Link metrics require the exact gold candidate code reference and source commit; the acceptance gate requires >=95% link precision and recall.",
         ],
     }
 
