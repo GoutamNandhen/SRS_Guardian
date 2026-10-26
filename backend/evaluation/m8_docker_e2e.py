@@ -96,11 +96,11 @@ def run(*, image_tag: str = "srs-m8-trusted-banking:ci") -> dict:
                     or report["executed_module_sha256"] != hashlib.sha256(source).hexdigest()):
                 raise AssertionError("Executed module bytes must match the indexed source")
             observations = report["worker_evidence"]["cases"]
-            if len(observations) != 2 or not all(
+            if len(observations) != 3 or not all(
                 isinstance(o.get("http_status"), int) and o["http_status"] == 200
                 for o in observations
             ):
-                raise AssertionError("M4 must return two actual HTTP 200 observations")
+                raise AssertionError("M4 must return three actual HTTP 200 observations")
             results.append({
                 "fixture": source_name, "expected_decision": expected,
                 "observed_decision": report["worker_evidence"]["decision"],
