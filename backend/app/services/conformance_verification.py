@@ -111,7 +111,9 @@ async def verify_approved_asgi_app(*, app: FastAPI, rule: TransferRule,
                 response = await client.post(route, json=case["request"])
                 body = response.json()
                 actual = body.get("accepted") if isinstance(body, dict) else None
-                status = "passed" if actual is False else ("failed" if actual is True else "inconclusive")
+                status = ("inconclusive" if response.status_code >= 500
+                          else "passed" if actual is False
+                          else "failed" if actual is True else "inconclusive")
                 observation = {
                     "case_id": case["case_id"], "request": case["request"],
                     "expected": case["expected"], "actual": {"accepted": actual},
