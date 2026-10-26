@@ -38,8 +38,8 @@ def _tokens(s: str) -> set[str]:
 def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None = None,
                     near_duplicate_threshold: float = .90) -> dict[str, Any]:
     validate_gold(gold)
-    digest = canonical_digest(gold)
-    if expected_sha256 is not None and not (len(expected_sha256) == 64 and digest == expected_sha256):
+    benchmark_fingerprint = canonical_digest(gold)
+    if expected_sha256 is not None and not (len(expected_sha256) == 64 and benchmark_fingerprint == expected_sha256):
         raise EvaluationError("Benchmark fingerprint does not match the preregistered lock")
     warnings: list[str] = []
     critical: list[str] = []
@@ -57,16 +57,18 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
             critical.append(f"Same code snapshot and symbol appear in multiple splits: {cid}")
         seen_codes[code_id] = split
         if row["dataset_status"] == "real_adjudicated":
+            if row["adjudication_status"] != "adjudicated":
+                critical.append(f"{cid}: real-world case must have completed adjudication; draft labels are not accepted")
             for k in REAL_REQUIRED:
                 if not isinstance(row.get(k), str) or not row[k].strip():
                     critical.append(f"{cid}: missing real-world provenance field {k}")
             if row.get("annotator_1") == row.get("annotator_2"):
                 critical.append(f"{cid}: two independent annotation identities are required")
-            digest = row.get("code_snapshot_sha256")
-            if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            snapshot_digest = row.get("code_snapshot_sha256")
+            if not isinstance(snapshot_digest, str) or re.fullmatch(r"[0-9a-f]{64}", snapshot_digest) is None:
                 critical.append(f"{cid}: code_snapshot_sha256 must be a lowercase 64-hex SHA-256 digest")
             else:
-                earlier = real_snapshot_projects.get(digest)
+                earlier = real_snapshot_projects.get(snapshot_digest)
                 if earlier is not None and earlier[0] != row["project_id"]:
                     previous_project, previous_split, previous_case = earlier
                     critical.append(
@@ -75,7 +77,7 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
                         f"{row['project_id']}/{split}/{cid}); cannot count as independent projects"
                     )
                 else:
-                    real_snapshot_projects[digest] = (row["project_id"], split, cid)
+                    real_snapshot_projects[snapshot_digest] = (row["project_id"], split, cid)
         split_tokens[split].append((cid, _tokens(row["requirement_text"])))
     # Flag near-exact paraphrases crossing splits (a safeguard, not semantic deduplication).
     # Exact overlap is already rejected by the M1 scorer.
@@ -95,7 +97,7 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
                         seen_pairs.add((ida, idb))
     sources = Counter(r["dataset_status"] for r in gold)
     return {
-        "fingerprint_sha256": digest,
+        "fingerprint_sha256": benchmark_fingerprint,
         "cases": len(gold),
         "projects": len(project_split),
         "real_distinct_source_snapshots": len(real_snapshot_projects),
@@ -104,7 +106,7 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
         "critical_issues": critical,
         "warnings": warnings[:250],
         "research_eligible_by_provenance": not critical and sources.get("real_adjudicated", 0) == len(gold),
-        "note": "Project IDs alone do not establish independent projects. This audit blocks exact source snapshot reuse across distinct real project IDs, but cannot detect modified forks, repackaged identical code, or falsified digests. An independent human must verify all provenance claims. No numerical performance claim follows from this audit.",
+        "note": "Project IDs alone do not establish independent projects. This audit blocks exact source snapshot reuse across distinct real project IDs and rejects draft adjudications. Its fingerprint identifies the canonical gold rows, not a source archive. It cannot detect modified forks, repackaged identical code, or falsified digests. An independent human must verify all provenance claims. No numerical performance claim follows from this audit.",
     }
 
 
