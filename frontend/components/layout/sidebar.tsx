@@ -10,6 +10,7 @@ import {
   CheckSquare,
   Sparkles,
   GitCompare,
+  FileCode2,
   FileBarChart,
   Settings,
   ShieldCheck,
@@ -35,6 +36,7 @@ const navItems: NavItem[] = [
   { name: "AI Suggestions", href: "/suggestions", icon: Sparkles },
   { name: "Version Comparison", href: "/compare", icon: GitCompare },
   { name: "Reports", href: "/reports", icon: FileBarChart },
+  { name: "Traceability", href: "/traceability", icon: FileCode2 },
 ];
 
 export function Sidebar() {
