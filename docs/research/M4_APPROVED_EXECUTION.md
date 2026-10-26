@@ -12,7 +12,7 @@ Sequence:
 2. Independently build, inspect and approve a Docker image from that reviewed code revision. **Uploaded ZIPs are never turned into images automatically**.
 3. An operator writes a local manifest containing source index ID, exact symbol ID, POST route, approved image **ID** (`sha256:...), module, app attribute and revision label. This manifest is **not** uploaded to the public API and must not contain secrets. Each mapping is a human attestation; the application does not independently prove that the image binary corresponds to the indexed source archive.
 4. Run the CLI with a specific requirement statement and `--approve-oracle. The verifier supports the narrow M3 requirement family: mandatory rejection of transfers strictly above one integer threshold.
-5. The host first verifies that the indexed symbol defines the approved route. It checks the local Docker image identity; it then runs a CLI-only container with restricted privileges/network and no host mounts. Inside the image, M4 loads the approved ASGI app and uses the M3 HTTP verifier to produce request/response evidence.
+5. The host first verifies that the indexed symbol defines the approved route. It checks the local Docker image identity; it then runs a CLI-only container with restricted privileges/network and no host mounts. Inside the image, M4 loads the approved ASGI app and uses the M3 HTTP verifier to produce request/response evidence. The M4 worker treats non-2xx HTTP results, including 404 missing endpoints, as **inconclusive**, even if the body says `accepted: false`.
 6. Return a provenance record that includes requirement text digest, source index ID, symbol, route, approved image ID, revision label and worker evidence checksum.
 
 ## Operator example (use only trusted, privately owned code)
@@ -55,6 +55,11 @@ The example API is under `examples/m4/banking_api.py. Build its Docker image on
 ## Accuracy and paper readiness
 
 M4 tests the mechanism, not the performance claim. The proposed **95%+** goal remains unverified. Before any publication evaluate labeled, unseen applications and compare text-only matching, rule-only inference and execution-backed decisions. Record *TP/FP/TN/FN, macro F1, violation precision/recall, coverage, abstentions, and time/cost*; don't train on test projects.
+
+## Verified during this iteration
+
+- 20/20 **focused local tests** passed, covering approval gating, fixed image identity, approved symbol/route matching, Docker command hardening, corrupted/contradictory evidence rejection, real FastAPI fixture execution and a deliberately buggy application.
+- Local tests used minimal compatibility stubs for existing M2/M3 imports because the full private repository was not available in the local test container. **The complete branch integration tests, actual Docker execution, and frontend production build remain pending.**
 
 ## Reproducibility
 
