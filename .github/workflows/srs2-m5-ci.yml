@@ -1,0 +1,41 @@
+name: SRS Guardian 2 M1-M5 Research Evaluation
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m5-research-benchmark-20261026
+  pull_request:
+    paths:
+      - 'backend/evaluation/m5_*.py'
+      - 'backend/tests/test_m5_research_benchmark.py'
+      - 'docs/research/M5_BENCHMARK_AND_ACCURACY.md'
+      - 'benchmarks/m5/**'
+      - '.github/workflows/srs2-m5-ci.yml'
+permissions:
+  contents: read
+jobs:
+  research-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44'
+      - name: Python compilation
+        run: python -m compileall -q backend/evaluation backend/app/research
+      - name: Run M1-M5 unit tests
+        run: python -m pytest -q backend/tests/test_evaluate_conformance.py backend/tests/test_code_traceability.py backend/tests/test_conformance_verification.py backend/tests/test_m4_approved_runner.py backend/tests/test_m5_research_benchmark.py
+      - name: Reproduce pilot and check no 95% research claim
+        run: |
+          python -m backend.evaluation.m5_controlled_pilot --out /tmp/m5_reproduced.json
+          python - <<'PY'
+          import json
+          r = json.load(open('/tmp/m5_reproduced.json', encoding='utf-8'))
+          assert r['benchmark_95_eligible'] is False
+          assert r['fixture_count'] == 20
+          assert r['method_comparison']['m3_two_probes']['fn'] == 5
+          assert r['method_comparison']['m5_three_probes']['fn'] == 0
+          print('Controlled pilot reproduced; research 95% remains NOT ELIGIBLE')
+          PY
