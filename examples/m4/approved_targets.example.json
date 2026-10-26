@@ -1,0 +1,17 @@
+{
+  "schema_version": "m4-approvals-1",
+  "targets": [
+    {
+      "id": "approved-local-bank-v1",
+      "approved": true,
+      "source_index_id": "REPLACE_WITH_64_HEX_SOURCE_ARCHIVE_INDEX_ID",
+      "symbol_id": "REPLACE_WITH_20_HEX_ENDPOINT_SYMBOL_ID",
+      "image_id": "sha256:REPLACE_WITH_LOCAL_DOCKER_IMAGE_ID",
+      "app_module": "examples.m4.banking_api",
+      "app_attribute": "app",
+      "route": "/payments/transfer",
+      "method": "POST",
+      "revision": "operator-reviewed-source-revision-1"
+    }
+  ]
+}
