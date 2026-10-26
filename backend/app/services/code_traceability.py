@@ -146,12 +146,19 @@ def index_archive(data:bytes,label:str="Uploaded Python project")->dict:
         strip=next(iter(roots)) if len(roots)==1 and all("/" in p for _,p in allowed) else None
         for info,path in allowed:
             relative=path[len(strip)+1:] if strip else path
-            try:src=archive.read(info).decode("utf-8-sig")
+            try:
+                source_bytes=archive.read(info)
+                src=source_bytes.decode("utf-8-sig")
             except (UnicodeDecodeError,RuntimeError,zipfile.BadZipFile):
                 warnings.append(f"Skipped unreadable source: {relative}")
                 continue
             indexed,warning=_index_python(relative,src)
             if warning:warnings.append(warning)
+            # Hash exact original ZIP member bytes, not a normalized excerpt.
+            # This permits M9 to check the executed image's Python module bytes.
+            file_digest=sha256(source_bytes).hexdigest()
+            for symbol in indexed:
+                symbol["source_sha256"]=file_digest
             symbols.extend(indexed)
             if len(symbols)>MAX_SYMBOLS:raise ValueError("Archive exceeds 12,000 source symbols")
     if not symbols:raise ValueError("No parsable Python functions or FastAPI endpoints were found")
