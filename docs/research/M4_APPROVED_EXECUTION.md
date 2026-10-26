@@ -49,7 +49,7 @@ The example API is under `examples/m4/banking_api.py. Build its Docker image on
 - The container's base image should be pinned by digest and rebuilt/patched under the institution's security policy. Docker hardening reduces risk but does not guarantee isolation from hostile code. Run only reviewed or trusted apps until dedicated sandbox and operational security testing is complete.
 - The indexed ZIP SHA-256 is a digest of the *submitted archive*, not cryptographic proof that it matches the Docker image. The manifest states an **operator-attested binding**, and the evidence makes that limitation explicit.
 - If Docker is unavailable, the runner fails closed. Do not bypass this by importing arbitrary app code into the FastAPI web server.
-- The parent SRS Guardian API currently has permissive CORS and inadequate authentication for exposing sensitive source indexes: do not deploy it publicly until those issues are fixed.
+- The SRS Guardian API currently has permissive CORS and inadequate authentication for exposing sensitive source indexes: do not deploy it publicly until those issues are fixed.
 - The worker output SHA-256 is an integrity checksum, not a signed attestation from an adversarial target.
 
 ## Accuracy and paper readiness
