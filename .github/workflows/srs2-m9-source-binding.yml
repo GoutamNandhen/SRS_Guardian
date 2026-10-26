@@ -1,0 +1,93 @@
+name: SRS Guardian 2 M9 Source-Content Binding
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m9-source-content-binding-20261026
+  pull_request:
+    paths:
+      - 'backend/app/services/code_traceability.py'
+      - 'backend/app/research/approved_runner.py'
+      - 'backend/app/research/m4_worker.py'
+      - 'backend/evaluation/m8_docker_e2e.py'
+      - 'backend/tests/test_m9_source_binding.py'
+      - '.github/workflows/srs2-m9-source-binding.yml'
+permissions:
+  contents: read
+jobs:
+  combined-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44' 'scikit-learn==1.7.2'
+      - name: Compile research modules
+        run: python -m compileall -q backend/evaluation backend/app/research backend/app/services/code_traceability.py backend/app/services/conformance_verification.py
+      - name: Run M1-M9 focused tests
+        run: |
+          python -m pytest -q \
+            backend/tests/test_evaluate_conformance.py \
+            backend/tests/test_code_traceability.py \
+            backend/tests/test_conformance_verification.py \
+            backend/tests/test_m4_approved_runner.py \
+            backend/tests/test_m5_research_benchmark.py \
+            backend/tests/test_m6_external_trace.py \
+            backend/tests/test_m7_hybrid_retrieval.py \
+            backend/tests/test_m9_source_binding.py
+  actual-docker-positive-and-negative:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install trusted-only test dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44'
+      - name: Build approved image from committed reviewed source
+        run: |
+          unset DOCKER_HOST
+          docker info --format 'Local Docker: {{.ServerVersion}}'
+          docker build -f examples/m4/Dockerfile -t srs-m8-trusted-banking:ci .
+      - name: Positive proof - correct and buggy modules match indexed ZIP bytes
+        run: |
+          python -m backend.evaluation.m8_docker_e2e --out /tmp/srs-m9-matched.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/srs-m9-matched.json'))
+          assert r['all_expectations_met'] is True
+          assert r['research_95_eligible'] is False
+          assert [x['observed_decision'] for x in r['results']] == ['passed_available_checks', 'observed_violation']
+          assert all(x['source_content_binding'] == 'worker_reported_module_digest_matches_index' for x in r['results'])
+          assert all(x['source_sha256'] == x['executed_module_sha256'] for x in r['results'])
+          print('Two real Docker source digests match their indexed files')
+          PY
+      - name: Negative proof - modified image source must be rejected
+        run: |
+          cp examples/m4/banking_api.py /tmp/m9-controlled-drift.py
+          printf '\n# intentionally modified in CI image only\n' >> /tmp/m9-controlled-drift.py
+          cid=$(docker create srs-m8-trusted-banking:ci)
+          docker cp /tmp/m9-controlled-drift.py "$cid":/app/examples/m4/banking_api.py
+          docker commit "$cid" srs-m9-controlled-drift:ci
+          docker rm "$cid"
+          docker tag srs-m9-controlled-drift:ci srs-m8-trusted-banking:ci
+          python - <<'PY'
+          from backend.evaluation.m8_docker_e2e import run
+          from backend.app.research.approved_runner import ApprovalError
+          try:
+              run()
+          except ApprovalError as exc:
+              if 'Executed module source differs' not in str(exc):
+                  raise
+              print('Expected source mismatch rejected by real Docker verifier')
+          else:
+              raise AssertionError('M9 accepted a changed application module')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m9-real-docker-source-match-evidence
+          path: /tmp/srs-m9-matched.json
+          retention-days: 14
