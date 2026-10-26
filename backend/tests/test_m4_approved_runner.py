@@ -150,6 +150,15 @@ def test_refuses_false_pass_even_with_rehashed_evidence(tmp_path):
         call(tmp_path,executor=runner)
 
 
+def test_refuses_false_pass_from_http_404(tmp_path):
+    evidence=_fake_evidence()
+    evidence['cases'][0]['http_status']=404
+    evidence['evidence_sha256']=_hash({k:v for k,v in evidence.items() if k!='evidence_sha256'})
+    runner,_=docker_stub(None,evidence=evidence)
+    with pytest.raises(ApprovalError,match='passing observation'):
+        call(tmp_path,executor=runner)
+
+
 def test_refuses_fake_aggregate_decision(tmp_path):
     evidence=_fake_evidence()
     evidence['decision']='observed_violation'
