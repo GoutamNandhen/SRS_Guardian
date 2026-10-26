@@ -48,6 +48,28 @@ jobs:
           name: srs-m8-docker-e2e-evidence
           path: /tmp/srs-m8-docker-evidence.json
           retention-days: 14
+  consolidated-core-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused end-to-end engineering dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44' 'scikit-learn==1.7.2'
+      - name: Compile all research and verification modules
+        run: python -m compileall -q backend/evaluation backend/app/research backend/app/services/code_traceability.py backend/app/services/conformance_verification.py
+      - name: Run M1-M7 combined regression without fabricated metrics
+        run: |
+          python -m pytest -q \
+            backend/tests/test_evaluate_conformance.py \
+            backend/tests/test_code_traceability.py \
+            backend/tests/test_conformance_verification.py \
+            backend/tests/test_m4_approved_runner.py \
+            backend/tests/test_m5_research_benchmark.py \
+            backend/tests/test_m6_external_trace.py \
+            backend/tests/test_m7_hybrid_retrieval.py
   frontend-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
