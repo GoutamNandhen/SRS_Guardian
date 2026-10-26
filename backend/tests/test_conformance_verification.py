@@ -73,6 +73,17 @@ def test_no_unapproved_or_nonregistered_test_targets():
                                         target_id="http://127.0.0.1:8000", oracle_approved=True))
 
 
+
+def test_fixed_demo_threshold_mismatch_abstains():
+    with pytest.raises(UnsupportedRequirement, match="10,000"):
+        asyncio.run(verify_trusted_demo(
+            req_key="REQ-OTHER",
+            text="The banking system shall reject transfers exceeding ₹20,000.",
+            target_id="demo_correct",
+            oracle_approved=True,
+        ))
+
+
 def test_generic_trusted_asgi_adapter():
     rule = parse_transfer_rule("REQ-1", BASE)
     report = asyncio.run(verify_approved_asgi_app(
