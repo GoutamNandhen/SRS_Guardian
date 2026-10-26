@@ -23,6 +23,7 @@ from backend.app.services.code_traceability import index_archive, save_index
 SAMPLES = (
     ("banking_api.py", "examples.m4.banking_api", "passed_available_checks"),
     ("banking_api_buggy.py", "examples.m4.banking_api_buggy", "observed_violation"),
+    ("banking_api_plus_two.py", "examples.m4.banking_api_plus_two", "observed_violation"),
 )
 RULE = "The banking system shall reject transfers exceeding 10000 rupees."
 IMAGE_ID = re.compile(r"sha256:[a-f0-9]{64}\Z")
@@ -52,7 +53,7 @@ def run(*, image_tag: str = "srs-m8-trusted-banking:ci") -> dict:
             source = filename.read_bytes()
             if len(source) > 40_000:
                 raise ApprovalError("Fixture unexpectedly large")
-            # Only these exact two committed files can enter this CI index.
+            # Only these exact three committed files can enter this CI index.
             buf = BytesIO()
             with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as archive:
                 archive.writestr("banking_api.py", source)
@@ -101,6 +102,12 @@ def run(*, image_tag: str = "srs-m8-trusted-banking:ci") -> dict:
                 for o in observations
             ):
                 raise AssertionError("M4 must return three actual HTTP 200 observations")
+            if source_name == "banking_api_plus_two.py":
+                failed = [o for o in observations if o["test_status"] == "failed"]
+                if (len(failed) != 1
+                        or failed[0]["request"] != {"amount": 10002}
+                        or failed[0].get("actual", {}).get("accepted") is not True):
+                    raise AssertionError("Narrow +2 acceptance hole was not detected")
             results.append({
                 "fixture": source_name, "expected_decision": expected,
                 "observed_decision": report["worker_evidence"]["decision"],
