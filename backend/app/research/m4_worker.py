@@ -8,6 +8,7 @@ import asyncio
 import hashlib
 import importlib
 import json
+from pathlib import Path
 import re
 import sys
 from fastapi import FastAPI
@@ -28,13 +29,24 @@ def execute_request(payload: dict) -> dict:
     if not MODULE.fullmatch(module) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", attr) or not ROUTE.fullmatch(route):
         raise ValueError("Invalid operator-pinned application location")
     # Image is prebuilt and approved, and container is already restricted by host.
-    app = getattr(importlib.import_module(module), attr)
+    module_obj = importlib.import_module(module)
+    app = getattr(module_obj, attr)
     if not isinstance(app, FastAPI):
         raise ValueError("Approved target is not a FastAPI instance")
     rule = parse_transfer_rule(payload["req_key"], payload["requirement"])
     report = asyncio.run(verify_approved_asgi_app(
         app=app, rule=rule, target_id=payload["target_id"],
         target_revision=payload["revision"], route=route))
+    # M9: report the exact bytes of the imported app module in this image.
+    # The host compares this with the indexed ZIP member. This detects accidental
+    # source/image drift, but a malicious image could forge its own report.
+    source_path = getattr(module_obj, "__file__", None)
+    source_sha256 = None
+    if isinstance(source_path, str) and source_path.endswith(".py"):
+        file = Path(source_path)
+        if file.is_file() and file.stat().st_size <= 1_048_576:
+            source_sha256 = hashlib.sha256(file.read_bytes()).hexdigest()
+    report["executed_module_sha256"] = source_sha256
     # This *specific* oracle assumes a 2xx JSON response carrying accepted=false.
     # 4xx/5xx, including nonexistent endpoints, cannot be treated as successful tests.
     for case in report["cases"]:

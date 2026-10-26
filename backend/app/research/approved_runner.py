@@ -80,7 +80,12 @@ def resolve_binding(*, manifest: dict, target_id: str, index_id: str,
     symbols = [s for s in index["symbols"] if s["symbol_id"] == symbol_id]
     if len(symbols) != 1 or not any(p.get("method") == "POST" and p.get("route") == target["route"] for p in symbols[0]["http"]):
         raise ApprovalError("Approved symbol is not the declared POST endpoint in the indexed source")
-    return dict(target, path=symbols[0]["path"], qualified_name=symbols[0]["qualified_name"])
+    source_sha256 = symbols[0].get("source_sha256")
+    if source_sha256 is not None and (not isinstance(source_sha256, str) or not SHA.fullmatch(source_sha256)):
+        raise ApprovalError("Invalid indexed source file digest")
+    return dict(target, path=symbols[0]["path"],
+                qualified_name=symbols[0]["qualified_name"],
+                indexed_source_sha256=source_sha256)
 
 
 def _docker(args: list[str], *, input_json: str | None = None, timeout: int = 30,
@@ -168,6 +173,15 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
     if digest != _hash(observed):
         raise ApprovalError("Evidence checksum invalid")
     observed["evidence_sha256"] = digest
+    indexed_digest = target.get("indexed_source_sha256")
+    if indexed_digest is not None:
+        # Fail closed on new indexes. Old indexes without file digests remain
+        # executable but their evidence explicitly records the missing binding.
+        if observed.get("executed_module_sha256") != indexed_digest:
+            raise ApprovalError("Executed module source differs from indexed ZIP source")
+        content_binding = "worker_reported_module_digest_matches_index"
+    else:
+        content_binding = "unverified_legacy_index_missing_file_digest"
     return {
         "schema_version": "m4-bound-evidence-1", "requirement_key": rule.req_key,
         "requirement_sha256": hashlib.sha256(rule.statement.encode("utf-8")).hexdigest(),
@@ -176,6 +190,9 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
         "approved_route": target["route"], "image_id": target["image_id"],
         "target_revision_label": target["revision"],
         "source_image_binding": "operator_attested_not_cryptographically_verified",
+        "source_content_binding": content_binding,
+        "indexed_source_sha256": indexed_digest,
+        "executed_module_sha256": observed.get("executed_module_sha256"),
         "isolation": "docker_local_network_none_readonly_unprivileged_no_mounts",
         "oracle_reviewed": True, "worker_evidence": observed,
         "research_warning": "Trusted operator-approved Docker image only. This does not prove arbitrary source correctness or 95% accuracy.",

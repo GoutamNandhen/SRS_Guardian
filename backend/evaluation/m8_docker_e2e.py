@@ -91,6 +91,10 @@ def run(*, image_tag: str = "srs-m8-trusted-banking:ci") -> dict:
                 raise AssertionError(f"{source_name}: unexpected conformance observation")
             if report["source_image_binding"] != "operator_attested_not_cryptographically_verified":
                 raise AssertionError("Provenance must not be overstated")
+            if (report["source_content_binding"] != "worker_reported_module_digest_matches_index"
+                    or report["indexed_source_sha256"] != hashlib.sha256(source).hexdigest()
+                    or report["executed_module_sha256"] != hashlib.sha256(source).hexdigest()):
+                raise AssertionError("Executed module bytes must match the indexed source")
             observations = report["worker_evidence"]["cases"]
             if len(observations) != 2 or not all(
                 isinstance(o.get("http_status"), int) and o["http_status"] == 200
@@ -101,6 +105,8 @@ def run(*, image_tag: str = "srs-m8-trusted-banking:ci") -> dict:
                 "fixture": source_name, "expected_decision": expected,
                 "observed_decision": report["worker_evidence"]["decision"],
                 "source_sha256": hashlib.sha256(source).hexdigest(),
+                "source_content_binding": report["source_content_binding"],
+                "executed_module_sha256": report["executed_module_sha256"],
                 "source_index_id": index["index_id"], "symbol_id": symbol["symbol_id"],
                 "image_id": image_id, "worker_evidence_sha256":
                     report["worker_evidence"]["evidence_sha256"],
