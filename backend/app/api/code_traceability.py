@@ -1,6 +1,6 @@
 """M2 read-only Python code index and SRS linking API."""
 from pathlib import Path
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from backend.app.core.database import get_db
@@ -53,7 +53,7 @@ class IndexResponse(BaseModel):
     methodology:str
 
 @router.post("/index",response_model=IndexResponse)
-async def index_source_archive(file:UploadFile=File(...),label:str="Uploaded Python project"):
+async def index_source_archive(file:UploadFile=File(...),label:str=Form("Uploaded Python project")):
     if not (file.filename or "").lower().endswith(".zip"):
         raise HTTPException(400,"Upload a Python source ZIP archive")
     data=await file.read(MAX_ARCHIVE_BYTES+1)
