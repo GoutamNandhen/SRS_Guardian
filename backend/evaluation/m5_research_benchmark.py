@@ -46,6 +46,9 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
     seen_codes: dict[tuple[str, str], str] = {}
     split_tokens: dict[str, list[tuple[str, set[str]]]] = defaultdict(list)
     project_split: dict[str, str] = {}
+    # Distinct project_id strings are not sufficient evidence of independent
+    # software. Forks/aliases can share exactly the same source snapshot.
+    real_snapshot_projects: dict[str, tuple[str, str, str]] = {}
     for row in gold:
         cid, split = row["case_id"], row["split"]
         project_split[row["project_id"]] = split
@@ -59,6 +62,20 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
                     critical.append(f"{cid}: missing real-world provenance field {k}")
             if row.get("annotator_1") == row.get("annotator_2"):
                 critical.append(f"{cid}: two independent annotation identities are required")
+            digest = row.get("code_snapshot_sha256")
+            if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+                critical.append(f"{cid}: code_snapshot_sha256 must be a lowercase 64-hex SHA-256 digest")
+            else:
+                earlier = real_snapshot_projects.get(digest)
+                if earlier is not None and earlier[0] != row["project_id"]:
+                    previous_project, previous_split, previous_case = earlier
+                    critical.append(
+                        f"{cid}: identical source snapshot SHA-256 across distinct project IDs "
+                        f"({previous_project}/{previous_split}/{previous_case} vs "
+                        f"{row['project_id']}/{split}/{cid}); cannot count as independent projects"
+                    )
+                else:
+                    real_snapshot_projects[digest] = (row["project_id"], split, cid)
         split_tokens[split].append((cid, _tokens(row["requirement_text"])))
     # Flag near-exact paraphrases crossing splits (a safeguard, not semantic deduplication).
     # Exact overlap is already rejected by the M1 scorer.
@@ -81,12 +98,13 @@ def audit_benchmark(gold: list[dict[str, Any]], *, expected_sha256: str | None =
         "fingerprint_sha256": digest,
         "cases": len(gold),
         "projects": len(project_split),
+        "real_distinct_source_snapshots": len(real_snapshot_projects),
         "splits": dict(Counter(r["split"] for r in gold)),
         "source_kinds": dict(sources),
         "critical_issues": critical,
         "warnings": warnings[:250],
         "research_eligible_by_provenance": not critical and sources.get("real_adjudicated", 0) == len(gold),
-        "note": "Provenance fields are assertions; an independent human audit must verify their truth. No numerical performance claim follows from this audit.",
+        "note": "Project IDs alone do not establish independent projects. This audit blocks exact source snapshot reuse across distinct real project IDs, but cannot detect modified forks, repackaged identical code, or falsified digests. An independent human must verify all provenance claims. No numerical performance claim follows from this audit.",
     }
 
 
