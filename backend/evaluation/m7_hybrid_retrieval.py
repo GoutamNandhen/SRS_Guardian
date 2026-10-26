@@ -38,7 +38,7 @@ def char_rank(query: str, paths: list[str]) -> list[str]:
         return []
     # Fit on candidate path text only, not on ground-truth annotations or test labels.
     vec = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5),
-                          lowercase=True, sublinear_tf=True, dtype=float)
+                          lowercase=True, sublinear_tf=True)
     matrix = vec.fit_transform(corpus)
     query_vec = vec.transform([" ".join(tokens(query))])
     scores = cosine_similarity(query_vec, matrix).ravel()
@@ -50,6 +50,8 @@ def rrf_rank(query: str, paths: list[str], k: int = 60) -> list[str]:
     """Predeclared equal-weight reciprocal-rank fusion; no outcome-dependent weights."""
     if k <= 0:
         raise ValueError("k must be positive")
+    if not paths or not tokens(query):
+        return []
     channels = [m6_rank(query, paths, "path_bm25"),
                 m6_rank(query, paths, "filename_bm25"), char_rank(query, paths)]
     scores: Counter[str] = Counter()
