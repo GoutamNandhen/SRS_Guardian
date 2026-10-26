@@ -10,6 +10,7 @@ import {
   CheckSquare,
   Sparkles,
   GitCompare,
+  FlaskConical,
   FileCode2,
   FileBarChart,
   Settings,
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { name: "Version Comparison", href: "/compare", icon: GitCompare },
   { name: "Reports", href: "/reports", icon: FileBarChart },
   { name: "Traceability", href: "/traceability", icon: FileCode2 },
+  { name: "Verification", href: "/verification", icon: FlaskConical },
 ];
 
 export function Sidebar() {
