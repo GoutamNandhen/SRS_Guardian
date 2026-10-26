@@ -88,7 +88,7 @@ def test_provenance_separate_annotators_needed():
         "annotator_1", "annotator_2", "adjudication_record",
         "oracle_provenance", "reproduction_instructions",
     ):
-        g[key] = "example"
+        g[key] = "a" * 64 if key == "code_snapshot_sha256" else "example"
     a = audit_benchmark([g])
     assert any("independent" in error for error in a["critical_issues"])
     g["annotator_2"] = "different person"
