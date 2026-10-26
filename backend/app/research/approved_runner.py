@@ -175,11 +175,26 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
     observed["evidence_sha256"] = digest
     indexed_digest = target.get("indexed_source_sha256")
     if indexed_digest is not None:
-        # Fail closed on new indexes. Old indexes without file digests remain
-        # executable but their evidence explicitly records the missing binding.
-        if observed.get("executed_module_sha256") != indexed_digest:
-            raise ApprovalError("Executed module source differs from indexed ZIP source")
-        content_binding = "worker_reported_module_digest_matches_index"
+        # Prefer the actual route handler's defining module: FastAPI entrypoints
+        # frequently include APIRouters from other files. Older M9 worker evidence
+        # has no endpoint fields and is retained only for backward compatibility.
+        endpoint_digest = observed.get("executed_endpoint_sha256")
+        endpoint_module = observed.get("executed_endpoint_module")
+        if endpoint_digest is not None and observed.get("executed_endpoint_qualname") != target["qualified_name"]:
+            raise ApprovalError("Executed endpoint symbol differs from indexed symbol")
+        if endpoint_digest is not None and endpoint_module != target["app_module"]:
+            # The actual handler lives in an included router or other module.
+            if endpoint_digest != indexed_digest:
+                raise ApprovalError("Executed endpoint source differs from indexed ZIP source")
+            content_binding = "worker_reported_endpoint_digest_matches_index"
+        else:
+            # Preserve M9's exact entrypoint digest gate, including when the
+            # endpoint metadata is absent in an older trusted worker.
+            if observed.get("executed_module_sha256") != indexed_digest:
+                raise ApprovalError("Executed module source differs from indexed ZIP source")
+            if endpoint_digest is not None and endpoint_digest != indexed_digest:
+                raise ApprovalError("Executed endpoint source differs from indexed ZIP source")
+            content_binding = "worker_reported_module_digest_matches_index"
     else:
         content_binding = "unverified_legacy_index_missing_file_digest"
     return {
@@ -193,6 +208,9 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
         "source_content_binding": content_binding,
         "indexed_source_sha256": indexed_digest,
         "executed_module_sha256": observed.get("executed_module_sha256"),
+        "executed_endpoint_sha256": observed.get("executed_endpoint_sha256"),
+        "executed_endpoint_module": observed.get("executed_endpoint_module"),
+        "executed_endpoint_qualname": observed.get("executed_endpoint_qualname"),
         "isolation": "docker_local_network_none_readonly_unprivileged_no_mounts",
         "oracle_reviewed": True, "worker_evidence": observed,
         "research_warning": "Trusted operator-approved Docker image only. This does not prove arbitrary source correctness or 95% accuracy.",
