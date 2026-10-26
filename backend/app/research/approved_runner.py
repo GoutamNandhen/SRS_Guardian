@@ -15,7 +15,7 @@ import subprocess
 from typing import Any, Callable
 
 from backend.app.services.code_traceability import load_index
-from backend.app.services.conformance_verification import parse_transfer_rule, UnsupportedRequirement
+from backend.app.services.conformance_verification import parse_transfer_rule, plan_cases, UnsupportedRequirement
 
 SHA = re.compile(r"^[a-f0-9]{64}$")
 IMAGE = re.compile(r"^sha256:[a-f0-9]{64}$")
@@ -132,6 +132,8 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
         observed = json.loads(lines[0])
     except json.JSONDecodeError as exc:
         raise ApprovalError("Malformed worker evidence") from exc
+    if not isinstance(observed, dict):
+        raise ApprovalError("Worker evidence must be an object")
     if observed.get("target_id") != target_id or observed.get("target_revision") != target["revision"]:
         raise ApprovalError("Worker reported unexpected target identity")
     if observed.get("requirement_key") != rule.req_key or observed.get("requirement_text") != rule.statement:
@@ -141,8 +143,26 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
     if observed.get("decision") not in {"observed_violation", "passed_available_checks", "insufficient_evidence"}:
         raise ApprovalError("Worker returned unsupported decision")
     cases = observed.get("cases")
-    if not isinstance(cases, list) or len(cases) < 1:
-        raise ApprovalError("No execution observations")
+    expected_cases = plan_cases(rule)
+    if not isinstance(cases, list) or len(cases) != len(expected_cases):
+        raise ApprovalError("Missing or extra execution observations")
+    for row, planned in zip(cases, expected_cases):
+        if not isinstance(row, dict) or any(row.get(k) != planned[k] for k in ("case_id", "request", "expected")):
+            raise ApprovalError("Worker evidence deviates from approved test plan")
+        if row.get("test_status") not in ("passed", "failed", "inconclusive"):
+            raise ApprovalError("Invalid test outcome")
+        actual = (row.get("actual") or {}).get("accepted")
+        status = row["test_status"]
+        if status == "passed" and (actual is not False or row.get("http_status", 500) >= 500):
+            raise ApprovalError("Invalid reported passing observation")
+        if status == "failed" and (actual is not True or row.get("http_status", 500) >= 500):
+            raise ApprovalError("Invalid reported failing observation")
+    decisions = {row["test_status"] for row in cases}
+    derived = ("observed_violation" if "failed" in decisions else
+               "insufficient_evidence" if "inconclusive" in decisions else
+               "passed_available_checks")
+    if observed["decision"] != derived:
+        raise ApprovalError("Aggregate decision contradicts observations")
     # Validate the worker-provided evidence checksum; integrity *not* attestation.
     digest = observed.pop("evidence_sha256", None)
     if digest != _hash(observed):
