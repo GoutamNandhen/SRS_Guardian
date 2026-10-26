@@ -118,7 +118,12 @@ async def verify_approved_asgi_app(*, app: FastAPI, rule: TransferRule,
                 response = await client.post(route, json=case["request"])
                 body = response.json()
                 actual = body.get("accepted") if isinstance(body, dict) else None
-                status = ("inconclusive" if response.status_code >= 500
+                # An HTTP error or redirect is not a successful business-rule
+                # rejection, even if its JSON happens to say accepted=false.
+                # Require a 2xx application response before judging the oracle.
+                # M4 already enforced this in its worker; keep the M3 verifier
+                # consistent so demos and approved execution cannot disagree.
+                status = ("inconclusive" if not 200 <= response.status_code < 300
                           else "passed" if actual is False
                           else "failed" if actual is True else "inconclusive")
                 observation = {
