@@ -5,6 +5,7 @@ Do not expose as a network service and never import host-uploaded source code.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import importlib
 import json
 import re
@@ -31,9 +32,24 @@ def execute_request(payload: dict) -> dict:
     if not isinstance(app, FastAPI):
         raise ValueError("Approved target is not a FastAPI instance")
     rule = parse_transfer_rule(payload["req_key"], payload["requirement"])
-    return asyncio.run(verify_approved_asgi_app(
+    report = asyncio.run(verify_approved_asgi_app(
         app=app, rule=rule, target_id=payload["target_id"],
         target_revision=payload["revision"], route=route))
+    # This *specific* oracle assumes a 2xx JSON response carrying accepted=false.
+    # 4xx/5xx, including nonexistent endpoints, cannot be treated as successful tests.
+    for case in report["cases"]:
+        http_status = case.get("http_status")
+        if not isinstance(http_status, int) or not 200 <= http_status < 300:
+            case["test_status"] = "inconclusive"
+    statuses = {case["test_status"] for case in report["cases"]}
+    report["decision"] = (
+        "observed_violation" if "failed" in statuses
+        else "insufficient_evidence" if "inconclusive" in statuses
+        else "passed_available_checks")
+    report.pop("evidence_sha256", None)
+    canonical = json.dumps(report, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    report["evidence_sha256"] = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return report
 
 
 def main() -> int:
