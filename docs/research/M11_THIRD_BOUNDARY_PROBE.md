@@ -1,6 +1,6 @@
 # M11 — Third boundary probe for isolated transfer-acceptance defects
 
-**Status:** CI validation pending. **Scope:** fixed, reviewer-approved integer transfer rejection only; not general requirement verification.
+**Status (2026-10-27 IST):** 123 focused tests passed (one dependency deprecation warning); real Docker M11 fault-detection CI passed, as did M8 frontend/build, M9 source-binding, M10 multi-module, and M1–M4 focused CI. **Scope:** fixed, reviewer-approved integer transfer rejection only; not general requirement verification.
 
 ## Problem observed in M5
 
