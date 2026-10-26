@@ -1,0 +1,48 @@
+{
+  "schema_version": "m6-ci-observed-metrics-summary-v1",
+  "source": "GitHub Actions run 40350771194, job 121669888069, Python 3.11",
+  "workflow_url": "https://github.com/GoutamNandhen/SRS_Guardian/actions/runs/40350771194",
+  "dataset": "benchmarks/m6/dronology_observed_trace_links.json",
+  "data_type": "external real-world published Dronology safety-case trace graph with observed positive links only",
+  "scope": "two versions of one project; Java paths; NOT end-to-end conformance",
+  "research_95_eligible": false,
+  "actual_M2_AST_accuracy_tested": false,
+  "methods": [
+    {
+      "version": "V0",
+      "method": "filename_bm25",
+      "known_linked_requirements": 8,
+      "hit_at_5": 0.25,
+      "mrr": 0.1875
+    },
+    {
+      "version": "V0",
+      "method": "path_bm25",
+      "known_linked_requirements": 8,
+      "hit_at_5": 0.375,
+      "mrr": 0.1548
+    },
+    {
+      "version": "V1",
+      "method": "filename_bm25",
+      "known_linked_requirements": 10,
+      "hit_at_5": 0.4,
+      "mrr": 0.325
+    },
+    {
+      "version": "V1",
+      "method": "path_bm25",
+      "known_linked_requirements": 10,
+      "hit_at_5": 0.4,
+      "mrr": 0.2879
+    }
+  ],
+  "limitations": [
+    "No trusted negative links; precision/accuracy not measurable.",
+    "One project only; V0 and V1 not independent splits.",
+    "Artifact graph indirect paths; labels possibly incomplete.",
+    "Source only metadata paths, no Java AST source ingestion.",
+    "No executable behavior ground truth.",
+    "No established 95% generalization."
+  ]
+}
