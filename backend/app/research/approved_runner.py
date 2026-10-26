@@ -153,9 +153,9 @@ def execute_approved(*, manifest_path: Path, index_directory: Path,
             raise ApprovalError("Invalid test outcome")
         actual = (row.get("actual") or {}).get("accepted")
         status = row["test_status"]
-        if status == "passed" and (actual is not False or row.get("http_status", 500) >= 500):
+        if status == "passed" and (actual is not False or not (200 <= row.get("http_status", 0) < 300)):
             raise ApprovalError("Invalid reported passing observation")
-        if status == "failed" and (actual is not True or row.get("http_status", 500) >= 500):
+        if status == "failed" and (actual is not True or not (200 <= row.get("http_status", 0) < 300)):
             raise ApprovalError("Invalid reported failing observation")
     decisions = {row["test_status"] for row in cases}
     derived = ("observed_violation" if "failed" in decisions else
