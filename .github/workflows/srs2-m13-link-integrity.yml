@@ -36,7 +36,8 @@ jobs:
             backend/tests/test_m7_hybrid_retrieval.py \
             backend/tests/test_m9_source_binding.py \
             backend/tests/test_m10_multimodule_binding.py \
-            backend/tests/test_m12_http_status_oracle.py
+            backend/tests/test_m12_http_status_oracle.py \
+            backend/tests/test_m13_link_integrity_gate.py
   trusted-docker-regression:
     runs-on: ubuntu-latest
     timeout-minutes: 25
