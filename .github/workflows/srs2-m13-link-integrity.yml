@@ -1,0 +1,99 @@
+name: SRS Guardian 2 M13 Link Integrity and 95 Percent Gate
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m13-link-integrity-gate-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/evaluate_conformance.py'
+      - 'backend/tests/test_m13_link_integrity_gate.py'
+      - 'docs/research/M13_LINK_INTEGRITY_GATE.md'
+      - '.github/workflows/srs2-m13-link-integrity.yml'
+permissions:
+  contents: read
+jobs:
+  link-integrity-and-full-research-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned research test dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44' 'scikit-learn==1.7.2'
+      - name: Compile verification and research modules
+        run: python -m compileall -q backend/app/research backend/app/services/conformance_verification.py backend/evaluation backend/tests/test_m13_link_integrity_gate.py
+      - name: Run M1-M13 focused regression
+        run: |
+          python -m pytest -q \
+            backend/tests/test_evaluate_conformance.py \
+            backend/tests/test_code_traceability.py \
+            backend/tests/test_conformance_verification.py \
+            backend/tests/test_m4_approved_runner.py \
+            backend/tests/test_m5_research_benchmark.py \
+            backend/tests/test_m6_external_trace.py \
+            backend/tests/test_m7_hybrid_retrieval.py \
+            backend/tests/test_m9_source_binding.py \
+            backend/tests/test_m10_multimodule_binding.py \
+            backend/tests/test_m12_http_status_oracle.py
+  trusted-docker-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned trusted Docker fixture dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44'
+      - name: Build reviewed source into local image
+        run: |
+          unset DOCKER_HOST
+          docker info --format 'Local Docker: {{.ServerVersion}}'
+          docker build -f examples/m4/Dockerfile -t srs-m8-trusted-banking:ci .
+      - name: Run real Docker positive and negative controls
+        run: |
+          python -m backend.evaluation.m8_docker_e2e --out /tmp/m13-single.json
+          python -m backend.evaluation.m10_multimodule_docker_e2e --out /tmp/m13-multi.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          single=json.loads(Path('/tmp/m13-single.json').read_text())
+          multi=json.loads(Path('/tmp/m13-multi.json').read_text())
+          assert single['docker_executed'] and multi['docker_executed']
+          assert single['all_expectations_met'] and multi['all_expectations_met']
+          assert not single['research_95_eligible'] and not multi['research_95_eligible']
+          assert [r['observed_decision'] for r in single['results']] == [
+              'passed_available_checks', 'observed_violation', 'observed_violation'
+          ]
+          assert [r['observed_decision'] for r in multi['results']] == [
+              'passed_available_checks', 'observed_violation'
+          ]
+          assert all(len(r['cases'])==3 for r in single['results'] + multi['results'])
+          print('M13 real Docker controls passed; 95 percent accuracy remains unproven')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m13-trusted-docker-evidence
+          path: /tmp/m13-*.json
+          retention-days: 14
+  frontend-production-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+      - name: TypeScript check
+        working-directory: frontend
+        run: npx tsc --noEmit
+      - name: Production build
+        working-directory: frontend
+        run: npm run build
