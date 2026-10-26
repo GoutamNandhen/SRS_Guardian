@@ -1,6 +1,6 @@
 # SRS Guardian 2.0 — M9 source-content binding audit
 
-**Status:** Implementation submitted for CI validation. No production merge. No claim of ≥95% conformance accuracy.
+**Status:** GitHub Actions M9 CI verified (2026-10-26): 110 focused tests passed (one warning); real Docker positive source-match and controlled source-drift rejection passed. M8 frontend production build and earlier regression checks also passed on this branch. No production merge. No claim of ≥95% conformance accuracy.
 
 ## Problem
 
