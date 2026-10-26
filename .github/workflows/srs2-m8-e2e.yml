@@ -39,8 +39,8 @@ jobs:
           assert evidence['docker_executed'] is True
           assert evidence['all_expectations_met'] is True
           assert evidence['research_95_eligible'] is False
-          assert [r['observed_decision'] for r in evidence['results']] == ['passed_available_checks', 'observed_violation']
-          assert all(len(r['cases'])==2 for r in evidence['results'])
+          assert [r['observed_decision'] for r in evidence['results']] == ['passed_available_checks', 'observed_violation', 'observed_violation']
+          assert all(len(r['cases'])==3 for r in evidence['results'])
           print('Trusted full Docker E2E verified; no 95 percent real-world claim')
           PY
       - uses: actions/upload-artifact@v4

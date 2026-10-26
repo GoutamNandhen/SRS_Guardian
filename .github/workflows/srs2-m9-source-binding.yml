@@ -60,10 +60,10 @@ jobs:
           r=json.load(open('/tmp/srs-m9-matched.json'))
           assert r['all_expectations_met'] is True
           assert r['research_95_eligible'] is False
-          assert [x['observed_decision'] for x in r['results']] == ['passed_available_checks', 'observed_violation']
+          assert [x['observed_decision'] for x in r['results']] == ['passed_available_checks', 'observed_violation', 'observed_violation']
           assert all(x['source_content_binding'] == 'worker_reported_module_digest_matches_index' for x in r['results'])
           assert all(x['source_sha256'] == x['executed_module_sha256'] for x in r['results'])
-          print('Two real Docker source digests match their indexed files')
+          print('Three real Docker source digests match their indexed files')
           PY
       - name: Negative proof - modified image source must be rejected
         run: |

@@ -1,0 +1,87 @@
+name: SRS Guardian 2 M11 Three-Probe Fault Detection
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m11-plus-two-boundary-probe-20261027
+  pull_request:
+    paths:
+      - 'backend/app/services/conformance_verification.py'
+      - 'backend/evaluation/m8_docker_e2e.py'
+      - 'backend/evaluation/m10_multimodule_docker_e2e.py'
+      - 'backend/tests/test_conformance_verification.py'
+      - 'examples/m4/banking_api_plus_two.py'
+      - '.github/workflows/srs2-m11-boundary.yml'
+permissions:
+  contents: read
+jobs:
+  complete-focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned research-test dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44' 'scikit-learn==1.7.2'
+      - name: Compile research source and tests
+        run: python -m compileall -q backend/app/research backend/app/services/conformance_verification.py backend/evaluation backend/tests/test_conformance_verification.py examples/m4
+      - name: Run M1-M11 focused regression
+        run: |
+          python -m pytest -q \
+            backend/tests/test_evaluate_conformance.py \
+            backend/tests/test_code_traceability.py \
+            backend/tests/test_conformance_verification.py \
+            backend/tests/test_m4_approved_runner.py \
+            backend/tests/test_m5_research_benchmark.py \
+            backend/tests/test_m6_external_trace.py \
+            backend/tests/test_m7_hybrid_retrieval.py \
+            backend/tests/test_m9_source_binding.py \
+            backend/tests/test_m10_multimodule_binding.py
+  real-docker-three-probes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned trusted-fixture dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44'
+      - name: Build reviewed Docker image
+        run: |
+          unset DOCKER_HOST
+          docker info --format 'Local Docker: {{.ServerVersion}}'
+          docker build -f examples/m4/Dockerfile -t srs-m8-trusted-banking:ci .
+      - name: Verify real Docker source binding and third-probe fault discovery
+        run: |
+          python -m backend.evaluation.m8_docker_e2e --out /tmp/m11-single-module.json
+          python -m backend.evaluation.m10_multimodule_docker_e2e --out /tmp/m11-multimodule.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          single=json.loads(Path('/tmp/m11-single-module.json').read_text())
+          multi=json.loads(Path('/tmp/m11-multimodule.json').read_text())
+          assert single['docker_executed'] and multi['docker_executed']
+          assert single['all_expectations_met'] and multi['all_expectations_met']
+          assert not single['research_95_eligible'] and not multi['research_95_eligible']
+          assert [r['observed_decision'] for r in single['results']] == [
+              'passed_available_checks', 'observed_violation', 'observed_violation'
+          ]
+          assert [r['observed_decision'] for r in multi['results']] == [
+              'passed_available_checks', 'observed_violation'
+          ]
+          for row in single['results'] + multi['results']:
+              assert [case['request']['amount'] for case in row['cases']] == [10001,10002,11000]
+              assert all(case['http_status']==200 for case in row['cases'])
+          narrow=single['results'][2]
+          assert narrow['fixture']=='banking_api_plus_two.py'
+          assert [case['request']['amount'] for case in narrow['cases']
+                  if case['test_status']=='failed']==[10002]
+          print('Real Docker caught isolated +2 acceptance fault with three source-bound HTTP probes')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m11-trusted-docker-boundary-probe-evidence
+          path: /tmp/m11-*.json
+          retention-days: 14

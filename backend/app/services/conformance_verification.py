@@ -59,7 +59,14 @@ def parse_transfer_rule(req_key: str, text: str) -> TransferRule:
 
 def plan_cases(rule: TransferRule) -> list[dict[str, Any]]:
     """Only above-limit rejection follows from this requirement; not below-limit success."""
-    amounts = [rule.threshold + 1, rule.threshold + max(2, (rule.threshold + 9) // 10)]
+    # M11: the original two probes missed a narrow faulty implementation
+    # accepting *only* threshold+2 (observed in M5's controlled pilot).
+    # Keep the distant probe while adding the adjacent +2 boundary. Ensure
+    # exactly three distinct above-limit amounts, even for small thresholds.
+    wide = rule.threshold + max(2, (rule.threshold + 9) // 10)
+    amounts = list(dict.fromkeys([rule.threshold + 1, rule.threshold + 2, wide]))
+    if len(amounts) < 3:
+        amounts.append(rule.threshold + 3)
     return [{"case_id": f"{rule.req_key}-ABOVE-{i+1}",
              "request": {"amount": amount},
              "expected": {"accepted": False},
