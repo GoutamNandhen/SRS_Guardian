@@ -62,7 +62,8 @@ jobs:
           assert r['all_expectations_met'] is True
           assert r['docker_executed'] is True
           assert r['research_95_eligible'] is False
-          assert [x['observed_decision'] for x in r['results']] == ['passed_available_checks','observed_violation']
+          assert [x['observed_decision'] for x in r['results']] == ['passed_available_checks','observed_violation','observed_violation']
+          assert [x['fixture'] for x in r['results']] == ['banking_api.py','banking_api_buggy.py','banking_api_plus_two.py']
           PY
       - uses: actions/upload-artifact@v4
         with:
