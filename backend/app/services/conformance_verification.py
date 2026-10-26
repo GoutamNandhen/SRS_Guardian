@@ -39,7 +39,7 @@ def parse_transfer_rule(req_key: str, text: str) -> TransferRule:
         raise UnsupportedRequirement("Only mandatory 'shall/must reject' transfer rules are supported")
     if not re.search(r"\btransfers?\b", lowered):
         raise UnsupportedRequirement("Only transfer-amount requirements are supported")
-    if re.search(r"\b(?:unless|except|only\s+if|at\s+least|up\s+to|per\s+day|daily|each\s+day)\b", lowered):
+    if re.search(r"\b(?:unless|except|if|when|provided\s+that|only\s+if|at\s+least|up\s+to|per\s+day|daily|each\s+day)\b", lowered):
         raise UnsupportedRequirement("Conditional, aggregated, or ambiguous transfer rules need review")
     if re.search(r"\b(?:USD|EUR|dollars?|euros?|million|crore|lakhs?)\b|[$€£]", sentence, re.I):
         raise UnsupportedRequirement("Currency or unit is not supported for this INR demo oracle")
