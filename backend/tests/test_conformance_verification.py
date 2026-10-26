@@ -26,6 +26,7 @@ def test_strict_parser():
     "The system shall allow transfers exceeding 10000.",
     "The system shall reject withdrawals exceeding 10000.",
     "The system shall reject transfers exceeding 10000 unless approved.",
+    "The system shall reject transfers exceeding 10000 if the customer is unverified.",
     "The system shall reject transfers exceeding 10000 per day.",
     "The system shall reject transfers exceeding 10000 and 15000.",
     "The system shall reject transfers exceeding USD 10000.",
