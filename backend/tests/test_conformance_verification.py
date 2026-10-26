@@ -94,6 +94,25 @@ def test_generic_trusted_asgi_adapter():
     assert report["source_repository_verified"] is False
 
 
+
+def test_http_server_failure_is_inconclusive_not_a_pass():
+    from fastapi.responses import JSONResponse
+
+    app = FastAPI()
+
+    @app.post("/payments/transfer")
+    async def broken_service():
+        return JSONResponse(status_code=503, content={"accepted": False})
+
+    report = asyncio.run(verify_approved_asgi_app(
+        app=app, rule=parse_transfer_rule("REQ-SERVER", BASE),
+        target_id="trusted-service-error", target_revision="broken-fixture",
+    ))
+    assert report["decision"] == "insufficient_evidence"
+    assert all(row["test_status"] == "inconclusive" for row in report["cases"])
+
+
+
 def test_provenance_digest():
     report = asyncio.run(verify_trusted_demo(req_key="REQ-1", text=BASE,
                                               target_id="demo_correct", oracle_approved=True))
