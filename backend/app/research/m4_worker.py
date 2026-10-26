@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import sys
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from backend.app.services.conformance_verification import (
     parse_transfer_rule, verify_approved_asgi_app,
 )
@@ -47,6 +48,25 @@ def execute_request(payload: dict) -> dict:
         if file.is_file() and file.stat().st_size <= 1_048_576:
             source_sha256 = hashlib.sha256(file.read_bytes()).hexdigest()
     report["executed_module_sha256"] = source_sha256
+    # M10: bind the *actual matched endpoint* rather than assuming its code
+    # lives in the FastAPI app entrypoint module. Reject ambiguous routes.
+    matching_routes = [r for r in app.routes if isinstance(r, APIRoute)
+                       and r.path == route and "POST" in r.methods]
+    report["executed_endpoint_sha256"] = None
+    report["executed_endpoint_module"] = None
+    report["executed_endpoint_qualname"] = None
+    if len(matching_routes) == 1:
+        endpoint = matching_routes[0].endpoint
+        endpoint_module_name = getattr(endpoint, "__module__", None)
+        endpoint_qualname = getattr(endpoint, "__qualname__", None)
+        endpoint_module = sys.modules.get(endpoint_module_name) if isinstance(endpoint_module_name, str) else None
+        endpoint_source = getattr(endpoint_module, "__file__", None)
+        if isinstance(endpoint_source, str) and endpoint_source.endswith(".py"):
+            endpoint_file = Path(endpoint_source)
+            if endpoint_file.is_file() and endpoint_file.stat().st_size <= 1_048_576:
+                report["executed_endpoint_sha256"] = hashlib.sha256(endpoint_file.read_bytes()).hexdigest()
+                report["executed_endpoint_module"] = endpoint_module_name
+                report["executed_endpoint_qualname"] = endpoint_qualname
     # This *specific* oracle assumes a 2xx JSON response carrying accepted=false.
     # 4xx/5xx, including nonexistent endpoints, cannot be treated as successful tests.
     for case in report["cases"]:
