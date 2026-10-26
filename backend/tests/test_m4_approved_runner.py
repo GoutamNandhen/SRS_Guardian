@@ -12,6 +12,7 @@ from backend.app.research.approved_runner import (
     ApprovalError, resolve_binding, read_manifest, execute_approved, _hash, SENTINEL,
 )
 from backend.app.research.m4_worker import execute_request
+from backend.app.services.conformance_verification import plan_cases, parse_transfer_rule
 
 INDEX_ID = 'a' * 64
 IMAGE_ID = 'sha256:' + 'b' * 64
@@ -36,7 +37,7 @@ def setup_approval(tmp_path, **changes):
 def _fake_evidence():
     result={'target_id':'bank-v1','target_revision':'rev1','requirement_key':'REQ-1',
         'requirement_text':REQ,'endpoint':{'method':'POST','route':'/payments/transfer'},
-        'decision':'passed_available_checks','cases':[{'request':{'amount':10001},'test_status':'passed'}]}
+        'decision':'passed_available_checks','cases':[{**{k:case[k] for k in ('case_id','request','expected')},'test_status':'passed','actual':{'accepted':False},'http_status':200} for case in plan_cases(parse_transfer_rule('REQ-1',REQ))]}
     result['evidence_sha256']=_hash(result)
     return result
 
@@ -131,6 +132,33 @@ def test_duplicate_target_ids_rejected(tmp_path):
         read_manifest(manifest)
 
 
+def test_refuses_missing_boundary_case(tmp_path):
+    evidence=_fake_evidence()
+    evidence['cases'].pop()
+    evidence['evidence_sha256']=_hash({k:v for k,v in evidence.items() if k!='evidence_sha256'})
+    runner,_=docker_stub(None,evidence=evidence)
+    with pytest.raises(ApprovalError,match='Missing or extra'):
+        call(tmp_path,executor=runner)
+
+
+def test_refuses_false_pass_even_with_rehashed_evidence(tmp_path):
+    evidence=_fake_evidence()
+    evidence['cases'][0]['actual']={'accepted':True}
+    evidence['evidence_sha256']=_hash({k:v for k,v in evidence.items() if k!='evidence_sha256'})
+    runner,_=docker_stub(None,evidence=evidence)
+    with pytest.raises(ApprovalError,match='passing observation'):
+        call(tmp_path,executor=runner)
+
+
+def test_refuses_fake_aggregate_decision(tmp_path):
+    evidence=_fake_evidence()
+    evidence['decision']='observed_violation'
+    evidence['evidence_sha256']=_hash({k:v for k,v in evidence.items() if k!='evidence_sha256'})
+    runner,_=docker_stub(None,evidence=evidence)
+    with pytest.raises(ApprovalError,match='Aggregate'):
+        call(tmp_path,executor=runner)
+
+
 def test_worker_against_real_fastapi_asgi_in_process():
     # Docker not present here; tests actual request execution in the *worker*.
     request={'req_key':'REQ-1','requirement':REQ,'app_module':'examples.m4.banking_api',
@@ -140,6 +168,14 @@ def test_worker_against_real_fastapi_asgi_in_process():
     assert result['target_revision']=='rev1'
     assert result['cases']
     assert result['evidence_sha256']==_hash({k:v for k,v in result.items() if k!='evidence_sha256'})
+
+
+def test_worker_detects_known_bug_in_real_fastapi_app():
+    request={'req_key':'REQ-1','requirement':REQ,'app_module':'examples.m4.banking_api_buggy',
+        'app_attribute':'app','route':'/payments/transfer','target_id':'bank-bug','revision':'rev-bug'}
+    report=execute_request(request)
+    assert report['decision']=='observed_violation'
+    assert any(x['test_status']=='failed' for x in report['cases'])
 
 
 def test_worker_rejects_arbitrary_module_string():
