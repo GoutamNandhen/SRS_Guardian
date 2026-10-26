@@ -155,6 +155,11 @@ async def verify_trusted_demo(*, req_key: str, text: str,
     if target_id not in TARGETS:
         raise ValueError("Only registered trusted demo targets are allowed")
     rule = parse_transfer_rule(req_key, text)
+    if rule.threshold != 10_000:
+        raise UnsupportedRequirement(
+            "Built-in demo applications implement the ₹10,000 limit only. "
+            "Use the approved development adapter for other thresholds."
+        )
     demo = TARGETS[target_id]
     report = await verify_approved_asgi_app(
         app=make_demo_app(faulty=demo["faulty"]), rule=rule,
