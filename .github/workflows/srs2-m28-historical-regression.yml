@@ -1,0 +1,69 @@
+name: SRS Guardian M28 Historical Real-World Regression Evidence
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m28-real-pagination-regression-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m28_historical_pagination_regression.py'
+      - 'backend/tests/test_m28_historical_pagination_regression.py'
+      - '.github/workflows/srs2-m28-historical-regression.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-historical-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned offline test dependencies
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Run offline M20 and M28 tests
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m28_historical_pagination_regression.py
+      - name: Verify six pinned static source objects and generate real regression review
+        run: python -m backend.evaluation.m28_historical_pagination_regression --out-dir /tmp/m28
+      - name: Verify reviewer separation, coverage and absence of fabricated verdicts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m28')
+          reviewer = root / 'reviewers'
+          internal = json.loads((root / 'internal' / 'internal.json').read_text())
+          assert internal['static_file_revision_objects_verified'] == 6
+          assert internal['historical_bug_report_scenarios'] == 2
+          assert internal['m20_link_pairs_pending'] == 4
+          assert internal['behavior_revision_cases_pending'] == 4
+          assert internal['independent_reviewed_links'] == 0
+          assert internal['independent_reviewed_behavior_cases'] == 0
+          assert internal['representative_held_out'] is False
+          assert not (reviewer / 'manifest.json').exists()
+          assert 'reported_observed_before' not in (reviewer / 'source_index.json').read_text()
+          for reviewer_id in ('A', 'B'):
+              links = [json.loads(s) for s in (reviewer / f'reviewer_{reviewer_id}.jsonl').read_text().splitlines()]
+              behavior = [json.loads(s) for s in (reviewer / f'behavior_reviewer_{reviewer_id}.jsonl').read_text().splitlines()]
+              assert len(links) == 4 and len(behavior) == 4
+              assert all(x['link_label'] is None and x['annotation_status'] == 'pending' for x in links)
+              assert all(x['observed_offers'] is None and x['conformance_label'] is None and x['violation_label'] is None for x in behavior)
+          for metric in ('conformance_accuracy', 'violation_precision', 'violation_recall', 'conformance_coverage'):
+              assert internal[metric] is None
+          print('M28: six pinned static file/revision objects; two real bug-report scenarios; four pending M20 links; four pending behavior/revision cases; zero gold.')
+          PY
+      - name: Upload independent reviewer packet
+        uses: actions/upload-artifact@v4
+        with:
+          name: m28-historical-regression-reviewers
+          path: /tmp/m28/reviewers/
+          retention-days: 30
+      - name: Upload separate internal historical report and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: m28-historical-regression-internal
+          path: /tmp/m28/internal/
+          retention-days: 30
