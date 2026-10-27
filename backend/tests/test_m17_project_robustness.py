@@ -14,7 +14,8 @@ from backend.tests.test_m5_research_benchmark import make_gold, make_pred
 
 def mock_project_benchmark(tmp_path, supports, *, wrong_on=None,
                            unlinked_supports=(20, 20, 20),
-                           extra_unlinked_project=0):
+                           extra_unlinked_project=0,
+                           unlinked_prediction_modes=("reject", "reject", "reject", "reject")):
     assert len(supports) == 3 and sum(supports) == 500
     gold = []
     predictions = []
@@ -43,6 +44,8 @@ def mock_project_benchmark(tmp_path, supports, *, wrong_on=None,
     # Each mock project now includes link-negative candidates. M18 checks
     # these explicitly; their labels and evidence are entirely synthetic.
     assert len(unlinked_supports) == 3
+    assert len(unlinked_prediction_modes) == 4
+    assert set(unlinked_prediction_modes) <= {"reject", "abstain", "claim"}
     for project_index, n in enumerate((*unlinked_supports, extra_unlinked_project)):
         project = f"MOCK-PROJECT-{project_index}"
         for i in range(n):
@@ -60,7 +63,14 @@ def mock_project_benchmark(tmp_path, supports, *, wrong_on=None,
                 "reproduction_instructions": "MOCK_NOT_REPRODUCIBLE",
             })
             gold.append(row)
-            predictions.append({"case_id": row["case_id"], "predicted_link": False})
+            mode = unlinked_prediction_modes[project_index]
+            # Synthetic adversarial link decisions. A false link claim is
+            # intentionally inconclusive for conformance, not a fake test run.
+            predictions.append({
+                "case_id": row["case_id"],
+                "predicted_link": {"reject": False, "abstain": None, "claim": True}[mode],
+                "decision": "insufficient_evidence",
+            })
     # Identical mock methods are intentional: we test a gate, not systems.
     return compare_systems(
         gold, {"mockA": predictions, "mockB": predictions},
