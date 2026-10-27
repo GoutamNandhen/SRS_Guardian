@@ -9,6 +9,18 @@ This is exploratory **trace-link retrieval**, NOT requirement-to-code behavioral
 - M23 verifies exact Git blob hashes of eleven static files, including both licenses. M25 adds SHA-256, source-line counts, and pinned GitHub URLs to the reviewer-only source index.
 - Rights in third-party architecture documentation have not been fully cleared. Do not redistribute that documentation beyond authorized review without resolving rights.
 
+## Verified M25 exploratory retrieval result (2026-10-27)
+
+[Successful GitHub Actions run 40535427628](https://github.com/GoutamNandhen/SRS_Guardian/actions/runs/40535427628): **36 focused tests passed**, all source hash verification, blinded packet separation, and two evidence artifact uploads succeeded.
+
+| Method | Hit@1 (3 observed-linked architecture statements) | Observed-positive recall@3 (6 unverified published links) |
+|---|---:|---:|
+| M7 path BM25 | 66.67% | 66.67% |
+| M7 hybrid RRF | 66.67% | 83.33% |
+| M25 source-content char TF-IDF | **100%** | **100%** |
+
+**Interpretation:** source-content retrieval outperformed path-only retrieval **on this deliberately selected three-statement development subset**. The improvement is not a statistically meaningful generalization claim and not conformance accuracy; there are no independent gold link labels, negative link labels, or behavioral violations. The observed links were published by third parties and have not been independently adjudicated.
+
 ## Reproduce from the M25 feature branch
 
 ~~~bash
