@@ -12,7 +12,9 @@ from backend.evaluation.m5_research_benchmark import canonical_digest, compare_s
 from backend.tests.test_m5_research_benchmark import make_gold, make_pred
 
 
-def mock_project_benchmark(tmp_path, supports, *, wrong_on=None):
+def mock_project_benchmark(tmp_path, supports, *, wrong_on=None,
+                           unlinked_supports=(20, 20, 20),
+                           extra_unlinked_project=0):
     assert len(supports) == 3 and sum(supports) == 500
     gold = []
     predictions = []
@@ -38,22 +40,27 @@ def mock_project_benchmark(tmp_path, supports, *, wrong_on=None):
             wrong = wrong_on == project_index and i < 20 and i % 2 == 0
             verdict = "violates" if wrong else label
             predictions.append(make_pred(row, tmp_path, decision=verdict))
-    for i in range(50):
-        row = make_gold(f"MOCK-UNLINKED-{i}", project="MOCK-PROJECT-0",
-                        dataset="real_adjudicated")
-        row.update({
-            "gold_link": False, "gold_conformance": None,
-            "annotation_source": "MOCK_ONLY_NOT_EXTERNAL",
-            "public_source_url": "MOCK_ONLY_NOT_A_PUBLIC_SOURCE",
-            "source_license": "MOCK_ONLY",
-            "code_snapshot_sha256": hashlib.sha256(b"MOCK-PROJECT-0").hexdigest(),
-            "annotator_1": "MOCK_A", "annotator_2": "MOCK_B",
-            "adjudication_record": "MOCK_ADJUDICATION",
-            "oracle_provenance": "MOCK_ORACLE",
-            "reproduction_instructions": "MOCK_NOT_REPRODUCIBLE",
-        })
-        gold.append(row)
-        predictions.append({"case_id": row["case_id"], "predicted_link": False})
+    # Each mock project now includes link-negative candidates. M18 checks
+    # these explicitly; their labels and evidence are entirely synthetic.
+    assert len(unlinked_supports) == 3
+    for project_index, n in enumerate((*unlinked_supports, extra_unlinked_project)):
+        project = f"MOCK-PROJECT-{project_index}"
+        for i in range(n):
+            row = make_gold(f"MOCK-UNLINKED-{project_index}-{i}", project=project,
+                            dataset="real_adjudicated")
+            row.update({
+                "gold_link": False, "gold_conformance": None,
+                "annotation_source": "MOCK_ONLY_NOT_EXTERNAL",
+                "public_source_url": "MOCK_ONLY_NOT_A_PUBLIC_SOURCE",
+                "source_license": "MOCK_ONLY",
+                "code_snapshot_sha256": hashlib.sha256(project.encode()).hexdigest(),
+                "annotator_1": "MOCK_A", "annotator_2": "MOCK_B",
+                "adjudication_record": "MOCK_ADJUDICATION",
+                "oracle_provenance": "MOCK_ORACLE",
+                "reproduction_instructions": "MOCK_NOT_REPRODUCIBLE",
+            })
+            gold.append(row)
+            predictions.append({"case_id": row["case_id"], "predicted_link": False})
     # Identical mock methods are intentional: we test a gate, not systems.
     return compare_systems(
         gold, {"mockA": predictions, "mockB": predictions},
