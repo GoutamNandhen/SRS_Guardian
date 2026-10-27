@@ -1,0 +1,72 @@
+name: SRS Guardian M33 Upstream Integration-Test Intent Replay
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m33-upstream-test-oracle-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m33_upstream_test_intent_replay.py'
+      - 'backend/tests/test_m33_upstream_test_intent_replay.py'
+      - 'docs/research/M33_UPSTREAM_TEST_INTENT_REPLAY.md'
+      - '.github/workflows/srs2-m33-upstream-test-intent.yml'
+permissions:
+  contents: read
+jobs:
+  upstream-test-intent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party test dependency
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Test M20, M28, M30, and M33
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m28_historical_pagination_regression.py \
+            backend/tests/test_m30_static_pagination_witness.py \
+            backend/tests/test_m33_upstream_test_intent_replay.py
+      - name: Download only pinned static source and replay upstream test intent
+        run: python -m backend.evaluation.m33_upstream_test_intent_replay --out-dir /tmp/m33
+      - name: Verify reviewer isolation and explicit unknown research metrics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m33')
+          report = json.loads((root/'internal'/'test_intent_replay.json').read_text())
+          assert report['test_intent_cases'] == 6
+          assert report['before_model_disagrees_with_test_intent'] == 2
+          assert report['after_model_agrees_with_test_intent'] == 6
+          assert report['verified_static_file_revision_objects'] == 6
+          assert report['m20_unlabeled_link_pairs'] == 12
+          assert report['behavior_revision_cases_per_reviewer'] == 12
+          assert report['independent_adjudications'] == 0
+          assert report['external_project_code_executed'] is False
+          assert report['held_out_evaluation'] is False
+          for metric in ('conformance_accuracy', 'violation_precision', 'violation_recall', 'conformance_coverage'):
+              assert report[metric] is None
+          reviewer_dir = root/'reviewers'
+          assert not (reviewer_dir/'test_intent_replay.json').exists()
+          assert not (reviewer_dir/'manifest.json').exists()
+          for reviewer in ('A','B'):
+              links = [json.loads(s) for s in (reviewer_dir/f'reviewer_{reviewer}.jsonl').read_text().splitlines()]
+              behaviors = [json.loads(s) for s in (reviewer_dir/f'behavior_reviewer_{reviewer}.jsonl').read_text().splitlines()]
+              assert len(links) == 12 and len(behaviors) == 12
+              assert all(x['link_label'] is None for x in links)
+              assert all(x['conformance_label'] is None and x['violation_label'] is None for x in behaviors)
+          print('Six upstream test intentions; two conditional pre-fix mismatches; zero independent labels.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m33-internal-test-intent-replay
+          path: /tmp/m33/internal/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m33-blinded-independent-review
+          path: /tmp/m33/reviewers/
+          retention-days: 30
