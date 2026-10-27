@@ -179,6 +179,8 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
     robustness_policy = {
         "minimum_linked_per_project": 50,
         "minimum_unlinked_per_project": 10,
+        "minimum_unlinked_decision_coverage_per_project": 0.95,
+        "minimum_unlinked_rejection_rate_per_project": 0.90,
         "minimum_per_conformance_class_per_project": 10,
         "minimum_worst_project_accuracy": 0.90,
         "minimum_project_macro_accuracy": 0.95,
@@ -212,6 +214,22 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
                 prediction_map.get(r["case_id"], {}).get("predicted_link") is True
                 for r in negative_rows
             )
+            # M19: distinguish a genuine rejection from silence. A system that
+            # abstains on every negative candidate must not claim that it
+            # successfully screened unlinked code. Missing predictions count
+            # as abstentions, never as correctly rejected links.
+            negative_decided = negative_correct + false_link_claims
+            negative_decision_coverage = (
+                negative_decided / len(negative_rows) if negative_rows else None
+            )
+            negative_rejection_rate = (
+                negative_correct / len(negative_rows) if negative_rows else None
+            )
+            negative_performance_sufficient = (
+                negative_decision_coverage is not None
+                and negative_decision_coverage >= robustness_policy["minimum_unlinked_decision_coverage_per_project"]
+                and negative_rejection_rate >= robustness_policy["minimum_unlinked_rejection_rate_per_project"]
+            )
             supports[project] = {
                 "linked": len(group),
                 "unlinked": len(negative_rows),
@@ -219,6 +237,9 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
                 "link_prediction_coverage": link_decided / len(project_rows),
                 "unlinked_correctly_rejected": negative_correct,
                 "unlinked_false_link_claims": false_link_claims,
+                "unlinked_abstentions": len(negative_rows) - negative_decided,
+                "unlinked_decision_coverage": negative_decision_coverage,
+                "unlinked_performance_sufficient": negative_performance_sufficient,
                 "unlinked_rejection_rate": (
                     negative_correct / len(negative_rows) if negative_rows else None
                 ),
@@ -258,24 +279,32 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
             and worst_project is not None
             and worst_project >= robustness_policy["minimum_worst_project_accuracy"]
         )
-        robust = m17_robust and m18_sufficient
+        # M19: link-negative *support* alone is not evidence of successful
+        # rejection. Enforce per-project coverage and rejection performance.
+        m19_performance = m18_sufficient and all(
+            x["unlinked_performance_sufficient"] for x in supports.values()
+        )
+        robust = m17_robust and m18_sufficient and m19_performance
         project_robustness[name] = {
             "project_macro_accuracy": project_macro,
             "worst_project_accuracy": worst_project,
             "minimum_support_met": m17_sufficient and m18_sufficient,
             "m17_conformance_gate_passed": m17_robust,
             "m18_negative_link_gate_passed": m18_sufficient,
+            "m19_negative_link_performance_passed": m19_performance,
             "gate_passed": robust,
             "projects": supports,
         }
         acceptance = results[name]["acceptance"]
         acceptance["m17_project_robustness_passed"] = m17_robust
         acceptance["m18_project_negative_link_coverage_passed"] = m18_sufficient
+        acceptance["m19_project_negative_link_performance_passed"] = m19_performance
         if m5_claim_eligible and acceptance["passed"] and not robust:
             acceptance["passed"] = False
             acceptance["status"] = (
                 "BLOCKED_BY_M17_PROJECT_ROBUSTNESS" if not m17_robust
-                else "BLOCKED_BY_M18_PROJECT_LINK_COVERAGE"
+                else "BLOCKED_BY_M18_PROJECT_LINK_COVERAGE" if not m18_sufficient
+                else "BLOCKED_BY_M19_PROJECT_NEGATIVE_LINK_PERFORMANCE"
             )
     names = sorted(systems)
     paired: dict[str, Any] = {}
@@ -308,7 +337,7 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
         "project_robustness_policy": robustness_policy,
         "project_robustness": project_robustness,
         "paired": paired,
-        "interpretation": "Synthetic benchmarks and demo evidence are never proof of 95% on unseen real projects. Missing/unsupported cases count against full-denominator accuracy. M17 requires project-balanced accuracy. M18 also enumerates every held-out project and requires negative link examples in each project to prevent hidden gaps in link evaluation.",
+        "interpretation": "Synthetic benchmarks and demo evidence are never proof of 95% on unseen real projects. Missing/unsupported cases count against full-denominator accuracy. M17 requires project-balanced accuracy. M18 also enumerates every held-out project and requires negative link examples in each project. M19 requires those negatives to be actively adjudicated by the system (>=95% link-decision coverage and >=90% correct rejection on each project); missing predictions and abstentions are not successful rejections.",
     }
 
 
