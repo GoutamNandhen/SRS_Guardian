@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from backend.evaluation.evaluate_conformance import (
-    EvaluationError, _evidence_ok, evaluate, read_jsonl, validate_gold,
+    EvaluationError, OUTCOMES, _evidence_ok, evaluate, read_jsonl, validate_gold,
     validate_predictions,
 )
 
