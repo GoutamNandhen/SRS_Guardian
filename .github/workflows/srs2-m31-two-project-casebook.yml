@@ -1,0 +1,81 @@
+name: SRS Guardian M31 Two-Project Verification Casebook
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m31-two-project-verification-casebook-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m31_two_project_casebook.py'
+      - 'backend/tests/test_m31_two_project_casebook.py'
+      - 'docs/research/M31_TWO_PROJECT_VERIFICATION_CASEBOOK.md'
+      - '.github/workflows/srs2-m31-two-project-casebook.yml'
+permissions:
+  contents: read
+jobs:
+  two-project-casebook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned test dependency
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Test only our M20 M28 M29 M30 M31 Python code
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m28_historical_pagination_regression.py \
+            backend/tests/test_m29_pip_historical_regression.py \
+            backend/tests/test_m30_static_pagination_witness.py \
+            backend/tests/test_m31_two_project_casebook.py
+      - name: Fetch pinned static source and build one-command demonstration
+        run: python -m backend.evaluation.m31_two_project_casebook --out-dir /tmp/m31
+      - name: Verify casebook counts and independent-review separation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m31')
+          book = json.loads((root/'internal'/'casebook.json').read_text())
+          assert book['project_count'] == 2
+          assert book['historical_scenarios'] == 5
+          assert book['static_file_revision_objects_verified'] == 12
+          assert book['revision_behavior_cases_pending_per_reviewer'] == 10
+          assert book['m20_link_pairs_pending_per_reviewer'] == 10
+          assert book['independent_adjudications'] == 0
+          assert book['external_project_code_executed'] is False
+          assert book['representative_held_out_evaluation'] is False
+          assert all(x is None for x in book['metrics'].values())
+          assert (root/'internal'/'index.html').is_file()
+          for project, links, cases in [('edc', 4, 4), ('pip', 6, 6)]:
+              review = root/project/'reviewers'
+              assert not (review/'manifest.json').exists()
+              assert not (review/'m30_conditional_static_witness.json').exists()
+              for reviewer in ('A','B'):
+                  a = [json.loads(x) for x in (review/f'reviewer_{reviewer}.jsonl').read_text().splitlines()]
+                  b = [json.loads(x) for x in (review/f'behavior_reviewer_{reviewer}.jsonl').read_text().splitlines()]
+                  assert len(a) == links and len(b) == cases
+                  assert all(x['link_label'] is None for x in a)
+                  assert all(x['conformance_label'] is None and x['violation_label'] is None for x in b)
+          print('M31: 2 projects, 5 scenarios, 10 behavior revision cases per reviewer, 0 gold.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m31-edc-blinded-reviewers
+          path: /tmp/m31/edc/reviewers/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m31-pip-blinded-reviewers
+          path: /tmp/m31/pip/reviewers/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m31-internal-casebook-and-provenance
+          path: |
+            /tmp/m31/internal/
+            /tmp/m31/edc/internal/
+            /tmp/m31/pip/internal/
+          retention-days: 30
