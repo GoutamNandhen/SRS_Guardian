@@ -1,0 +1,68 @@
+name: SRS Guardian M24 Cross-Corpus External Retrieval Baseline
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m24-cross-corpus-observed-link-baseline-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/m24_cross_corpus_baseline.py'
+      - 'backend/tests/test_m24_cross_corpus_baseline.py'
+      - '.github/workflows/srs2-m24-external-baseline.yml'
+permissions:
+  contents: read
+jobs:
+  two-project-observed-link-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install fixed CPU-only evaluation dependencies
+        run: python -m pip install 'pytest==8.4.2' 'scikit-learn==1.7.2'
+      - name: Run offline source, annotation and baseline tests
+        run: python -m pytest -q backend/tests/test_m20_annotation_queue.py backend/tests/test_m23_teastore_external.py backend/tests/test_m24_cross_corpus_baseline.py
+      - name: Fetch eleven pinned licensed TeaStore files and produce blinded M20 queue
+        run: python -m backend.evaluation.m23_teastore_external --out-dir /tmp/m24-teastore
+      - name: Run frozen M7 retrieval against two external projects
+        run: |
+          python -m backend.evaluation.m24_cross_corpus_baseline \
+            --dronology benchmarks/m6/dronology_observed_trace_links.json \
+            --teastore-universe /tmp/m24-teastore/candidate_universe.json \
+            --teastore-evidence /tmp/m24-teastore/external_evidence.json \
+            --output /tmp/m24-two-project-baseline.json
+      - name: Validate no fabricated conformance or adjudication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/m24-two-project-baseline.json').read_text())
+          assert r['independent_project_count']==2
+          assert r['evaluation_cohorts']==3
+          assert len(r['runs'])==6
+          assert {x['project'] for x in r['runs']}=={'Dronology','TeaStore'}
+          assert r['research_95_eligible'] is False
+          assert r['independently_adjudicated_conformance_cases']==0
+          assert r['independently_adjudicated_link_pairs']==0
+          for key in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'):
+              assert r[key] is None
+              assert all(x[key] is None for x in r['runs'])
+          assert all(x['statements_with_observed_positive']<=x['total_statements'] for x in r['runs'])
+          assert all(x['observed_positive_links_unverified']>=x['statements_with_observed_positive'] for x in r['runs'])
+          assert all(x['observed_positive_link_recall_at_k']['1'] is None or
+                     0 <= x['observed_positive_link_recall_at_k']['1'] <= 1 for x in r['runs'])
+          print('M24: 2 external projects, 3 cohorts, 2 frozen methods, NO conformance claims')
+          for x in r['runs']:
+              print(x['project'], x['version'], x['method'],
+                    'linked_n=',x['statements_with_observed_positive'],
+                    'hit1=',x['hit_at_k_among_observed_linked_statements']['1'],
+                    'observed_recall3=',x['observed_positive_link_recall_at_k']['3'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m24-two-project-external-baseline-and-review-queue
+          path: |
+            /tmp/m24-two-project-baseline.json
+            /tmp/m24-teastore/
+          retention-days: 30
