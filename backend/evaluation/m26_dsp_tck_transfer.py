@@ -55,7 +55,7 @@ class SourceError(ValueError):
 
 
 def git_blob_id(raw: bytes) -> str:
-    return hashlib.sha1(f"blob {len(raw)}\\0".encode("ascii") + raw).hexdigest()
+    return hashlib.sha1(f"blob {len(raw)}\0".encode("ascii") + raw).hexdigest()
 
 
 def fetch_pinned(*, source_dir: Path | None = None) -> dict[str, bytes]:
@@ -99,7 +99,7 @@ def build_evidence(files: dict[str, bytes]) -> dict:
     if b"SPDX-License-Identifier: Apache-2.0" not in files["NOTICE.md"]:
         raise SourceError("Pinned NOTICE license declaration missing")
     readme = files["README.md"].decode("utf-8")
-    normalized = re.sub(r"\\s+", " ", readme.replace("**", "").replace("`", ""))
+    normalized = re.sub(r"\s+", " ", readme.replace("**", "").replace("`", ""))
     # Source is author documentation, NOT a separately adjudicated spec.
     for rid, sentence in MODULE_TEXT.items():
         if sentence not in normalized:
@@ -200,18 +200,18 @@ def main(argv: list[str] | None = None) -> int:
     (reviewer / "manifest.json").unlink()  # selection origins are internal only
     reviewer.mkdir(parents=True, exist_ok=True)
     (reviewer / "source_index.json").write_text(
-        json.dumps(result["reviewer"]["index"], indent=2) + "\\n", encoding="utf-8")
+        json.dumps(result["reviewer"]["index"], indent=2) + "\n", encoding="utf-8")
     (reviewer / "README.txt").write_text(
         "Review all 20 pairs independently. Inspect pinned README and Java source URLs. "
         "Record linked/not-linked/uncertain with cited source lines; third reviewer adjudicates. "
         "Do not use internal manifests or assume unobserved links are negatives. "
-        "These are module-to-compliance-test links, NOT connector conformance cases.\\n",
+        "These are module-to-compliance-test links, NOT connector conformance cases.\n",
         encoding="utf-8")
     internal.mkdir(parents=True, exist_ok=True)
     write_outputs(result["reviewer"]["queue"], internal / "annotation_provenance")
     for name, data in result["internal"].items():
         (internal / (name + ".json")).write_text(
-            json.dumps(data, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+            json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     b = result["internal"]["baseline"]
     print(json.dumps({
         "project": b["project"], "pinned_files": b["pinned_static_files"],
