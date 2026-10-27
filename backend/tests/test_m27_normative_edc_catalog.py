@@ -11,17 +11,17 @@ def fixtures(monkeypatch):
     lines = ["# intentionally synthetic offline fixture"] * 100
     for _, excerpt, _, start, _ in m.REQUIREMENTS:
         lines[start - 1] = excerpt
-    spec = ("\\n".join(lines) + "\\n").encode()
+    spec = ("\n".join(lines) + "\n").encode()
     sources = {
-        m.SPEC_REPO: {"LICENSE": b"Apache License\\n", m.SPEC_PATH: spec},
-        m.CODE_REPO: {"LICENSE": b"Apache License\\n"},
-        m.TCK_REPO: {"LICENSE.md": b"Apache License\\n",
-                     m.TCK_PATH: b"// SPDX-License-Identifier: Apache-2.0\\n@MandatoryTest class Catalog01Test {}"},
+        m.SPEC_REPO: {"LICENSE": b"Apache License\n", m.SPEC_PATH: spec},
+        m.CODE_REPO: {"LICENSE": b"Apache License\n"},
+        m.TCK_REPO: {"LICENSE.md": b"Apache License\n",
+                     m.TCK_PATH: b"// SPDX-License-Identifier: Apache-2.0\n@MandatoryTest class Catalog01Test {}"},
     }
     for i, path in enumerate(m.CODE_PATHS):
         sources[m.CODE_REPO][path] = (
-            "// SPDX-License-Identifier: Apache-2.0\\n"
-            + f"public class Test{i} {{ String catalog = \\"request response pagination filter\\"; }}\\n"
+            "// SPDX-License-Identifier: Apache-2.0\n"
+            + f"public class Test{i} {{ String catalog = \"request response pagination filter\"; }}\n"
         ).encode()
     monkeypatch.setattr(m, "FILES", {
         repo: {path: m.git_blob_id(raw) for path, raw in paths.items()}
@@ -31,7 +31,7 @@ def fixtures(monkeypatch):
 
 
 def test_git_blob_sha1_known_vector():
-    assert m.git_blob_id(b"test\\n") == "9daeafb9864cf43055ae93beb0afd6c7d144bfa4"
+    assert m.git_blob_id(b"test\n") == "9daeafb9864cf43055ae93beb0afd6c7d144bfa4"
 
 
 def test_complete_normative_to_real_implementation_review_unlabeled(monkeypatch):
