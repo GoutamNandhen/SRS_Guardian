@@ -20,7 +20,7 @@ on:
       - 'docs/research/M16_WRONG_EDGE_PRECISION.md'
       - 'docs/research/M17_PROJECT_ROBUSTNESS.md'
       - 'docs/research/M18_PROJECT_LINK_NEGATIVE_COVERAGE.md'
-      - '.github/workflows/srs2-m18-ci.yml'
+      - '.github/workflows/srs2-m19-ci.yml'
 permissions:
   contents: read
 jobs:
@@ -74,7 +74,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          r=json.loads(Path('/tmp/m18-docker-evidence.json').read_text())
+          r=json.loads(Path('/tmp/m19-docker-evidence.json').read_text())
           assert r['all_expectations_met'] is True
           assert r['docker_executed'] is True
           assert r['research_95_eligible'] is False
@@ -84,7 +84,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: m19-trusted-docker-evidence
-          path: /tmp/m18-docker-evidence.json
+          path: /tmp/m19-docker-evidence.json
           retention-days: 14
   frontend-production-regression:
     runs-on: ubuntu-latest
