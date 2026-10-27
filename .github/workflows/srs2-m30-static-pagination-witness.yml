@@ -1,0 +1,64 @@
+name: SRS Guardian M30 Source-Grounded Pagination Witness
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m30-source-grounded-pagination-witness-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m30_static_pagination_witness.py'
+      - 'backend/tests/test_m30_static_pagination_witness.py'
+      - '.github/workflows/srs2-m30-static-pagination-witness.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-static-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependency
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Test our offline M20 M28 and M30 logic
+        run: |
+          python -m pytest -q backend/tests/test_m20_annotation_queue.py backend/tests/test_m28_historical_pagination_regression.py backend/tests/test_m30_static_pagination_witness.py
+      - name: Fetch six hash-verified static M28 objects and build M30 witness
+        run: python -m backend.evaluation.m30_static_pagination_witness --out-dir /tmp/m30
+      - name: Check source-bound model outputs and strict reviewer separation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m30')
+          witness = json.loads((root/'internal'/'m30_conditional_static_witness.json').read_text())
+          assert len(witness['cases']) == 2
+          assert [(c['before']['model_returned_offers'], c['after']['model_returned_offers']) for c in witness['cases']] == [(100,52),(3,2)]
+          assert all(c['runtime_observed_before'] is None and c['runtime_observed_after'] is None for c in witness['cases'])
+          assert witness['independent_adjudications'] == 0
+          assert witness['external_code_executed'] is False
+          assert witness['held_out_evaluation'] is False
+          assert len(witness['verified_source_expression_anchors']['before']) == 6
+          assert len(witness['verified_source_expression_anchors']['after']) == 6
+          assert all(witness[key] is None for key in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'))
+          assert not (root/'reviewers'/'manifest.json').exists()
+          for reviewer in ('A','B'):
+              links = [json.loads(x) for x in (root/'reviewers'/f'reviewer_{reviewer}.jsonl').read_text().splitlines()]
+              behavior = [json.loads(x) for x in (root/'reviewers'/f'behavior_reviewer_{reviewer}.jsonl').read_text().splitlines()]
+              assert len(links) == len(behavior) == 4
+              assert all(x['link_label'] is None for x in links)
+              assert all(x['observed_offers'] is None and x['conformance_label'] is None for x in behavior)
+          assert not (root/'reviewers'/'m30_conditional_static_witness.json').exists()
+          print('M30: 2 source-grounded conditional counterexamples, 4 revision cases, 0 adjudications.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m30-blinded-reviewers
+          path: /tmp/m30/reviewers/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m30-internal-static-witness
+          path: /tmp/m30/internal/
+          retention-days: 30
