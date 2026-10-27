@@ -32,10 +32,12 @@ def test_pooled_negative_cases_cannot_hide_projects_without_negatives(tmp_path):
     assert robust["project_macro_accuracy"] == 1.0
     assert robust["worst_project_accuracy"] == 1.0
     assert robust["gate_passed"] is False
+    assert robust["m17_conformance_gate_passed"] is True
+    assert robust["m18_negative_link_gate_passed"] is False
     assert robust["projects"]["MOCK-PROJECT-1"]["unlinked"] == 0
     assert robust["projects"]["MOCK-PROJECT-1"]["unlinked_rejection_rate"] is None
     assert robust["projects"]["MOCK-PROJECT-1"]["support_sufficient"] is False
-    assert report["systems"]["mockA"]["acceptance"]["status"] == "BLOCKED_BY_M17_PROJECT_ROBUSTNESS"
+    assert report["systems"]["mockA"]["acceptance"]["status"] == "BLOCKED_BY_M18_PROJECT_LINK_COVERAGE"
 
 
 def test_unlinked_only_project_is_not_silently_dropped(tmp_path):
@@ -65,4 +67,7 @@ def test_minimum_unlinked_support_applies_to_each_project(tmp_path):
     assert robust["projects"]["MOCK-PROJECT-1"]["unlinked"] == 9
     assert robust["projects"]["MOCK-PROJECT-1"]["support_sufficient"] is False
     assert robust["projects"]["MOCK-PROJECT-2"]["support_sufficient"] is True
+    assert robust["m17_conformance_gate_passed"] is True
+    assert robust["m18_negative_link_gate_passed"] is False
     assert robust["gate_passed"] is False
+    assert report["systems"]["mockA"]["acceptance"]["status"] == "BLOCKED_BY_M18_PROJECT_LINK_COVERAGE"
