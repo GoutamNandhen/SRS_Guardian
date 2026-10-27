@@ -222,6 +222,14 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
                 "unlinked_rejection_rate": (
                     negative_correct / len(negative_rows) if negative_rows else None
                 ),
+                "conformance_support_sufficient": (
+                    len(group) >= robustness_policy["minimum_linked_per_project"]
+                    and all(counts[c] >= robustness_policy["minimum_per_conformance_class_per_project"]
+                            for c in OUTCOMES)
+                ),
+                "negative_link_support_sufficient": (
+                    len(negative_rows) >= robustness_policy["minimum_unlinked_per_project"]
+                ),
                 "support_sufficient": (
                     len(group) >= robustness_policy["minimum_linked_per_project"]
                     and len(negative_rows) >= robustness_policy["minimum_unlinked_per_project"]
@@ -237,26 +245,38 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
             if supports and len(accuracies) == len(supports) else None
         )
         worst_project = min(accuracies) if len(accuracies) == len(supports) and accuracies else None
-        sufficient = bool(supports) and all(x["support_sufficient"] for x in supports.values())
-        robust = (
-            sufficient
+        m17_sufficient = bool(supports) and all(
+            x["conformance_support_sufficient"] for x in supports.values()
+        )
+        m18_sufficient = bool(supports) and all(
+            x["negative_link_support_sufficient"] for x in supports.values()
+        )
+        m17_robust = (
+            m17_sufficient
             and project_macro is not None
             and project_macro >= robustness_policy["minimum_project_macro_accuracy"]
             and worst_project is not None
             and worst_project >= robustness_policy["minimum_worst_project_accuracy"]
         )
+        robust = m17_robust and m18_sufficient
         project_robustness[name] = {
             "project_macro_accuracy": project_macro,
             "worst_project_accuracy": worst_project,
-            "minimum_support_met": sufficient,
+            "minimum_support_met": m17_sufficient and m18_sufficient,
+            "m17_conformance_gate_passed": m17_robust,
+            "m18_negative_link_gate_passed": m18_sufficient,
             "gate_passed": robust,
             "projects": supports,
         }
         acceptance = results[name]["acceptance"]
-        acceptance["m17_project_robustness_passed"] = robust
+        acceptance["m17_project_robustness_passed"] = m17_robust
+        acceptance["m18_project_negative_link_coverage_passed"] = m18_sufficient
         if m5_claim_eligible and acceptance["passed"] and not robust:
             acceptance["passed"] = False
-            acceptance["status"] = "BLOCKED_BY_M17_PROJECT_ROBUSTNESS"
+            acceptance["status"] = (
+                "BLOCKED_BY_M17_PROJECT_ROBUSTNESS" if not m17_robust
+                else "BLOCKED_BY_M18_PROJECT_LINK_COVERAGE"
+            )
     names = sorted(systems)
     paired: dict[str, Any] = {}
     for i, a in enumerate(names):
