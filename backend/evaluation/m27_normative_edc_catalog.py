@@ -168,7 +168,7 @@ def build_evidence(files: dict[str, dict[str, bytes]]) -> dict:
         "schema": "m27-review-source-index-1",
         "specification_version": "DSP 2025-1 (pinned repository commit)",
         "requirements": citations,
-        "implementation_files": manifest[CODE_REPO],
+        "implementation_files": {path: manifest[CODE_REPO][path] for path in CODE_PATHS},
         "external_compliance_test": manifest[TCK_REPO][TCK_PATH],
         "warning": "All 16 requirement-to-code links UNADJUDICATED. External TCK tests were NOT run and do not establish EDC conformance. Do not infer negative labels from absent links.",
     }
