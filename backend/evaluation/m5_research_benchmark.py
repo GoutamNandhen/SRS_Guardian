@@ -178,6 +178,7 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
     # These checks do not independently authenticate provenance.
     robustness_policy = {
         "minimum_linked_per_project": 50,
+        "minimum_unlinked_per_project": 10,
         "minimum_per_conformance_class_per_project": 10,
         "minimum_worst_project_accuracy": 0.90,
         "minimum_project_macro_accuracy": 0.95,
@@ -186,23 +187,56 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
     for name in systems:
         supports = {}
         accuracies = []
-        for project in sorted(strata[name]):
-            group = [r for r in selected if r["project_id"] == project]
+        # M18: enumerate ALL held-out projects, including projects containing
+        # only gold-negative candidate pairs. M17's linked-only strata omitted
+        # these projects and could hide a lack of link-negative evaluation.
+        split_projects = sorted({r["project_id"] for r in gold if r["split"] == split})
+        for project in split_projects:
+            project_rows = [r for r in gold if r["split"] == split and r["project_id"] == project]
+            group = [r for r in project_rows if r["gold_link"]]
+            negative_rows = [r for r in project_rows if not r["gold_link"]]
             counts = Counter(r["gold_conformance"] for r in group)
-            accuracy = strata[name][project]["full_denominator_accuracy"]
-            accuracies.append(accuracy)
+            accuracy = strata[name].get(project, {}).get("full_denominator_accuracy")
+            if accuracy is not None:
+                accuracies.append(accuracy)
+            prediction_map = lookup[name]
+            link_decided = sum(
+                prediction_map.get(r["case_id"], {}).get("predicted_link") is not None
+                for r in project_rows
+            )
+            negative_correct = sum(
+                prediction_map.get(r["case_id"], {}).get("predicted_link") is False
+                for r in negative_rows
+            )
+            false_link_claims = sum(
+                prediction_map.get(r["case_id"], {}).get("predicted_link") is True
+                for r in negative_rows
+            )
             supports[project] = {
                 "linked": len(group),
+                "unlinked": len(negative_rows),
                 "class_counts": {c: counts[c] for c in OUTCOMES},
+                "link_prediction_coverage": link_decided / len(project_rows),
+                "unlinked_correctly_rejected": negative_correct,
+                "unlinked_false_link_claims": false_link_claims,
+                "unlinked_rejection_rate": (
+                    negative_correct / len(negative_rows) if negative_rows else None
+                ),
                 "support_sufficient": (
                     len(group) >= robustness_policy["minimum_linked_per_project"]
+                    and len(negative_rows) >= robustness_policy["minimum_unlinked_per_project"]
                     and all(counts[c] >= robustness_policy["minimum_per_conformance_class_per_project"]
                             for c in OUTCOMES)
                 ),
                 "accuracy_full_denominator": accuracy,
             }
-        project_macro = sum(accuracies) / len(accuracies) if accuracies else None
-        worst_project = min(accuracies) if accuracies else None
+        # Do not report a project macro accuracy that silently drops a
+        # project with zero conformance-linked cases.
+        project_macro = (
+            sum(accuracies) / len(supports)
+            if supports and len(accuracies) == len(supports) else None
+        )
+        worst_project = min(accuracies) if len(accuracies) == len(supports) and accuracies else None
         sufficient = bool(supports) and all(x["support_sufficient"] for x in supports.values())
         robust = (
             sufficient
@@ -254,7 +288,7 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
         "project_robustness_policy": robustness_policy,
         "project_robustness": project_robustness,
         "paired": paired,
-        "interpretation": "Synthetic benchmarks and demo evidence are never proof of 95% on unseen real projects. Missing/unsupported cases count against full-denominator accuracy. M17 additionally requires adequate class support and project-balanced accuracy to prevent a dominant project from masking poor generalization.",
+        "interpretation": "Synthetic benchmarks and demo evidence are never proof of 95% on unseen real projects. Missing/unsupported cases count against full-denominator accuracy. M17 requires project-balanced accuracy. M18 also enumerates every held-out project and requires negative link examples in each project to prevent hidden gaps in link evaluation.",
     }
 
 
