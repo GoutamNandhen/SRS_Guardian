@@ -69,7 +69,7 @@ class EvidenceError(ValueError):
 
 
 def git_blob_id(raw: bytes) -> str:
-    return hashlib.sha1(f"blob {len(raw)}\\0".encode("ascii") + raw).hexdigest()
+    return hashlib.sha1(f"blob {len(raw)}\0".encode("ascii") + raw).hexdigest()
 
 
 def _url(repo: str, path: str) -> str:
@@ -121,7 +121,7 @@ def build_evidence(files: dict[str, dict[str, bytes]]) -> dict:
             raise EvidenceError("Apache-2.0 license not verified: " + repo)
     spec = files[SPEC_REPO][SPEC_PATH].decode("utf-8")
     lines = spec.splitlines()
-    normalized = re.sub(r"\\s+", " ", spec)
+    normalized = re.sub(r"\s+", " ", spec)
     requirements = []
     for rid, excerpt, anchor, start, end in REQUIREMENTS:
         if excerpt not in normalized or anchor not in lines[start - 1]:
@@ -228,7 +228,7 @@ def main(argv: list[str] | None = None) -> int:
     # M20 manifest includes lexical sampling origin; do not give it to reviewers.
     reviewers.joinpath("manifest.json").unlink()
     reviewers.joinpath("source_index.json").write_text(
-        json.dumps(result["reviewer_index"], indent=2) + "\\n", encoding="utf-8")
+        json.dumps(result["reviewer_index"], indent=2) + "\n", encoding="utf-8")
     for reviewer in ("A", "B"):
         rows = [
             {"requirement_id": rid, "reviewer": reviewer,
@@ -240,23 +240,23 @@ def main(argv: list[str] | None = None) -> int:
             for rid, _, _, _, _ in REQUIREMENTS
         ]
         reviewers.joinpath(f"behavior_reviewer_{reviewer}.jsonl").write_text(
-            "".join(json.dumps(row, sort_keys=True) + "\\n" for row in rows), encoding="utf-8")
+            "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
     reviewers.joinpath("REVIEW_INSTRUCTIONS.md").write_text(
-        "# M27 independent review\\n\\n"
+        "# M27 independent review\n\n"
         "Review 16 blinded requirement-to-code pairs using pinned spec and EDC source links; "
         "record linked/not-linked/uncertain and exact source lines independently. "
-        "Adjudicate disagreements with a third reviewer.\\n\\n"
+        "Adjudicate disagreements with a third reviewer.\n\n"
         "Separately evaluate four normative behaviors against a verified compatible EDC runtime "
         "using approved reproducible execution evidence; do NOT infer behavioral conformance "
         "from static code or TCK source. Record real conforming and violating revisions, "
-        "or leave all labels NULL. This packet contains no gold labels.\\n",
+        "or leave all labels NULL. This packet contains no gold labels.\n",
         encoding="utf-8")
     internal.mkdir(parents=True, exist_ok=True)
     internal.joinpath("m20_sampling_manifest.json").write_text(
-        json.dumps(result["queue"]["manifest"], indent=2) + "\\n", encoding="utf-8")
+        json.dumps(result["queue"]["manifest"], indent=2) + "\n", encoding="utf-8")
     for key in ("internal", "manifest", "candidate_universe", "rankings_unscored"):
         internal.joinpath(key + ".json").write_text(
-            json.dumps(result[key], indent=2) + "\\n", encoding="utf-8")
+            json.dumps(result[key], indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "verified_static_files": result["internal"]["static_files_git_hash_verified"],
         "normative_requirements": result["internal"]["normative_requirements"],
