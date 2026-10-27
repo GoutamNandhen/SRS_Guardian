@@ -65,7 +65,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          r=json.loads(Path('/tmp/m15-docker-evidence.json').read_text())
+          r=json.loads(Path('/tmp/m16-docker-evidence.json').read_text())
           assert r['all_expectations_met'] is True
           assert r['docker_executed'] is True
           assert r['research_95_eligible'] is False
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: m16-trusted-docker-evidence
-          path: /tmp/m15-docker-evidence.json
+          path: /tmp/m16-docker-evidence.json
           retention-days: 14
   frontend-production-regression:
     runs-on: ubuntu-latest
