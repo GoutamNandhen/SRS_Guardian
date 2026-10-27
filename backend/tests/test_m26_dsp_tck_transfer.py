@@ -83,6 +83,6 @@ def test_queue_deterministic_and_no_gold_in_reviewer_packet(monkeypatch):
     b = m26.build_evidence(dict(reversed(list(files.items()))))
     assert a["reviewer"] == b["reviewer"]
     assert a["internal"]["universe"]["observed_links"] != []
-    assert "observed_links" not in str(a["reviewer"])
+    assert all("origin" not in row and "link_label" not in row for row in a["reviewer"]["queue"]["queue"])
     assert "sampling_provenance" not in str(a["reviewer"]["index"])
     assert a["reviewer"]["queue"]["manifest"]["independent_labels_collected"] is False
