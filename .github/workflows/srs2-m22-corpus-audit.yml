@@ -1,0 +1,45 @@
+name: SRS Guardian M22 Real Corpus Availability Evidence
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m22-real-corpus-availability-audit-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/m22_external_corpus_inventory.py'
+      - 'backend/tests/test_m22_external_corpus_inventory.py'
+      - '.github/workflows/srs2-m22-corpus-audit.yml'
+permissions:
+  contents: read
+jobs:
+  external-static-corpus-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused test runner
+        run: python -m pip install pytest==8.4.2
+      - name: Run offline metadata audit tests
+        run: python -m pytest -q backend/tests/test_m22_external_corpus_inventory.py
+      - name: Fetch pinned Git tree metadata only, never source contents
+        run: python -m backend.evaluation.m22_external_corpus_inventory --out /tmp/m22-corpus-inventory.json
+      - name: Verify research honesty and license scope
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('/tmp/m22-corpus-inventory.json').read_text())
+          assert p['research_95_eligible'] is False
+          assert p['independently_adjudicated_projects']==0
+          assert len(p['projects'])==7
+          assert all(x['data_rights']=='not_verified' for x in p['projects'])
+          assert all(p[k] is None for k in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'))
+          print('M22 inventory verified; no unreviewed corpus is gold or assumed licensed')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m22-real-corpus-source-inventory-unadjudicated
+          path: /tmp/m22-corpus-inventory.json
+          retention-days: 30

@@ -1,0 +1,80 @@
+name: SRS Guardian M25 Pinned Source Retrieval and Blinded Review
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m25-source-grounded-teastore-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/m25_source_grounded_teastore.py'
+      - 'backend/tests/test_m25_source_grounded_teastore.py'
+      - '.github/workflows/srs2-m25-source-grounded.yml'
+permissions:
+  contents: read
+jobs:
+  teastore-source-grounded:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned CPU-only test dependencies
+        run: python -m pip install 'pytest==8.4.2' 'scikit-learn==1.7.2'
+      - name: Run offline source, annotation, and retrieval tests
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m23_teastore_external.py \
+            backend/tests/test_m24_cross_corpus_baseline.py \
+            backend/tests/test_m25_source_grounded_teastore.py
+      - name: Download and hash-verify eleven pinned static external files
+        run: python -m backend.evaluation.m25_source_grounded_teastore --out-dir /tmp/m25
+      - name: Validate reviewer packet separation and truthful evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/m25')
+          review=root/'reviewers'
+          internal=root/'internal'
+          b=json.loads((internal/'baseline.json').read_text())
+          index=json.loads((review/'source_index.json').read_text())
+          rows=[json.loads(line) for line in (review/'blind_queue.jsonl').read_text().splitlines()]
+          a=[json.loads(line) for line in (review/'reviewer_A.jsonl').read_text().splitlines()]
+          c=[json.loads(line) for line in (review/'reviewer_B.jsonl').read_text().splitlines()]
+          assert len(rows)==len(a)==len(c)==len(index['cases'])==15
+          assert len(index['source_files'])==5 and len(index['requirement_files'])==3
+          assert b['source_files']==5 and b['architecture_statements']==3
+          assert b['published_links_unverified']==6
+          assert b['independently_adjudicated_link_pairs']==0
+          assert b['independently_adjudicated_behavioral_cases']==0
+          assert b['research_95_eligible'] is False
+          assert len(b['comparison']['runs'])==3
+          assert {r['method'] for r in b['comparison']['runs']}=={
+              'path_bm25','hybrid_rrf','source_char_tfidf'}
+          assert all(r['annotation_status']=='pending' and r['link_label'] is None for r in a+c)
+          assert not (review/'manifest.json').exists()
+          assert not (review/'candidate_universe.json').exists()
+          assert 'observed_links' not in (review/'source_index.json').read_text()
+          for key in ('conformance_accuracy','violation_precision',
+                      'violation_recall','conformance_coverage'):
+              assert b[key] is None
+              assert all(run[key] is None for run in b['comparison']['runs'])
+          for run in b['comparison']['runs']:
+              print(run['method'], 'hit@1=',run['hit_at_k_on_observed_linked_statements']['1'],
+                    'observed-positive-recall@3=',run['observed_positive_link_recall_at_k']['3'])
+          print('M25 verified: 15 pending blinded review cases; no conformance claims.')
+          PY
+      - name: Upload reviewer-only packet without observed-link labels
+        uses: actions/upload-artifact@v4
+        with:
+          name: m25-blinded-reviewer-only-packet
+          path: /tmp/m25/reviewers/
+          retention-days: 30
+      - name: Upload internal research evidence separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: m25-internal-source-ranking-and-provenance
+          path: /tmp/m25/internal/
+          retention-days: 30

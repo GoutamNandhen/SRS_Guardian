@@ -1,0 +1,33 @@
+name: SRS Guardian 2 M1-M4 Focused CI
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m4-approved-isolated-runner-20261026
+  pull_request:
+    paths:
+      - 'backend/app/research/**'
+      - 'backend/app/services/code_traceability.py'
+      - 'backend/app/services/conformance_verification.py'
+      - 'backend/evaluation/evaluate_conformance.py'
+      - 'backend/tests/test_m4_approved_runner.py'
+      - 'backend/tests/test_conformance_verification.py'
+      - 'backend/tests/test_code_traceability.py'
+      - 'backend/tests/test_evaluate_conformance.py'
+      - '.github/workflows/srs2-m4-ci.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused test dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44'
+      - name: Compile isolated runner
+        run: python -m compileall -q backend/app/research examples/m4
+      - name: Verify M1-M4 components
+        run: python -m pytest -q backend/tests/test_evaluate_conformance.py backend/tests/test_code_traceability.py backend/tests/test_conformance_verification.py backend/tests/test_m4_approved_runner.py

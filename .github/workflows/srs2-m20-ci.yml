@@ -1,0 +1,136 @@
+name: SRS Guardian 2 M20 Blinded Annotation Queue and Regression
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m20-blind-link-annotation-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/m20_annotation_queue.py'
+      - 'backend/tests/test_m20_annotation_queue.py'
+      - 'benchmarks/m20/**'
+      - 'docs/research/M20_BLIND_ANNOTATION_QUEUE.md'
+      - 'backend/evaluation/m5_research_benchmark.py'
+      - 'backend/tests/test_m5_research_benchmark.py'
+      - 'backend/tests/test_m14_snapshot_independence.py'
+      - 'backend/tests/test_m15_provenance_lock_integrity.py'
+      - 'backend/tests/test_m16_wrong_link_precision.py'
+      - 'backend/tests/test_m17_project_robustness.py'
+      - 'backend/tests/test_m18_project_link_coverage.py'
+      - 'backend/tests/test_m19_negative_link_performance.py'
+      - 'docs/research/M19_NEGATIVE_LINK_PERFORMANCE.md'
+      - 'docs/research/M14_SNAPSHOT_INDEPENDENCE.md'
+      - 'docs/research/M15_PROVENANCE_LOCK_INTEGRITY.md'
+      - 'docs/research/M16_WRONG_EDGE_PRECISION.md'
+      - 'docs/research/M17_PROJECT_ROBUSTNESS.md'
+      - 'docs/research/M18_PROJECT_LINK_NEGATIVE_COVERAGE.md'
+      - '.github/workflows/srs2-m20-ci.yml'
+permissions:
+  contents: read
+jobs:
+  research-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned evaluation test dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'pytest==8.4.2' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44' 'scikit-learn==1.7.2'
+      - name: Compile research and verification code
+        run: python -m compileall -q backend/evaluation backend/app/research backend/tests/test_m14_snapshot_independence.py backend/tests/test_m15_provenance_lock_integrity.py backend/tests/test_m16_wrong_link_precision.py backend/tests/test_m17_project_robustness.py backend/tests/test_m18_project_link_coverage.py backend/tests/test_m19_negative_link_performance.py
+      - name: Run M1-M20 regression, including blinded annotation tests
+        run: |
+          python -m pytest -q \
+            backend/tests/test_evaluate_conformance.py \
+            backend/tests/test_code_traceability.py \
+            backend/tests/test_conformance_verification.py \
+            backend/tests/test_m4_approved_runner.py \
+            backend/tests/test_m5_research_benchmark.py \
+            backend/tests/test_m6_external_trace.py \
+            backend/tests/test_m7_hybrid_retrieval.py \
+            backend/tests/test_m9_source_binding.py \
+            backend/tests/test_m10_multimodule_binding.py \
+            backend/tests/test_m12_http_status_oracle.py \
+            backend/tests/test_m13_link_integrity_gate.py \
+            backend/tests/test_m14_snapshot_independence.py \
+            backend/tests/test_m15_provenance_lock_integrity.py \
+            backend/tests/test_m16_wrong_link_precision.py \
+            backend/tests/test_m17_project_robustness.py \
+            backend/tests/test_m18_project_link_coverage.py \
+            backend/tests/test_m19_negative_link_performance.py \
+            backend/tests/test_m20_annotation_queue.py
+      - name: Generate a blinded synthetic annotation queue without gold labels
+        run: |
+          python -m backend.evaluation.m20_annotation_queue --universe benchmarks/m20/synthetic_candidate_universe.json --seed preregistered-study-seed-v1 --out-dir /tmp/m20-annotation
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('/tmp/m20-annotation')
+          manifest=json.loads((root/'manifest.json').read_text())
+          queue=[json.loads(s) for s in (root/'blind_queue.jsonl').read_text().splitlines()]
+          assert manifest['research_95_eligible'] is False
+          assert manifest['independent_labels_collected'] is False
+          assert manifest['sampled_pairs']==len(queue)
+          assert all('origin' not in row and 'gold_link' not in row for row in queue)
+          for name in ('reviewer_A.jsonl','reviewer_B.jsonl'):
+              rows=[json.loads(s) for s in (root/name).read_text().splitlines()]
+              assert all(row['link_label'] is None and row['annotation_status']=='pending' for row in rows)
+          digest=hashlib.sha256(json.dumps(queue,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
+          assert digest==manifest['blind_queue_sha256']
+          print('M20 queue reproducible, unlabeled and blinded')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m20-synthetic-annotation-queue-not-gold
+          path: /tmp/m20-annotation/
+          retention-days: 14
+  trusted-docker-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned trusted Docker fixture dependencies
+        run: python -m pip install 'fastapi==0.115.12' 'httpx==0.28.1' 'python-multipart==0.0.20' 'SQLAlchemy==2.0.44'
+      - name: Build reviewed banking fixtures locally
+        run: docker build -f examples/m4/Dockerfile -t srs-m8-trusted-banking:ci .
+      - name: Verify correct and faulty real HTTP cases in restricted Docker
+        run: |
+          python -m backend.evaluation.m8_docker_e2e --out /tmp/m19-docker-evidence.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/m19-docker-evidence.json').read_text())
+          assert r['all_expectations_met'] is True
+          assert r['docker_executed'] is True
+          assert r['research_95_eligible'] is False
+          assert [x['observed_decision'] for x in r['results']] == ['passed_available_checks','observed_violation','observed_violation']
+          assert [x['fixture'] for x in r['results']] == ['banking_api.py','banking_api_buggy.py','banking_api_plus_two.py']
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m19-trusted-docker-evidence
+          path: /tmp/m19-docker-evidence.json
+          retention-days: 14
+  frontend-production-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+      - name: TypeScript validation
+        working-directory: frontend
+        run: npx tsc --noEmit
+      - name: Production build
+        working-directory: frontend
+        run: npm run build

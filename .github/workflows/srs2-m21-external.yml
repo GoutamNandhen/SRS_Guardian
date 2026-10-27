@@ -1,0 +1,61 @@
+name: SRS Guardian M21 External Pinned Source Annotation
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m21-external-source-annotation-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/m21_external_fixture.py'
+      - 'backend/tests/test_m21_external_fixture.py'
+      - 'docs/research/M21_EXTERNAL_SOURCE_EVIDENCE.md'
+      - '.github/workflows/srs2-m21-external.yml'
+permissions:
+  contents: read
+jobs:
+  verify-external-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused testing dependencies
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Compile static-only external ingestion and run M20-M21 tests
+        run: |
+          python -m compileall -q backend/evaluation/m20_annotation_queue.py backend/evaluation/m21_external_fixture.py
+          python -m pytest -q backend/tests/test_m20_annotation_queue.py backend/tests/test_m21_external_fixture.py
+      - name: Fetch pinned Apache-2.0 upstream static files and prepare blind reviewers
+        run: python -m backend.evaluation.m21_external_fixture --out-dir /tmp/m21-external
+      - name: Audit upstream hashes, unverified labels, and real-world metric nulls
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/m21-external')
+          evidence=json.loads((root/'external_evidence.json').read_text())
+          manifest=json.loads((root/'annotation/manifest.json').read_text())
+          assert len(evidence['source_files_verified']) == 7
+          assert evidence['license']=='Apache-2.0'
+          assert evidence['requirement_count']==3
+          assert evidence['implementation_component_count']==6
+          assert evidence['author_declared_links_unverified']==6
+          assert evidence['sampled_annotation_pairs']==12
+          assert evidence['independent_labels_collected'] is False
+          assert evidence['research_95_eligible'] is False
+          assert all(evidence[k] is None for k in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'))
+          assert manifest['sampled_pairs']==12 and manifest['research_95_eligible'] is False
+          queue=[json.loads(s) for s in (root/'annotation/blind_queue.jsonl').read_text().splitlines()]
+          assert len(queue)==12 and all('origin' not in row and 'link_label' not in row for row in queue)
+          for reviewer in ('reviewer_A','reviewer_B'):
+              rows=[json.loads(s) for s in (root/f'annotation/{reviewer}.jsonl').read_text().splitlines()]
+              assert len(rows)==12
+              assert all(row['link_label'] is None and row['annotation_status']=='pending' for row in rows)
+          print('Verified pinned upstream source; all 12 reviewer cases remain unadjudicated')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m21-verified-external-unlabeled-annotation-evidence
+          path: /tmp/m21-external/
+          retention-days: 30

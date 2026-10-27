@@ -1,0 +1,592 @@
+{
+  "schema_version": "m6-external-trace-v1",
+  "dataset_name": "Dronology versioned safety case trace links (SAREC-Lab/SAFA-Artifacts)",
+  "upstream_repository": "https://github.com/SAREC-Lab/SAFA-Artifacts",
+  "upstream_license": "MIT (copyright 2019 Ankit; see upstream LICENSE)",
+  "upstream_ref": "master",
+  "label_provenance": "observed reachable Code nodes under requirement nodes in upstream published artifact tree; potential incompleteness and indirect linking",
+  "no_negative_labels": true,
+  "not_executable_conformance": true,
+  "one_project_two_versions": true,
+  "versions": [
+    {
+      "version": "V0",
+      "source_file": "V0-simplified.json",
+      "source_blob_sha": "48c7d96edd6f1bf62dcb6bdb0aa08f5f4463a510",
+      "source_repo_root_count": 16,
+      "requirements": [
+        {
+          "requirement_id": "UAV-1010",
+          "kind": "SafetyRequirement",
+          "text": "All waypoints in flight routes assigned to UAV must be at least 3 meters above the highest terrain in the flying zone",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/coordinate/AbstractPosition.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/PhysicalDrone.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1032",
+          "kind": "SafetyRequirement",
+          "text": "Dronology provides features to allow a human operator to monitor active flights.",
+          "observed_link_paths": [
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/instances/flightmanager/FlightInfoCreator.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoPanel.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMainLayout.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMapComponent.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/MapDrawingUtil.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRMainLayout.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRTableDisplay.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/start/MyUI.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/utils/Configuration.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/utils/MapAddMarkerListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/utils/MapMarkerUtilities.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1034",
+          "kind": "ProcessRequirement",
+          "text": "Dronology operator will manually disable GCS in case of unknown UAV activation",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1037",
+          "kind": "Requirement",
+          "text": "All routes are carefully planned and tested in the simulator and any violation of the _MINIMUM_SEPARATION_DISTANCE_ shall be reported in the simulator log.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1041",
+          "kind": "SafetyRequirement",
+          "text": "UAVs connect to dronology via a GCS which leverages a well defined handshake protocol with Dronology's Ground-Station middleware.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1044",
+          "kind": "SafetyRequirement",
+          "text": "Automate the process of generating routes for river search in a predefined section of the river.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1061",
+          "kind": "SafetyRequirement",
+          "text": "The UAV passes all mandatory calibration tests prior to flight including compass, accelerometer. (List more)",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1063",
+          "kind": "ProcessRequirement",
+          "text": "When the flying area includes hilly terrain, the operator inspects all assigned flight routes to ensure that waypoints are above the highest terrain level.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1066",
+          "kind": "SafetyRequirement",
+          "text": "All waypoint directives issued by Dronology to a UAV will represent valid coordinates that will not cause the UAV to fly into the terrain.",
+          "observed_link_paths": [
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedLandingPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TaskFactory.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRTableDisplay.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/mapoperations/MapAddMarkerListener.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1102",
+          "kind": "SafetyRequirement",
+          "text": "Prior to flying in a controlled airspace, the maximum altitude of each UAV is set through its internal geofence.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1122",
+          "kind": "ProcessRequirement",
+          "text": "All routes are carefully planned and tested in the simulator by the Dronology operator prior to physical flights to ensure minimum separation of UAVs by at least 8 meters vertical or horizontal distance at all times.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1123",
+          "kind": "Requirement",
+          "text": "When a route is run in the simulator and _MINIMUM_SEPARATION_DISTANCE_ is violated an error shall be reported in the simulator log.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-424",
+          "kind": "SafetyRequirement",
+          "text": "When the \"return to home\" command is issued, the _FlightManager_ shall immediately command the the UAV to return to its original launch location using a unique flight route.",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/flightzone/FlightZoneManager2.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-456",
+          "kind": "SafetyRequirement",
+          "text": "If a UAV has lost connectivity with the GCS and has no currently assigned waypoint, then it shall hover in place until it receives a further command.",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/flight/internal/SoloDirector.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/ManagedDrone.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/PhysicalDrone.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/VirtualDrone.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-698",
+          "kind": "SafetyRequirement",
+          "text": "The _RealTimeFlightUI_ shall notify users when an emergency occurs.",
+          "observed_link_paths": [
+            "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/StateMessageTypeAdapter.java",
+            "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/UAVStateMessage.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-862",
+          "kind": "SafetyRequirement",
+          "text": "When in Mission Planning mode, the takeoff and positioning of all UAVs at the start of their first assigned routes shall be choreographed to avoid collisions.",
+          "observed_link_paths": [
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedLandingPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/FullMissionPlan.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/UAVMissionPlan.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SyncConstants.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationManager.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationPoint.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationState.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TakeoffTask.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TaskFactory.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-950",
+          "kind": "SafetyRequirement",
+          "text": "Waypoint commands shall only be issued to a UAV if it has sufficient voltage to reach its destination and return to a safe landing place.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-966",
+          "kind": "ProcessRequirement",
+          "text": "Avoid all fixed obstacles such as trees on the bank, bridges etc when planning routes.  Check all routes on the simulator prior to flight.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-975",
+          "kind": "Requirement",
+          "text": "After the user cedes control of the UAV from Dronology, the user can issue a RTL command using the hand-held GCS.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-977",
+          "kind": "ProcessRequirement",
+          "text": "For area mapping applications, routes are assigned manually.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-978",
+          "kind": "ProcessRequirement",
+          "text": "RTL for multiple UAVs executed one at a time",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-979",
+          "kind": "SafetyRequirement",
+          "text": "All UAVs shall have failsafe mechanisms that enable them to independently make basic land-in-place, stop in place,  and RTL decisions in case of emergency.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-982",
+          "kind": "ProcessRequirement",
+          "text": "When the RPIC determines that Dronology has lost control of the UAV for more than _acceptable loss of communication_ minutes, then the RPIC shall take control.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-984",
+          "kind": "SafetyRequirement",
+          "text": "The UI shall display the available battery percentage for each UAV in flight.",
+          "observed_link_paths": [
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java"
+          ]
+        }
+      ],
+      "candidate_code_paths": [
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/coordinate/AbstractPosition.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/flight/internal/SoloDirector.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/flightzone/FlightZoneManager2.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/ManagedDrone.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/PhysicalDrone.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/VirtualDrone.java",
+        "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/StateMessageTypeAdapter.java",
+        "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/UAVStateMessage.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/instances/flightmanager/FlightInfoCreator.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedLandingPattern.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/FullMissionPlan.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/UAVMissionPlan.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SyncConstants.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationManager.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationPoint.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationState.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TakeoffTask.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TaskFactory.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoPanel.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMainLayout.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMapComponent.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/MapDrawingUtil.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRMainLayout.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRTableDisplay.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/mapoperations/MapAddMarkerListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/start/MyUI.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/utils/Configuration.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/utils/MapAddMarkerListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/utils/MapMarkerUtilities.java"
+      ]
+    },
+    {
+      "version": "V1",
+      "source_file": "V1-simplified.json",
+      "source_blob_sha": "06ed8fc87aa4f5c9b1e6c807521978b6d7c3d709",
+      "source_repo_root_count": 16,
+      "requirements": [
+        {
+          "requirement_id": "UAV-1010",
+          "kind": "SafetyRequirement",
+          "text": "All waypoints in flight routes assigned to UAV must be at least 3 meters above the highest terrain in the flying zone",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/coordinate/AbstractPosition.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/PhysicalDrone.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1032",
+          "kind": "SafetyRequirement",
+          "text": "Dronology provides features to allow a human operator to monitor active flights.",
+          "observed_link_paths": [
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMainLayout.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMapComponent.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/MapDrawingUtil.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/start/MyUI.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1034",
+          "kind": "ProcessRequirement",
+          "text": "Dronology operator will manually disable GCS in case of unknown UAV activation",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1041",
+          "kind": "SafetyRequirement",
+          "text": "UAVs connect to dronology via a GCS which leverages a well defined handshake protocol with Dronology's Ground-Station middleware.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1044",
+          "kind": "SafetyRequirement",
+          "text": "Automate the process of generating routes for river search in a predefined section of the river.",
+          "observed_link_paths": [
+            "edu.nd.dronology.services.core/src/edu/nd/dronology/services/core/areamapping/MetricsStatistics.java",
+            "edu.nd.dronology.services.core/src/edu/nd/dronology/services/core/items/IMappedItem.java",
+            "edu.nd.dronology.services.core/src/edu/nd/dronology/services/core/items/MappedItem.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/creation/MapRiver.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/AdaptedCreepingLinePrimitive.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/PriorityPolygonPrimitive.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/RiverBankPrimitive.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/SourcePoints.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/metrics/MetricsRunner.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/metrics/MetricsUtilities.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/model/RoutePrimitive.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/selection/random/RandomRouteSelector.java",
+            "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/util/Utilities.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/AdaptedCreepingLinePrimitive.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/Drone.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/DroneRouteAssignment.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/DroneRouteAssignments.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/ExecuteableSearchPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/Geometry.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/ImageWaypoint.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/ImageWaypoints.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/MapRiver.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/MetricsRunner.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/MetricsUtilities.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/RoutePrimitive.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/Utilities.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/instances/areamapping/AreaMappingServiceInstance.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMEditModeController.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMEditPrioritiesController.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMEditSidesController.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMInfoBox.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMInfoPanel.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMMainLayout.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMMapComponent.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMMapMarkerUtilities.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMPriorityArea.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMMapAddMarkerListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMMarkerMouseOverListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPriorityDragEndListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPriorityMouseOutListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPriorityMouseOverListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPrioritySideMouseOverListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMRightClickListener.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMDeleteMappingConfirmation.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMEditChoicesWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMNewMappingWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPriorityAreaCreationWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPriorityCreationWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPriorityInfoWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPrioritySideCreationWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMSaveAreaWithoutFinishWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMSaveSideWithoutFinishWindow.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMUnsavedChangesConfirmation.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMWayPointPopupView.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1061",
+          "kind": "SafetyRequirement",
+          "text": "The UAV passes all mandatory calibration tests prior to flight including compass, accelerometer. (List more)",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1063",
+          "kind": "ProcessRequirement",
+          "text": "When the flying area includes hilly terrain, the operator inspects all assigned flight routes to ensure that waypoints are above the highest terrain level.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1066",
+          "kind": "SafetyRequirement",
+          "text": "All waypoint directives issued by Dronology to a UAV will represent valid coordinates that will not cause the UAV to fly into the terrain.",
+          "observed_link_paths": [
+            "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TaskFactory.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRTableDisplay.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/mapoperations/MapAddMarkerListener.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1076",
+          "kind": "SafetyRequirement",
+          "text": "When two UAVs violate the _MINIMUM_SEPARATION_DISTANCE_ they will both stop and hover in place.",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/CollisionAvoidanceBackend.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/CollisionAvoidanceMessenger.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/CollisionAvoider.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/guidancecommands/NedCommand.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/guidancecommands/StopCommand.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/strategy/StopEveryone.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-1102",
+          "kind": "SafetyRequirement",
+          "text": "Prior to flying in a controlled airspace, the maximum altitude of each UAV is set through its internal geofence.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1122",
+          "kind": "ProcessRequirement",
+          "text": "All routes are carefully planned and tested in the simulator by the Dronology operator prior to physical flights to ensure minimum separation of UAVs by at least 8 meters vertical or horizontal distance at all times.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1123",
+          "kind": "Requirement",
+          "text": "When a route is run in the simulator and _MINIMUM_SEPARATION_DISTANCE_ is violated an error shall be reported in the simulator log.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1125",
+          "kind": "SafetyRequirement",
+          "text": "The GCS shall monitor each UAV under its control for GPS calibration errors and shall report them to Dronology.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-1126",
+          "kind": "ProcessRequirement",
+          "text": "When the RPIC determines that Dronology has lost control of the UAV for more than _acceptable loss of communication_ minutes, then the RPIC shall take control.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-424",
+          "kind": "SafetyRequirement",
+          "text": "When the \"return to home\" command is issued, the _FlightManager_ shall immediately command the the UAV to return to its original launch location using a unique flight route.",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/flightzone/FlightZoneManager2.java",
+            "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/UAVStateMessage.java",
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-456",
+          "kind": "SafetyRequirement",
+          "text": "If a UAV has lost connectivity with the GCS and has no currently assigned waypoint, then it shall hover in place until it receives a further command.",
+          "observed_link_paths": [
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/flight/internal/SoloDirector.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/ManagedDrone.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/PhysicalDrone.java",
+            "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/VirtualDrone.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-698",
+          "kind": "SafetyRequirement",
+          "text": "The _RealTimeFlightUI_ shall notify users when an emergency occurs.",
+          "observed_link_paths": [
+            "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/StateMessageTypeAdapter.java",
+            "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/UAVStateMessage.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-862",
+          "kind": "SafetyRequirement",
+          "text": "When in Mission Planning mode, the takeoff and positioning of all UAVs at the start of their first assigned routes shall be choreographed to avoid collisions.",
+          "observed_link_paths": [
+            "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+            "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/tasks/TakeoffTask.java",
+            "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/tasks/TaskFactory.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/FullMissionPlan.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/UAVMissionPlan.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SyncConstants.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationManager.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationPoint.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationState.java",
+            "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TaskFactory.java"
+          ]
+        },
+        {
+          "requirement_id": "UAV-950",
+          "kind": "SafetyRequirement",
+          "text": "Waypoint commands shall only be issued to a UAV if it has sufficient voltage to reach its destination and return to a safe landing place.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-966",
+          "kind": "ProcessRequirement",
+          "text": "Avoid all fixed obstacles such as trees on the bank, bridges etc when planning routes.  Check all routes on the simulator prior to flight.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-975",
+          "kind": "Requirement",
+          "text": "After the user cedes control of the UAV from Dronology, the user can issue a RTL command using the hand-held GCS.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-977",
+          "kind": "ProcessRequirement",
+          "text": "For area mapping applications, routes are assigned manually.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-979",
+          "kind": "SafetyRequirement",
+          "text": "All UAVs shall have failsafe mechanisms that enable them to independently make basic land-in-place, stop in place,  and RTL decisions in case of emergency.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-982",
+          "kind": "ProcessRequirement",
+          "text": "When the RPIC determines that Dronology has lost control of the UAV for more than _acceptable loss of communication_ minutes, then the RPIC shall take control.",
+          "observed_link_paths": []
+        },
+        {
+          "requirement_id": "UAV-984",
+          "kind": "SafetyRequirement",
+          "text": "The UI shall display the available battery percentage for each UAV in flight.",
+          "observed_link_paths": [
+            "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java"
+          ]
+        }
+      ],
+      "candidate_code_paths": [
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/CollisionAvoidanceBackend.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/CollisionAvoidanceMessenger.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/CollisionAvoider.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/guidancecommands/NedCommand.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/guidancecommands/StopCommand.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/collisionavoidance/strategy/StopEveryone.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/coordinate/AbstractPosition.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/flight/internal/SoloDirector.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/flightzone/FlightZoneManager2.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/ManagedDrone.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/PhysicalDrone.java",
+        "edu.nd.dronology.core/src/edu/nd/dronology/core/vehicle/internal/VirtualDrone.java",
+        "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/StateMessageTypeAdapter.java",
+        "edu.nd.dronology.gstation.python.connector/src/edu/nd/dronology/gstation/connector/messages/UAVStateMessage.java",
+        "edu.nd.dronology.services.core/src/edu/nd/dronology/services/core/areamapping/MetricsStatistics.java",
+        "edu.nd.dronology.services.core/src/edu/nd/dronology/services/core/items/IMappedItem.java",
+        "edu.nd.dronology.services.core/src/edu/nd/dronology/services/core/items/MappedItem.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/creation/MapRiver.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/AdaptedCreepingLinePrimitive.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/PriorityPolygonPrimitive.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/RiverBankPrimitive.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/internal/SourcePoints.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/metrics/MetricsRunner.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/metrics/MetricsUtilities.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/model/RoutePrimitive.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/selection/random/RandomRouteSelector.java",
+        "edu.nd.dronology.services.extensions.areamapping/src/edu/nd/dronology/services/extensions/areamapping/util/Utilities.java",
+        "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+        "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/tasks/TakeoffTask.java",
+        "edu.nd.dronology.services.extensions.missionplanning/src/edu/nd/dronology/services/extensions/missionplanning/tasks/TaskFactory.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/AdaptedCreepingLinePrimitive.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/Drone.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/DroneRouteAssignment.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/DroneRouteAssignments.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/ExecuteableSearchPattern.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/Geometry.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/ImageWaypoint.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/ImageWaypoints.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/MapRiver.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/MetricsRunner.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/MetricsUtilities.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/RoutePrimitive.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/areamapping/output/Utilities.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/instances/areamapping/AreaMappingServiceInstance.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/patterns/CoordinatedTakeoffPattern.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/FullMissionPlan.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/plan/UAVMissionPlan.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SyncConstants.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationManager.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationPoint.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/sync/SynchronizationState.java",
+        "edu.nd.dronology.services/src/edu/nd/dronology/services/missionplanning/tasks/TaskFactory.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFInfoBox.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMainLayout.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/AFMapComponent.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/activeflights/MapDrawingUtil.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMEditModeController.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMEditPrioritiesController.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMEditSidesController.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMInfoBox.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMInfoPanel.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMMainLayout.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMMapComponent.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMMapMarkerUtilities.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/AMPriorityArea.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMMapAddMarkerListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMMarkerMouseOverListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPriorityDragEndListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPriorityMouseOutListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPriorityMouseOverListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMPrioritySideMouseOverListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/mapoperations/AMRightClickListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMDeleteMappingConfirmation.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMEditChoicesWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMNewMappingWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPriorityAreaCreationWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPriorityCreationWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPriorityInfoWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMPrioritySideCreationWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMSaveAreaWithoutFinishWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMSaveSideWithoutFinishWindow.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMUnsavedChangesConfirmation.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/areamapping/windows/AMWayPointPopupView.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/FRTableDisplay.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/flightroutes/mapoperations/MapAddMarkerListener.java",
+        "edu.nd.dronology.ui.vaadin/src/main/java/edu/nd/dronology/ui/vaadin/start/MyUI.java"
+      ]
+    }
+  ]
+}

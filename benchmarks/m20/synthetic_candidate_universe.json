@@ -1,0 +1,48 @@
+{
+  "schema_version": "m20-candidate-universe-1",
+  "project_id": "SYNTHETIC-BANKING-EXAMPLE",
+  "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "code_snapshot_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "requirements": [
+    {
+      "requirement_id": "REQ-LOGIN",
+      "requirement_text": "The system shall verify login credentials."
+    },
+    {
+      "requirement_id": "REQ-LIMIT",
+      "requirement_text": "The system shall reject transfers above the daily transfer limit."
+    }
+  ],
+  "symbols": [
+    {
+      "symbol_id": "SYM-LOGIN",
+      "source_path": "app/auth.py",
+      "qualified_name": "verify_login",
+      "description": "Verify user login credentials"
+    },
+    {
+      "symbol_id": "SYM-LIMIT",
+      "source_path": "app/limits.py",
+      "qualified_name": "reject_daily_transfer",
+      "description": "Reject transfers exceeding daily limit"
+    },
+    {
+      "symbol_id": "SYM-TRANSFER",
+      "source_path": "app/transfer.py",
+      "qualified_name": "transfer_money",
+      "description": "Transfer funds"
+    },
+    {
+      "symbol_id": "SYM-AUDIT",
+      "source_path": "app/audit.py",
+      "qualified_name": "record_audit",
+      "description": "Record audit log"
+    }
+  ],
+  "observed_links": [
+    {
+      "requirement_id": "REQ-LOGIN",
+      "symbol_id": "SYM-LOGIN"
+    }
+  ]
+}
