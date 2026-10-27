@@ -207,6 +207,11 @@ def evaluate(gold_rows: list[dict[str, Any]], predictions: list[dict[str, Any]],
                     and p.get("source_commit") == r["source_commit"]):
                 link_tp += 1
             else:
+                # The true gold edge was missed AND a different edge/revision
+                # was asserted. Counting only FN inflates link precision to
+                # 100% when every prediction targets the wrong source symbol.
+                # A mismatched claimed edge contributes both FP and FN.
+                link_fp += 1
                 link_fn += 1
                 link_reference_mismatch += 1
         elif pred_link is True and not r["gold_link"]:
