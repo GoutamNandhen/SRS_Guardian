@@ -1,0 +1,80 @@
+name: SRS Guardian M26 Pinned DSP-TCK Cross-Project Transfer
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m26-dsp-tck-transfer-evidence-20261027
+  pull_request:
+    paths:
+      - 'backend/evaluation/m26_dsp_tck_transfer.py'
+      - 'backend/tests/test_m26_dsp_tck_transfer.py'
+      - '.github/workflows/srs2-m26-dsp-tck-transfer.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-cross-project-transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install fixed CPU-only test dependencies
+        run: python -m pip install 'pytest==8.4.2' 'scikit-learn==1.7.2'
+      - name: Offline unit tests for M20-M26
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m23_teastore_external.py \
+            backend/tests/test_m24_cross_corpus_baseline.py \
+            backend/tests/test_m25_source_grounded_teastore.py \
+            backend/tests/test_m26_dsp_tck_transfer.py
+      - name: Fetch and hash-verify eight pinned Apache-2.0 static files
+        run: python -m backend.evaluation.m26_dsp_tck_transfer --out-dir /tmp/m26
+      - name: Check independent-label honesty and reviewer separation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/m26')
+          review=root/'reviewers'
+          internal=root/'internal'
+          b=json.loads((internal/'baseline.json').read_text())
+          index=json.loads((review/'source_index.json').read_text())
+          rows=[json.loads(s) for s in (review/'blind_queue.jsonl').read_text().splitlines()]
+          a=[json.loads(s) for s in (review/'reviewer_A.jsonl').read_text().splitlines()]
+          c=[json.loads(s) for s in (review/'reviewer_B.jsonl').read_text().splitlines()]
+          assert b['pinned_static_files']==8
+          assert b['module_descriptions']==4
+          assert b['java_test_classes']==5
+          assert b['documentation_derived_associations_unverified']==5
+          assert len(rows)==len(a)==len(c)==len(index['review_pairs'])==20
+          assert len(b['comparison']['runs'])==3
+          assert b['research_95_eligible'] is False
+          assert b['independent_gold'] is False
+          assert b['independently_adjudicated_link_pairs']==0
+          assert b['independently_adjudicated_behavioral_cases']==0
+          assert all(row['link_label'] is None and row['annotation_status']=='pending' for row in a+c)
+          assert all('origin' not in row and 'link_label' not in row for row in rows)
+          assert not (review/'manifest.json').exists()
+          assert 'observed_links' not in (review/'source_index.json').read_text()
+          for key in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'):
+              assert b[key] is None
+              assert all(run[key] is None for run in b['comparison']['runs'])
+          for run in b['comparison']['runs']:
+              print(run['method'], 'hit@1=', run['hit_at_k_on_observed_linked_statements']['1'],
+                    'observed-recall@3=', run['observed_positive_link_recall_at_k']['3'])
+          print('M26: verified pinned external source and 20 pending reviewer pairs; no conformance claims.')
+          PY
+      - name: Upload reviewer-only packet
+        uses: actions/upload-artifact@v4
+        with:
+          name: m26-dsp-tck-blinded-reviewer-packet
+          path: /tmp/m26/reviewers/
+          retention-days: 30
+      - name: Upload internal ranking and source evidence separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: m26-dsp-tck-internal-transfer-evidence
+          path: /tmp/m26/internal/
+          retention-days: 30
