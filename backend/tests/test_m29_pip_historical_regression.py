@@ -76,7 +76,7 @@ def test_missing_post_fix_test_fails_closed(monkeypatch):
         m29, "FILES",
         {rev: {path: m29.blob_sha(raw) for path, raw in paths.items()} for rev, paths in files.items()},
     )
-    with pytest.raises(m29.EvidenceError, match="regression tests"):
+    with pytest.raises(m29.EvidenceError, match="regression-test changes|regression tests"):
         m29.build_evidence(files)
 
 
