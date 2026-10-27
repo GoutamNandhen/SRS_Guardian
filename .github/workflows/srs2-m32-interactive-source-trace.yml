@@ -1,0 +1,86 @@
+name: SRS Guardian M32 Interactive Source Trace Demonstration
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m32-interactive-source-trace-demo-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m32_interactive_source_trace_demo.py'
+      - 'backend/tests/test_m32_interactive_source_trace_demo.py'
+      - 'docs/research/M32_INTERACTIVE_SOURCE_TRACE_DEMO.md'
+      - '.github/workflows/srs2-m32-interactive-source-trace.yml'
+permissions:
+  contents: read
+jobs:
+  source-trace-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned test dependency
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Test first-party M20-M32 source evidence and replay
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m28_historical_pagination_regression.py \
+            backend/tests/test_m29_pip_historical_regression.py \
+            backend/tests/test_m30_static_pagination_witness.py \
+            backend/tests/test_m31_two_project_casebook.py \
+            backend/tests/test_m32_interactive_source_trace_demo.py
+      - name: Fetch immutable static evidence and build internal interactive demo
+        run: python -m backend.evaluation.m32_interactive_source_trace_demo --out-dir /tmp/m32
+      - name: Verify conditional trace, abstentions, and blinded packet isolation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m32')
+          demo = json.loads((root/'internal'/'replay.json').read_text())
+          assert demo['schema'] == 'm32-interactive-source-trace-demo-1'
+          assert demo['projects'] == 2
+          assert len(demo['pagination_scenarios']) == 2
+          assert len(demo['pip_scenarios']) == 3
+          assert [x['before']['model_returned_offers'] for x in demo['pagination_scenarios']] == [100, 3]
+          assert [x['after']['model_returned_offers'] for x in demo['pagination_scenarios']] == [52, 2]
+          assert all(x['model_status'] == 'ABSTAIN_NO_BEHAVIORAL_MODEL' for x in demo['pip_scenarios'])
+          assert demo['independent_adjudications'] == 0
+          assert all(v is None for v in demo['metrics'].values())
+          assert demo['external_project_code_executed'] is False
+          assert demo['held_out_evaluation'] is False
+          html = (root/'internal'/'replay.html').read_text()
+          assert 'NOT VALIDATED' in html and 'data-panel' in html
+          for project, expected_links, expected_behaviors in [('edc', 4, 4), ('pip', 6, 6)]:
+              review = root/project/'reviewers'
+              assert not (review/'replay.json').exists()
+              assert not (review/'replay.html').exists()
+              assert not (review/'m30_conditional_static_witness.json').exists()
+              for reviewer in ('A','B'):
+                  links = [json.loads(x) for x in (review/f'reviewer_{reviewer}.jsonl').read_text().splitlines()]
+                  behaviors = [json.loads(x) for x in (review/f'behavior_reviewer_{reviewer}.jsonl').read_text().splitlines()]
+                  assert len(links) == expected_links and len(behaviors) == expected_behaviors
+                  assert all(x['link_label'] is None for x in links)
+                  assert all(x['conformance_label'] is None and x['violation_label'] is None for x in behaviors)
+          print('M32: 2 real projects; 2 conditional source-linked traces; 3 pip abstentions; 0 gold labels.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m32-internal-interactive-trace-and-provenance
+          path: |
+            /tmp/m32/internal/
+            /tmp/m32/edc/internal/
+            /tmp/m32/pip/internal/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m32-edc-blinded-reviewers
+          path: /tmp/m32/edc/reviewers/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m32-pip-blinded-reviewers
+          path: /tmp/m32/pip/reviewers/
+          retention-days: 30
