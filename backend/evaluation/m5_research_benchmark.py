@@ -172,6 +172,57 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
             strata[name][project] = {"correct": correct, "total": len(group),
                                      "full_denominator_accuracy": correct / len(group),
                                      "wilson_95_interval": _wilson(correct, len(group))}
+    # M17: a high micro-accuracy on 500 rows must not hide a tiny or
+    # systematically failing independent project. Report full-denominator
+    # project accuracy and require minimum label support in EACH project.
+    # These checks do not independently authenticate provenance.
+    robustness_policy = {
+        "minimum_linked_per_project": 50,
+        "minimum_per_conformance_class_per_project": 10,
+        "minimum_worst_project_accuracy": 0.90,
+        "minimum_project_macro_accuracy": 0.95,
+    }
+    project_robustness: dict[str, Any] = {}
+    for name in systems:
+        supports = {}
+        accuracies = []
+        for project in sorted(strata[name]):
+            group = [r for r in selected if r["project_id"] == project]
+            counts = Counter(r["gold_conformance"] for r in group)
+            accuracy = strata[name][project]["full_denominator_accuracy"]
+            accuracies.append(accuracy)
+            supports[project] = {
+                "linked": len(group),
+                "class_counts": {c: counts[c] for c in OUTCOMES},
+                "support_sufficient": (
+                    len(group) >= robustness_policy["minimum_linked_per_project"]
+                    and all(counts[c] >= robustness_policy["minimum_per_conformance_class_per_project"]
+                            for c in OUTCOMES)
+                ),
+                "accuracy_full_denominator": accuracy,
+            }
+        project_macro = sum(accuracies) / len(accuracies) if accuracies else None
+        worst_project = min(accuracies) if accuracies else None
+        sufficient = bool(supports) and all(x["support_sufficient"] for x in supports.values())
+        robust = (
+            sufficient
+            and project_macro is not None
+            and project_macro >= robustness_policy["minimum_project_macro_accuracy"]
+            and worst_project is not None
+            and worst_project >= robustness_policy["minimum_worst_project_accuracy"]
+        )
+        project_robustness[name] = {
+            "project_macro_accuracy": project_macro,
+            "worst_project_accuracy": worst_project,
+            "minimum_support_met": sufficient,
+            "gate_passed": robust,
+            "projects": supports,
+        }
+        acceptance = results[name]["acceptance"]
+        acceptance["m17_project_robustness_passed"] = robust
+        if m5_claim_eligible and acceptance["passed"] and not robust:
+            acceptance["passed"] = False
+            acceptance["status"] = "BLOCKED_BY_M17_PROJECT_ROBUSTNESS"
     names = sorted(systems)
     paired: dict[str, Any] = {}
     for i, a in enumerate(names):
@@ -200,8 +251,10 @@ def compare_systems(gold: list[dict[str, Any]], systems: dict[str, list[dict[str
         "selected_split": split,
         "systems": results,
         "project_strata": strata,
+        "project_robustness_policy": robustness_policy,
+        "project_robustness": project_robustness,
         "paired": paired,
-        "interpretation": "Synthetic benchmarks and demo evidence are never proof of 95% on unseen real projects. Missing/unsupported cases count against full-denominator accuracy.",
+        "interpretation": "Synthetic benchmarks and demo evidence are never proof of 95% on unseen real projects. Missing/unsupported cases count against full-denominator accuracy. M17 additionally requires adequate class support and project-balanced accuracy to prevent a dominant project from masking poor generalization.",
     }
 
 
