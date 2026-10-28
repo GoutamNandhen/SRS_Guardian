@@ -1,7 +1,7 @@
 # Codex task — produce SRS Guardian 2.0 IEEE-style research-paper package
 **Date:** 28 October 2026
 **Status:** Execution task for Codex. This file is a specification; the paper must actually be authored and built by Codex. Do not say it is finished until build and evidence checks complete.
-**Working branch:** \`feature/srs-guardian-paper-codex-20261028\`
+**Working branch:** `feature/srs-guardian-paper-codex-20261028`
 **Repository:** GoutamNandhen/SRS_Guardian (private)
 
 ## Objective — execute, do not just plan
@@ -15,16 +15,16 @@ Framing: bounded negative-results / feasibility / evidence-calibration empirical
 
 ## Must-read, ground-truth repository files, in this order
 
-1. \`docs/research/SRS_GUARDIAN_PRELIMINARY_MANUSCRIPT_20261028.md\` — complete working draft + M41–M45 correction appendix. Preserve its defensible facts, limitations, problem formulation, cited sources, research questions.
-2. \`docs/research/M40_PIP_E2E_FEASIBILITY.md\`, \`backend/evaluation/m40_pip_e2e_feasibility.py\`, and its tests — frozen selected-case baseline, 0/6 historical known fix locus among top five, 6/6 behavioral abstentions (the historical fix locus is **not** independently adjudicated gold).
-3. \`docs/research/M41_PIP_RETRIEVAL_ABLATION.md\` (if present; search exact M41 docs), \`docs/research/M42_PIP_FIRST_PARTY_TREE_RETRIEVAL.md\`, \`docs/research/M43_RETRIEVAL_GATED_WITNESS.md\`; distinguish M41's **oracle-selected file** success (6/6 top-five only inside preselected file) from actual M42 **whole-tree** normalized retrieval (2/6 top-five, top-one 0/6) and M43 2/6 static witnesses, all behavioral abstentions.
-4. \`docs/research/M6_EXTERNAL_DATASET_VALIDATION.md\`, \`benchmarks/m6/observed_metrics_summary.json\` and \`docs/research/M7_HYBRID_RETRIEVAL.md\` — external Dronology artifact-graph known-positive link retrieval, *not* link-classification accuracy and not executable conformance. M6 V0/V1 only 8/10 linked requirement IDs. M7 path/character retrieval ablation on the same one-project dataset. If used, report Hit@5 with exact provenance and caveats.
-5. \`docs/research/M4_APPROVED_EXECUTION.md\` plus \`backend/app/research/approved_runner.py\`, \`backend/app/research/m4_worker.py\`, \`backend/evaluation/m8_docker_e2e.py\` — approved trusted Docker target demonstration, *not* upstream project conformance.
-6. \`docs/research/M28_HISTORICAL_PAGINATION_REGRESSION.md\` or search the exact M28 docs; M29 pip, M34, M37–M39 — selected source review and pending adjudication artifacts only.
-7. \`docs/research/M44_REQUESTS_INDEPENDENT_REVIEW.md\`, \`M45_REQUESTS_INDEPENDENT_BEHAVIOR_PROTOCOL.md\`, \`M47_APPROVED_REQUESTS_REVIEWER_CAPTURE.md\`, \`M48_REQUESTS_OBSERVATION_HANDOFF.md\` — requests pinned issue review and offline observation pipeline. **M47/M48 first-party tests use synthetic/stubbed observations. No actual approved upstream Requests run, human submission, or adjudicated case is reported.**
-8. \`docs/research/M1_EVALUATION_PROTOCOL.md\`, \`docs/EVALUATION.md\` — original SRS text-quality benchmark scores, **different tasks** from M40/M43 or conformance, never aggregate these numbers into 2.0 accuracy.
+1. `docs/research/SRS_GUARDIAN_PRELIMINARY_MANUSCRIPT_20261028.md` — complete working draft + M41–M45 correction appendix. Preserve its defensible facts, limitations, problem formulation, cited sources, research questions.
+2. `docs/research/M40_PIP_E2E_FEASIBILITY.md`, `backend/evaluation/m40_pip_e2e_feasibility.py`, and its tests — frozen selected-case baseline, 0/6 historical known fix locus among top five, 6/6 behavioral abstentions (the historical fix locus is **not** independently adjudicated gold).
+3. `docs/research/M41_PIP_RETRIEVAL_ABLATION.md` (if present; search exact M41 docs), `docs/research/M42_PIP_FIRST_PARTY_TREE_RETRIEVAL.md`, `docs/research/M43_RETRIEVAL_GATED_WITNESS.md`; distinguish M41's **oracle-selected file** success (6/6 top-five only inside preselected file) from actual M42 **whole-tree** normalized retrieval (2/6 top-five, top-one 0/6) and M43 2/6 static witnesses, all behavioral abstentions.
+4. `docs/research/M6_EXTERNAL_DATASET_VALIDATION.md`, `benchmarks/m6/observed_metrics_summary.json` and `docs/research/M7_HYBRID_RETRIEVAL.md` — external Dronology artifact-graph known-positive link retrieval, *not* link-classification accuracy and not executable conformance. M6 V0/V1 only 8/10 linked requirement IDs. M7 path/character retrieval ablation on the same one-project dataset. If used, report Hit@5 with exact provenance and caveats.
+5. `docs/research/M4_APPROVED_EXECUTION.md` plus `backend/app/research/approved_runner.py`, `backend/app/research/m4_worker.py`, `backend/evaluation/m8_docker_e2e.py` — approved trusted Docker target demonstration, *not* upstream project conformance.
+6. `docs/research/M28_HISTORICAL_PAGINATION_REGRESSION.md` or search the exact M28 docs; M29 pip, M34, M37–M39 — selected source review and pending adjudication artifacts only.
+7. `docs/research/M44_REQUESTS_INDEPENDENT_REVIEW.md`, `M45_REQUESTS_INDEPENDENT_BEHAVIOR_PROTOCOL.md`, `M47_APPROVED_REQUESTS_REVIEWER_CAPTURE.md`, `M48_REQUESTS_OBSERVATION_HANDOFF.md` — requests pinned issue review and offline observation pipeline. **M47/M48 first-party tests use synthetic/stubbed observations. No actual approved upstream Requests run, human submission, or adjudicated case is reported.**
+8. `docs/research/M1_EVALUATION_PROTOCOL.md`, `docs/EVALUATION.md` — original SRS text-quality benchmark scores, **different tasks** from M40/M43 or conformance, never aggregate these numbers into 2.0 accuracy.
 
-If a listed document filename is not present, find the corresponding M-number's actual docs with \`git ls-files docs/research\`; record the resolved path. Do not quietly substitute unsupported claims.
+If a listed document filename is not present, find the corresponding M-number's actual docs with `git ls-files docs/research`; record the resolved path. Do not quietly substitute unsupported claims.
 
 ## Evidence table that MUST be correctly interpreted
 
@@ -74,14 +74,14 @@ Include useful artifacts:
 
 ## Output files (all required)
 
-Write into \`paper/srs_guardian_feasibility_20261028/\`:
-- \`main.tex\` — complete IEEEtran conference-style LaTeX source, no "TODO" or unfilled references
-- \`references.bib\` — **verified** bib entries with actual bibliographic metadata; use official publisher/arXiv/GitHub links; omit unverified references
-- \`figures/architecture.tex\`, \`figures/evidence_gate.tex\` — vector TikZ diagrams integrated in paper, fit columns
-- \`paper.pdf\` — successfully rendered final PDF, if TeX engine available in Codex environment
-- \`EVIDENCE_AUDIT.md\` — claim-to-actual-file/test/CI link matrix, status labels VERIFIED / QUALIFIED / UNSUPPORTED; no unsupported claims in paper
-- \`BUILD.md\` — precise reproducible build command (e.g. \`latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex\`); report whether TeX actually ran
-- \`MANUSCRIPT_REVIEW.md\` — remaining academic limitations, citation verification status, suitability verdict, page count if built, all build warnings.
+Write into `paper/srs_guardian_feasibility_20261028/`:
+- `main.tex` — complete IEEEtran conference-style LaTeX source, no "TODO" or unfilled references
+- `references.bib` — **verified** bib entries with actual bibliographic metadata; use official publisher/arXiv/GitHub links; omit unverified references
+- `figures/architecture.tex`, `figures/evidence_gate.tex` — vector TikZ diagrams integrated in paper, fit columns
+- `paper.pdf` — successfully rendered final PDF, if TeX engine available in Codex environment
+- `EVIDENCE_AUDIT.md` — claim-to-actual-file/test/CI link matrix, status labels VERIFIED / QUALIFIED / UNSUPPORTED; no unsupported claims in paper
+- `BUILD.md` — precise reproducible build command (e.g. `latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex`); report whether TeX actually ran
+- `MANUSCRIPT_REVIEW.md` — remaining academic limitations, citation verification status, suitability verdict, page count if built, all build warnings.
 
 If LaTeX is unavailable, **still create all source files**, report failed/missing engine accurately and DO NOT invent the PDF. If feasible, install/use an allowed local TeX engine, and compile. Do not substitute a PNG for the editable diagram. Never mark a PDF built unless its file exists and opens.
 
