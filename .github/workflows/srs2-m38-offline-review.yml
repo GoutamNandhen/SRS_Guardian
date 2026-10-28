@@ -1,0 +1,63 @@
+name: SRS Guardian M38 Offline Independent Review
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m38-werkzeug-offline-review-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m38_werkzeug_offline_review.py'
+      - 'backend/tests/test_m38_werkzeug_offline_review.py'
+      - 'docs/research/M38_WERKZEUG_OFFLINE_REVIEW.md'
+      - '.github/workflows/srs2-m38-offline-review.yml'
+permissions:
+  contents: read
+jobs:
+  generate-reviewer-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'pytest==8.4.2'
+      - name: First-party tests, including pinned external static bytes
+        run: python -m pytest -q backend/tests/test_m37_werkzeug_holdout.py backend/tests/test_m38_werkzeug_offline_review.py
+      - name: Generate offline A/B packages from immutable licensed source
+        run: |
+          python -m backend.evaluation.m38_werkzeug_offline_review --out-dir /tmp/m38
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/m38')
+          m=json.loads((root/'internal/m38_manifest.json').read_text())
+          assert m['independent_reviewer_packages']==2
+          assert m['source_file_revision_objects_hash_verified']==8
+          assert m['links_pending_per_reviewer']==6
+          assert m['behavior_revisions_pending_per_reviewer']==4
+          assert m['independent_adjudications']==0
+          assert m['approved_runtime_observations']==0
+          assert not m['external_project_code_executed']
+          assert all(v is None for v in m['metrics'].values())
+          for reviewer in ('A','B'):
+              path=root/f'reviewer_{reviewer}'
+              assert (path/'workspace.html').is_file()
+              assert (path/'source_index.html').is_file()
+              assert len(list(path.glob('source/**/*.txt')))==8
+              assert not (path/'internal').exists()
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m38-werkzeug-reviewer-A-OFFLINE-NOT-GOLD
+          path: /tmp/m38/reviewer_A/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m38-werkzeug-reviewer-B-OFFLINE-NOT-GOLD
+          path: /tmp/m38/reviewer_B/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m38-werkzeug-INTERNAL-provenance-NOT-GOLD
+          path: /tmp/m38/internal/
+          retention-days: 14
