@@ -112,3 +112,8 @@ def test_excerpt_has_correct_line_numbers_and_does_not_execute():
     assert result["end_line"] == 4
     assert result["source_lines"][3] == {
         "line": 4, "text": "    return 'special_token'"}
+
+
+def test_upstream_empty_and_repeated_test_metadata_is_preserved():
+    assert m59.expected_tests("[]") == []
+    assert m59.expected_tests('["x", "x"]') == ["x", "x"]
