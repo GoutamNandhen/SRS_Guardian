@@ -68,7 +68,7 @@ def expected_source_blobs(commit: str) -> tuple[str, dict[str, str]]:
     for obj in tree.get("tree", []):
         path = obj.get("path", "")
         if path.startswith(PREFIX) and path.endswith(".py"):
-            if obj.get("type") != "blob" or obj.get("mode") != "100644":
+            if obj.get("type") != "blob" or obj.get("mode") not in ("100644", "100755"):
                 raise m29.EvidenceError("Unexpected first-party source object type")
             expected[path] = obj["sha"]
     if not 20 <= len(expected) <= MAX_FILES:
