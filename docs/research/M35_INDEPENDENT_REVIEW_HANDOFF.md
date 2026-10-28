@@ -11,14 +11,14 @@ executes external Java/pip code.
 
 Run:
 
-\`\`\`bash
+```bash
 python -m pip install 'pytest==8.4.2'
 python -m pytest -q backend/tests/test_m20_annotation_queue.py backend/tests/test_m28_historical_pagination_regression.py backend/tests/test_m29_pip_historical_regression.py backend/tests/test_m30_static_pagination_witness.py backend/tests/test_m31_two_project_casebook.py backend/tests/test_m35_independent_review_workspace.py
 python -m backend.evaluation.m35_independent_review_workspace --out-dir /tmp/m35
-\`\`\`
+```
 
 The four reviewer-specific HTML files are in
-\`/tmp/m35/{edc,pip}/reviewers/workspace_reviewer_{A,B}.html\`.
+`/tmp/m35/{edc,pip}/reviewers/workspace_reviewer_{A,B}.html`.
 Open the appropriate HTML file locally. Reviewers can record link judgments
 with source-line reasoning and revision-specific behavioral verdicts with
 independent observations, evidence citation, fixture/environment and notes.
@@ -26,7 +26,7 @@ Export both JSONL files for later third-party adjudication. The UI permits
 unanswered cases, retains null labels, and does not transmit annotations.
 
 **Give each reviewer only their own project's artifact**. Never give reviewers
-\`/tmp/m35/internal\`, source-model predictions, M20 sampling provenance, the
+`/tmp/m35/internal`, source-model predictions, M20 sampling provenance, the
 other reviewer's file, or an upstream issue's alleged failure as an answer key.
 
 ## Exact pending human work
