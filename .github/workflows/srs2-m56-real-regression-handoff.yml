@@ -1,0 +1,35 @@
+name: M56 Real Regression Test to M20 Behavioral Review (NOT GOLD)
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m56-real-regression-test-handoff-20261029
+  pull_request:
+    paths:
+      - 'backend/evaluation/m56_sympy_regression_review_handoff.py'
+      - 'backend/tests/test_m56_sympy_regression_review_handoff.py'
+      - '.github/workflows/srs2-m56-real-regression-handoff.yml'
+permissions:
+  contents: read
+jobs:
+  real-regression-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party test and inert dataset readers
+        run: python -m pip install 'pytest==8.4.2' 'pyarrow==17.0.0'
+      - name: Test first-party M56 behavior handoff
+        run: python -m pytest -q backend/tests/test_m56_sympy_regression_review_handoff.py
+      - name: Reproduce existing real M55 pinned source and retrieval evidence
+        run: python -m backend.evaluation.m55_sympy_three_case_proxy --out-dir /tmp/m55_real
+      - name: Bind three real regression test patches to M20 cases (NO EXECUTION)
+        run: python -m backend.evaluation.m56_sympy_regression_review_handoff --m55-dir /tmp/m55_real --out-dir /tmp/m56_real
+      - name: Upload independently reviewable test evidence (NOT GOLD)
+        uses: actions/upload-artifact@v4
+        with:
+          name: m56-three-real-sympy-regression-test-handoff-NOT-GOLD
+          path: /tmp/m56_real/
+          retention-days: 14
