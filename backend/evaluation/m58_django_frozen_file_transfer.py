@@ -65,13 +65,16 @@ def read_archive(raw: bytes, expected: dict[str, str]) -> dict[str, bytes]:
                 continue
             parts = PurePosixPath(item.filename).parts
             if (len(parts) < 2 or ".." in parts or item.filename.startswith("/")
-                    or "\\" in item.filename
-                    or stat.S_ISLNK((item.external_attr >> 16) & 65535)):
-                raise ValueError("Unsafe archive entry")
+                    or "\\" in item.filename):
+                raise ValueError("Unsafe archive path")
             roots.add(parts[0])
             path = "/".join(parts[1:])
+            # Unrelated archive symlinks are inert and never extracted/read.
+            # Indexed production source must be a regular Git-verified blob.
             if not production_source(path):
                 continue
+            if stat.S_ISLNK((item.external_attr >> 16) & 65535):
+                raise ValueError("Symlink in production source")
             if path not in expected or path in files:
                 raise ValueError("Unexpected or duplicate production file")
             if item.file_size > m54.MAX_FILE_BYTES:
