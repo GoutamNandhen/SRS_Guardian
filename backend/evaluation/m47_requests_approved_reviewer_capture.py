@@ -78,6 +78,11 @@ def verify_checkout(checkout: Path, revision: str) -> dict[str, str]:
         capture_output=True, text=True, check=True, timeout=10)
     if result.stdout.strip() != REVISIONS[revision]:
         raise CaptureError("Git HEAD is not the expected pinned revision")
+    status = subprocess.run(
+        ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all"],
+        capture_output=True, text=True, check=True, timeout=10)
+    if status.stdout.strip():
+        raise CaptureError("Checkout must be clean, including untracked files")
     for relative, expected in BLOBS[revision].items():
         path = root / relative
         if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(root):
