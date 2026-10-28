@@ -70,9 +70,9 @@ def expected_tests(raw: str) -> list[str]:
         tests = json.loads(raw)
     except (TypeError, ValueError) as exc:
         raise ValueError("Invalid FAIL_TO_PASS JSON") from exc
-    if (not isinstance(tests, list) or len(tests) > 100
-            or any(not isinstance(t, str) or not t.strip() or len(t) > 500
-                   for t in tests) or len(tests) != len(set(tests))):
+    if (not isinstance(tests, list) or len(tests) > 20000
+            or any(not isinstance(t, str) or not t.strip() or len(t) > 5000
+                   for t in tests)):
         raise ValueError("Invalid FAIL_TO_PASS test IDs")
     return tests
 
@@ -181,6 +181,13 @@ def build(row: dict, snapshot: dict, internal: dict,
             "source_candidates_per_reviewer": 5,
             "candidate_regression_tests": len(tests),
             "upstream_fail_to_pass_list_empty": not bool(tests),
+            "upstream_fail_to_pass_duplicate_count": len(tests) - len(set(tests)),
+            "reported_benchmark_gold_failure": (
+                row["instance_id"] == "django__django-10097"),
+            "reported_benchmark_issue_urls_INTERNAL": (
+                ["https://github.com/SWE-bench/SWE-bench/issues/267",
+                 "https://github.com/SWE-bench/SWE-bench/issues/487"]
+                if row["instance_id"] == "django__django-10097" else []),
             "candidate_test_patch_files": len(paths_in_test_patch),
             "independent_link_labels": 0,
             "independent_behavioral_observations": 0,
@@ -193,6 +200,7 @@ def build(row: dict, snapshot: dict, internal: dict,
             "coverage": None,
             "limitations": [
                 "This is one already inspected cross-project development case, NOT an untouched held-out evaluation.",
+                "If this is django__django-10097, upstream SWE-bench issue reports dispute gold-patch execution; independently validate before using as gold.",
                 "Source excerpts are lexical navigation aids, not semantic proof or full source.",
                 "Stage 2 upstream test patch and expected test identifiers may leak fix information.",
                 "Historical patch-file hit is NOT a ground-truth trace or behavioral label.",
