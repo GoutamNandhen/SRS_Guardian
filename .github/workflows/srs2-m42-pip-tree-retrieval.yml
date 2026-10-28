@@ -1,0 +1,49 @@
+name: SRS Guardian M42 Pinned First-Party Pip Retrieval
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m42-first-party-tree-retrieval-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m42_pip_first_party_tree_retrieval.py'
+      - 'backend/tests/test_m42_pip_first_party_tree_retrieval.py'
+      - 'docs/research/M42_PIP_FIRST_PARTY_TREE_RETRIEVAL.md'
+      - '.github/workflows/srs2-m42-pip-tree-retrieval.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-first-party-source-retrieval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'pytest==8.4.2'
+      - name: First-party unit and regression tests (no external execution)
+        run: python -m pytest -q backend/tests/test_m40_pip_e2e_feasibility.py backend/tests/test_m41_pip_retrieval_ablation.py backend/tests/test_m42_pip_first_party_tree_retrieval.py
+      - name: Verify upstream pinned Git trees and rank complete first-party implementation tree
+        run: |
+          python -m backend.evaluation.m42_pip_first_party_tree_retrieval --out-dir /tmp/m42
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('/tmp/m42/m42_first_party_tree_retrieval.json').read_text())
+          assert r['requirement_revision_pairs'] == 6
+          assert all(x['verified_first_party_python_files'] >= 20 for x in r['source_revisions'].values())
+          assert r['independent_adjudications'] == 0
+          assert r['behavioral_abstentions'] == 6
+          assert r['behavioral_decisions'] == 0
+          assert r['held_out_project_evaluation'] is False
+          assert r['external_project_code_executed'] is False
+          assert all(r[k] is None for k in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'))
+          for method, scores in r['methods'].items():
+              print(method, scores, 'NOT GOLD')
+          print('Indexed', {k: (v['verified_first_party_python_files'], v['indexed_implementation_symbols']) for k,v in r['source_revisions'].items()})
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m42-pip-first-party-tree-retrieval-NOT-GOLD
+          path: /tmp/m42/
+          retention-days: 14
