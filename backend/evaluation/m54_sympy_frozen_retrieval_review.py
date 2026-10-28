@@ -115,7 +115,7 @@ def fetch_snapshot(case: dict, *, get_json=None, get_bytes=None):
             "files": files, "license_git_blob": license_sha}
 
 
-def build(case: dict, snapshot: dict):
+def build(case: dict, snapshot: dict, *, unique_case_ids: bool = False):
     """Rank using unchanged M42 normalized BM25, without patch-derived oracle."""
     if case["source_commit"] != snapshot["commit"] or case["project"] != REPO:
         raise ValueError("Requirement/source revision mismatch")
@@ -147,11 +147,12 @@ def build(case: dict, snapshot: dict):
     full_text = case["requirement_text"]
     # M20 accepts <=5000 characters. Keep original full text in reviewer rows.
     review_excerpt = full_text[:4900]
+    case_id = case["review_case_id"].replace("-", "") if unique_case_ids else "CASE001"
     universe = {"schema_version": m20.SCHEMA,
-                "project_id": "SYMPY_" + snapshot["commit"][:12] + "_CASE001",
+                "project_id": "SYMPY_" + snapshot["commit"][:12] + "_" + case_id,
                 "source_commit": snapshot["commit"],
                 "code_snapshot_sha256": digest,
-                "requirements": [{"requirement_id": "CASE001",
+                "requirements": [{"requirement_id": case_id,
                                   "requirement_text": review_excerpt}],
                 "symbols": candidates, "observed_links": []}
     queue = m20.build_queue(universe, seed="m54-frozen-m42-sympy-v1",
