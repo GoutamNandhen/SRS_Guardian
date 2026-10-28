@@ -1,0 +1,48 @@
+name: SRS Guardian M37 Third-Project Held-Out Candidate
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m37-werkzeug-heldout-candidate-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m37_werkzeug_holdout.py'
+      - 'backend/tests/test_m37_werkzeug_holdout.py'
+      - 'docs/research/M37_WERKZEUG_HELDOUT_CANDIDATE.md'
+      - '.github/workflows/srs2-m37-werkzeug-heldout.yml'
+permissions:
+  contents: read
+jobs:
+  static-source-and-m20-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'pytest==8.4.2'
+      - name: Verify pinned external source and first-party M20 handoff
+        run: python -m pytest -q backend/tests/test_m37_werkzeug_holdout.py
+      - name: Generate immutable evidence and pending independent review seeds
+        run: |
+          python -m backend.evaluation.m37_werkzeug_holdout --out-dir /tmp/m37
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path('/tmp/m37/internal/evidence_manifest.json').read_text())
+          assert m['file_revision_objects_verified']==8
+          assert m['review_cases']=={'links_per_reviewer':6,'behavior_revisions_per_reviewer':4}
+          assert m['independent_adjudications']==0
+          assert m['external_project_code_executed'] is False
+          assert all(v is None for v in m['metrics'].values())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m37-werkzeug-BLINDED-reviewer-seeds-NOT-gold
+          path: /tmp/m37/reviewers/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m37-werkzeug-INTERNAL-provenance-NOT-gold
+          path: /tmp/m37/internal/
+          retention-days: 14
