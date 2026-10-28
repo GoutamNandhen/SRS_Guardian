@@ -56,7 +56,7 @@ class EvidenceError(ValueError):
 
 
 def blob_sha(raw: bytes) -> str:
-    return hashlib.sha1(("blob %d\\0" % len(raw)).encode("ascii") + raw).hexdigest()
+    return hashlib.sha1(("blob %d\0" % len(raw)).encode("ascii") + raw).hexdigest()
 
 
 def url(revision: str, path: str, line: int | None = None) -> str:
