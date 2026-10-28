@@ -1,0 +1,66 @@
+name: SRS Guardian M34 pip Source Structural Witness
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m34-pip-source-structural-witness-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m34_pip_source_structure_witness.py'
+      - 'backend/tests/test_m34_pip_source_structure_witness.py'
+      - 'docs/research/M34_PIP_SOURCE_STRUCTURE_WITNESS.md'
+      - '.github/workflows/srs2-m34-pip-structure.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-pip-structure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party test dependency
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Test M20 M29 and M34 (first-party Python only)
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m29_pip_historical_regression.py \
+            backend/tests/test_m34_pip_source_structure_witness.py
+      - name: Verify pinned MIT source and AST paths without executing pip
+        run: python -m backend.evaluation.m34_pip_source_structure_witness --out-dir /tmp/m34
+      - name: Check verified structural evidence and pending ground truth
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m34')
+          r = json.loads((root/'internal'/'m34_source_structure.json').read_text())
+          assert r['verified_file_revision_objects'] == 6
+          assert [x['successful_link_extras_yield_sites'] for x in r['structural_observations']] == [1, 2]
+          assert r['structural_observations'][1]['separate_extras_requirement']
+          assert r['m20_unlabeled_link_pairs'] == 6
+          assert r['behavior_revision_cases_per_reviewer'] == 6
+          assert r['independent_adjudications'] == 0
+          assert r['external_project_code_executed'] is False
+          assert r['held_out_evaluation'] is False
+          assert all(v is None for v in r['metrics'].values())
+          assert not (root/'reviewers'/'manifest.json').exists()
+          for reviewer in ('A', 'B'):
+              link_rows = [json.loads(s) for s in (root/'reviewers'/f'reviewer_{reviewer}.jsonl').read_text().splitlines()]
+              behavior_rows = [json.loads(s) for s in (root/'reviewers'/f'behavior_reviewer_{reviewer}.jsonl').read_text().splitlines()]
+              assert len(link_rows) == len(behavior_rows) == 6
+              assert all(x['link_label'] is None for x in link_rows)
+              assert all(x['conformance_label'] is None and x['violation_label'] is None for x in behavior_rows)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m34-internal-pip-structural-evidence
+          path: /tmp/m34/internal/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m34-blinded-pip-reviewer-packet
+          path: /tmp/m34/reviewers/
+          retention-days: 14
