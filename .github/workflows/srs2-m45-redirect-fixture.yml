@@ -1,0 +1,26 @@
+name: SRS Guardian M45 Independent Redirect Fixture
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m45-independent-redirect-fixture-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m45_redirect_observation_fixture.py'
+      - 'backend/tests/test_m45_redirect_observation_fixture.py'
+      - '.github/workflows/srs2-m45-redirect-fixture.yml'
+permissions:
+  contents: read
+jobs:
+  first-party-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'pytest==8.4.2'
+      - name: Exercise first-party loopback server only
+        run: python -m pytest -q backend/tests/test_m45_redirect_observation_fixture.py
+      - name: Verify M44 source and reviewer evidence tests
+        run: python -m pytest -q backend/tests/test_m44_requests_independent_review.py
