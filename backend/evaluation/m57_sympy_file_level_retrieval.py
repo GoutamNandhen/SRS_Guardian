@@ -81,8 +81,8 @@ def evaluate(case: dict, row: dict, snapshot: dict) -> dict:
     if (case["source_commit"] != snapshot["commit"] or
             row["base_commit"] != snapshot["commit"] or
             row["instance_id"] != case["instance_id"] or
-            m52.digest(row["problem_statement"]) != case["requirement_sha256"] or
-            m52.digest(row["patch"]) != case["patch_sha256"]):
+            m52.digest(row["problem_statement"].encode("utf-8")) != case["requirement_sha256"] or
+            m52.digest(row["patch"].encode("utf-8")) != case["patch_sha256"]):
         raise ValueError("Case, revision or requirement provenance mismatch")
     ranked, truncated = file_rank(snapshot, row["problem_statement"])
     if len(ranked) != 5:
