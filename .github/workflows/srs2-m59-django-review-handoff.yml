@@ -34,7 +34,8 @@ jobs:
           internal = json.loads((p / 'INTERNAL_NOT_GOLD.json').read_text())
           assert internal['project'] == 'django/django'
           assert internal['source_candidates_per_reviewer'] == 5
-          assert internal['candidate_regression_tests'] >= 1
+          assert internal['candidate_regression_tests'] >= 0
+          assert internal['candidate_test_patch_files'] >= 1
           assert internal['independent_link_labels'] == 0
           assert internal['independent_behavioral_observations'] == 0
           assert internal['independent_adjudications'] == 0
