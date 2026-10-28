@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import zipfile
 
 from backend.app.services.code_traceability import _index_python
 from backend.evaluation import m20_annotation_queue as m20
@@ -84,6 +86,44 @@ def verify_snapshot(snapshot: dict, revision: str) -> None:
         raise ValueError("Project license metadata inconsistent")
 
 
+
+def read_source_archive(raw: bytes, expected: dict[str, str]) -> dict[str, bytes]:
+    """Read inert Python source from pinned ZIP; reject ambiguous or unsafe members."""
+    if len(raw) > m42.MAX_ZIP_BYTES or not zipfile.is_zipfile(io.BytesIO(raw)):
+        raise ValueError("Invalid pinned ZIP")
+    files = {}
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        entries = archive.infolist()
+        if len(entries) > m42.MAX_ENTRIES:
+            raise ValueError("Too many archive entries")
+        roots = set()
+        total = 0
+        for item in entries:
+            if item.is_dir():
+                continue
+            parts = PurePosixPath(item.filename).parts
+            if len(parts) < 2 or ".." in parts or item.filename.startswith("/"):
+                raise ValueError("Unsafe ZIP member path")
+            roots.add(parts[0])
+            path = "/".join(parts[1:])
+            if not path.startswith(PREFIX) or not path.endswith(".py"):
+                continue
+            if path not in expected or path in files:
+                raise ValueError("Unexpected or duplicate source file")
+            if item.file_size > m42.MAX_FILE_BYTES:
+                raise ValueError("Oversized source file")
+            total += item.file_size
+            if total > m42.MAX_TOTAL_SOURCE_BYTES:
+                raise ValueError("Oversized source tree")
+            data = archive.read(item)
+            if m29.blob_sha(data) != expected[path]:
+                raise ValueError("Source Git blob mismatch: " + path)
+            files[path] = data
+    if len(roots) != 1 or set(files) != set(expected):
+        raise ValueError("Incomplete or ambiguous source archive")
+    return files
+
+
 def fetch_snapshot(revision: str) -> dict:
     """Retrieve public immutable Git objects; never import or run their code."""
     if revision not in COMMITS:
@@ -116,7 +156,7 @@ def fetch_snapshot(revision: str) -> dict:
     archive = m42.get_bytes(
         f"https://codeload.github.com/{REPO}/zip/{commit}", m42.MAX_ZIP_BYTES
     )
-    files = m42.read_archive(archive, expected)
+    files = read_source_archive(archive, expected)
     pinned = {
         path: m42.get_bytes(
             f"https://raw.githubusercontent.com/{REPO}/{commit}/{path}",
