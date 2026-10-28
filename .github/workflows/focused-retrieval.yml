@@ -1,0 +1,48 @@
+name: Focused SRS Code Retrieval Experiment — Full Pinned pip Tree
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-focused-retrieval-experiment-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/focused_full_tree_retrieval.py'
+      - 'backend/tests/test_focused_full_tree_retrieval.py'
+      - '.github/workflows/focused-retrieval.yml'
+permissions:
+  contents: read
+jobs:
+  real-source-code-retrieval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install fixed CPU dependencies
+        run: python -m pip install 'pytest==8.4.2' 'numpy==2.2.6' 'scikit-learn==1.7.2'
+      - name: Verify focused retrieval implementation and M42 regression
+        run: python -m pytest -q backend/tests/test_focused_full_tree_retrieval.py backend/tests/test_m42_pip_first_party_tree_retrieval.py
+      - name: Measure frozen experiment on actual hash-verified complete pip code trees
+        run: |
+          python -m backend.evaluation.focused_full_tree_retrieval --out-dir /tmp/srs-focused
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/srs-focused/focused_retrieval_results.json').read_text())
+          assert r['project_count'] == 1 and r['held_out_projects'] == 0
+          assert r['upstream_code_executed'] is False
+          assert r['behavioral_abstentions'] == 6 and r['behavioral_decisions'] == 0
+          assert r['independent_adjudications'] == 0 and r['independent_gold'] is None
+          assert all(r[k] is None for k in ('conformance_accuracy','violation_precision','violation_recall','conformance_coverage'))
+          assert sorted(r['revision_sizes']) == ['after','before']
+          assert all(v['python_files'] >= 100 for v in r['revision_sizes'].values())
+          assert r['diagnostics_NOT_GOLD']['m42_inflection']['known_fix_top5_exploratory'] == 2
+          print('Exploratory full-tree code retrieval ONLY — accuracy still UNDEFINED')
+          print(json.dumps(r['diagnostics_NOT_GOLD'],indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: focused-real-pip-code-retrieval-NOT-GOLD
+          path: /tmp/srs-focused/
+          retention-days: 14
