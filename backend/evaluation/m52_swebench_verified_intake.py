@@ -95,6 +95,8 @@ def build_manifest(rows: list[dict], *, license_fetch=download, count: int = 3) 
         validate_license(license_raw)
         selected.append({
             "instance_id": row["instance_id"],
+            "review_case_id": f"CASE-{len(selected) + 1:03d}",
+            "requirement_text": row["problem_statement"],
             "project": REPO,
             "source_commit": commit,
             "source_snapshot_url": f"https://github.com/sympy/sympy/tree/{commit}",
@@ -149,13 +151,15 @@ def write_manifest(manifest: dict, output: Path) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "INTERNAL_PROVENANCE_NOT_GOLD.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # Do not expose the instance ID: it encodes the upstream fix PR number.
+    # Historical PR URLs and patch metadata stay in the internal manifest only.
+    # These are pre-M20 case intakes, not independently reviewed trace links.
     for reviewer in ("A", "B"):
         path = output / f"reviewer_{reviewer}_intake_NOT_M20_GOLD.jsonl"
         path.write_text("".join(json.dumps({
-            "instance_id": case["instance_id"],
+            "review_case_id": case["review_case_id"],
+            "requirement_text": case["requirement_text"],
             "source_snapshot_url": case["source_snapshot_url"],
-            "historical_pr_url": case["historical_pr_url"],
-            "dataset_revision": DATASET_REV,
             "requirement_sha256": case["requirement_sha256"],
             "reviewer": reviewer,
             "link_label": None,
