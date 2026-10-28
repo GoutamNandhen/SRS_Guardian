@@ -1,0 +1,43 @@
+name: SRS Guardian M36 Independent Adjudication Handoff
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m36-adjudication-handoff-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m36_adjudication_handoff.py'
+      - 'backend/tests/test_m36_adjudication_handoff.py'
+      - 'docs/research/M36_ADJUDICATION_HANDOFF.md'
+      - '.github/workflows/srs2-m36-adjudication-handoff.yml'
+permissions:
+  contents: read
+jobs:
+  first-party-review-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'pytest==8.4.2'
+      - name: Validate reviewer reconciliation (synthetic first-party tests)
+        run: python -m pytest -q backend/tests/test_m36_adjudication_handoff.py
+      - name: Generate pinned M35 reviewer seeds and pending adjudicator handoff
+        run: |
+          python -m backend.evaluation.m35_independent_review_workspace --out-dir /tmp/m35
+          python -m backend.evaluation.m36_adjudication_handoff --review-root /tmp/m35 --out-dir /tmp/m36
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path('/tmp/m36/adjudication_manifest.json').read_text())
+          assert m['tasks']==20 and m['independent_adjudications']==0
+          assert m['comparison_counts']['pending_or_incomplete']==20
+          assert all(v is None for v in m['metrics'].values())
+          assert m['external_project_code_executed'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m36-empty-adjudicator-handoff-NOT-gold
+          path: /tmp/m36/
+          retention-days: 14
