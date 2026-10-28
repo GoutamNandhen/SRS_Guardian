@@ -70,6 +70,9 @@ def build_manifest(rows: list[dict], *, license_fetch=download, count: int = 3) 
         raise ValueError("Candidate count must be 1..10")
     candidates = sorted((r for r in rows if r.get("repo") == REPO),
                         key=lambda r: r.get("instance_id", ""))
+    ids = [r.get("instance_id") for r in candidates]
+    if len(ids) != len(set(ids)):
+        raise ValueError("Duplicate candidate")
     selected = []
     seen = set()
     for row in candidates:
