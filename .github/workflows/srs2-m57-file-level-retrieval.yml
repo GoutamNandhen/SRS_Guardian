@@ -1,0 +1,33 @@
+name: M57 Real SymPy File Retrieval Ablation (NOT GOLD)
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m57-file-level-retrieval-20261029
+  pull_request:
+    paths:
+      - 'backend/evaluation/m57_sympy_file_level_retrieval.py'
+      - 'backend/tests/test_m57_sympy_file_level_retrieval.py'
+      - '.github/workflows/srs2-m57-file-level-retrieval.yml'
+permissions:
+  contents: read
+jobs:
+  file-retrieval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party test and inert dataset readers
+        run: python -m pip install 'pytest==8.4.2' 'pyarrow==17.0.0'
+      - name: Test first-party file retrieval and M20 handoff (synthetic fixtures only)
+        run: python -m pytest -q backend/tests/test_m57_sympy_file_level_retrieval.py
+      - name: Retrieve Git-verified real SymPy source as inert text; compare development proxy
+        run: python -m backend.evaluation.m57_sympy_file_level_retrieval --out-dir /tmp/m57_real
+      - name: Upload M57 real-source retrieval and independent review packets (NOT GOLD)
+        uses: actions/upload-artifact@v4
+        with:
+          name: m57-three-real-sympy-file-level-retrieval-NOT-GOLD
+          path: /tmp/m57_real/
+          retention-days: 14
