@@ -13,7 +13,6 @@ from pathlib import Path, PurePosixPath
 
 from backend.evaluation import m29_pip_historical_regression as m29
 from backend.evaluation import m52_swebench_verified_intake as m52
-from backend.evaluation import m56_sympy_regression_review_handoff as m56
 from backend.evaluation import m57_sympy_file_level_retrieval as m57
 from backend.evaluation import m58_django_frozen_file_transfer as m58
 
@@ -61,6 +60,21 @@ def test_patch_paths(patch: str) -> list[str]:
                 raise ValueError("Unsafe regression patch path")
         paths.add(after)
     return sorted(paths)
+
+
+def expected_tests(raw: str) -> list[str]:
+    """Allow a genuine empty upstream FAIL_TO_PASS list; never invent test IDs."""
+    if not isinstance(raw, str):
+        raise ValueError("Missing FAIL_TO_PASS metadata")
+    try:
+        tests = json.loads(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid FAIL_TO_PASS JSON") from exc
+    if (not isinstance(tests, list) or len(tests) > 100
+            or any(not isinstance(t, str) or not t.strip() or len(t) > 500
+                   for t in tests) or len(tests) != len(set(tests))):
+        raise ValueError("Invalid FAIL_TO_PASS test IDs")
+    return tests
 
 
 def build(row: dict, snapshot: dict, internal: dict,
@@ -121,7 +135,7 @@ def build(row: dict, snapshot: dict, internal: dict,
         stage1[reviewer] = packet
 
     # Stage 2 is deliberately separate: regression patches can reveal fix hints.
-    tests = m56.parse_test_ids(row["FAIL_TO_PASS"])
+    tests = expected_tests(row["FAIL_TO_PASS"])
     paths_in_test_patch = test_patch_paths(row["test_patch"])
     stage2 = {}
     for reviewer in ("A", "B"):
@@ -166,6 +180,7 @@ def build(row: dict, snapshot: dict, internal: dict,
             "m58_queue_sha256": internal["m20_queue_sha256"],
             "source_candidates_per_reviewer": 5,
             "candidate_regression_tests": len(tests),
+            "upstream_fail_to_pass_list_empty": not bool(tests),
             "candidate_test_patch_files": len(paths_in_test_patch),
             "independent_link_labels": 0,
             "independent_behavioral_observations": 0,
