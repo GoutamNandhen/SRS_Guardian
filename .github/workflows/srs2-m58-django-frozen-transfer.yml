@@ -1,0 +1,53 @@
+name: M58 Frozen Django Cross-Project Retrieval (NOT GOLD)
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m58-django-frozen-transfer-20261029
+  pull_request:
+    paths:
+      - 'backend/evaluation/m58_django_frozen_file_transfer.py'
+      - 'backend/tests/test_m58_django_frozen_file_transfer.py'
+      - '.github/workflows/srs2-m58-django-frozen-transfer.yml'
+permissions:
+  contents: read
+jobs:
+  frozen-cross-project-retrieval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party test and inert Parquet reader
+        run: python -m pip install 'pytest==8.4.2' 'pyarrow==17.0.0'
+      - name: Run first-party offline tests (synthetic fixtures only)
+        run: python -m pytest -q backend/tests/test_m58_django_frozen_file_transfer.py
+      - name: Verify new Django project source as inert Git blobs and retrieve with frozen M57 BM25
+        run: python -m backend.evaluation.m58_django_frozen_file_transfer --out-dir /tmp/m58_django
+      - name: Check no fabricated independent labels or behavioral metrics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m58_django')
+          x = json.loads((root / 'INTERNAL_NOT_GOLD.json').read_text())
+          assert x['project'] == 'django/django'
+          assert x['verified_production_files'] >= 100
+          assert x['independent_link_labels'] == 0
+          assert x['independent_adjudications'] == 0
+          assert x['held_out_behavioral_projects_scored'] == 0
+          assert x['external_project_code_executed'] is False
+          assert all(x[k] is None for k in (
+              'conformance_accuracy', 'violation_precision',
+              'violation_recall', 'coverage'))
+          assert len((root / 'reviewer_A.jsonl').read_text().splitlines()) == 5
+          assert len((root / 'reviewer_B.jsonl').read_text().splitlines()) == 5
+          print('Frozen Django retrieval and M20 packets verified; NOT GOLD')
+          PY
+      - name: Upload independently reviewable new-project evidence (NOT GOLD)
+        uses: actions/upload-artifact@v4
+        with:
+          name: m58-django-frozen-m57-transfer-NOT-GOLD
+          path: /tmp/m58_django/
+          retention-days: 14
