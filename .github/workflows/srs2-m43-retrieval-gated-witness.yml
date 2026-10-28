@@ -47,7 +47,7 @@ jobs:
               if row['retrieval_gated_source_witness']:
                   w = row['retrieval_gated_source_witness']
                   assert w['retrieval_rank'] <= 5
-                  assert w['source_git_blob_sha1'] in [x['git_blob_sha1'] for x in []] if False else len(w['source_git_blob_sha1']) == 40
+                  assert len(w['source_git_blob_sha1']) == 40
           print('Gated source witnesses:', r['retrieval_gated_source_witness_cases'], '/6 (NOT behavioral conformance)')
           print('Per revision:', r['per_revision'])
           PY
