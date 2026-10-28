@@ -54,8 +54,9 @@ def test_four_offline_workspaces_remain_blinded_and_unlabeled(tmp_path):
         assert "sampling_provenance" not in html
         assert '"conformance_label": null' in html
         assert '"link_label": null' in html
-        assert f'"reviewer": "{entry["reviewer"]}"' in html
-        assert f'"reviewer": "reviewer_{entry["reviewer"]}"' in html
+        reviewer = entry["reviewer"]
+        assert f'"reviewer": "{reviewer}"' in html
+        assert f'"reviewer": "reviewer_{reviewer}"' in html
         other = "B" if entry["reviewer"] == "A" else "A"
         assert f'"reviewer": "reviewer_{other}"' not in html
         assert f'"reviewer": "{other}"' not in html
