@@ -63,10 +63,12 @@ def test_capture_exception_is_observation_not_a_verdict():
 
 
 def test_pinned_checkout_rejects_mismatched_source(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        m47.subprocess, "run",
-        lambda *args, **kwargs: SimpleNamespace(stdout=m47.REVISIONS["before"] + "\n"),
-    )
+    def fake_git(command, **kwargs):
+        if "status" in command:
+            return SimpleNamespace(stdout="")
+        return SimpleNamespace(stdout=m47.REVISIONS["before"] + "\n")
+
+    monkeypatch.setattr(m47.subprocess, "run", fake_git)
     (tmp_path / "LICENSE").write_text("tampered", encoding="utf-8")
     with pytest.raises(m47.CaptureError, match="Git blob mismatch"):
         m47.verify_checkout(tmp_path, "before")
@@ -83,3 +85,14 @@ def test_pinned_checkout_rejects_wrong_commit(tmp_path, monkeypatch):
 
 def test_git_blob_hash_is_content_addressed():
     assert m47.git_blob_sha(b"hello") == "b6fc4c620b67d95f953a5c1c1230aaab5db5a1b0"
+
+
+def test_pinned_checkout_rejects_dirty_tree(tmp_path, monkeypatch):
+    def fake_git(command, **kwargs):
+        if "status" in command:
+            return SimpleNamespace(stdout="?? src/requests/injected.py\\n")
+        return SimpleNamespace(stdout=m47.REVISIONS["before"] + "\\n")
+
+    monkeypatch.setattr(m47.subprocess, "run", fake_git)
+    with pytest.raises(m47.CaptureError, match="clean"):
+        m47.verify_checkout(tmp_path, "before")
