@@ -91,7 +91,7 @@ def test_pinned_checkout_rejects_dirty_tree(tmp_path, monkeypatch):
     def fake_git(command, **kwargs):
         if "status" in command:
             return SimpleNamespace(stdout="?? src/requests/injected.py\\n")
-        return SimpleNamespace(stdout=m47.REVISIONS["before"] + "\\n")
+        return SimpleNamespace(stdout=m47.REVISIONS["before"] + "\n")
 
     monkeypatch.setattr(m47.subprocess, "run", fake_git)
     with pytest.raises(m47.CaptureError, match="clean"):
