@@ -58,6 +58,14 @@ def test_no_patch_leak_in_reviewer_intake(tmp_path):
     m52.write_manifest(manifest, tmp_path)
     reviewer = (tmp_path / "reviewer_A_intake_NOT_M20_GOLD.jsonl").read_text()
     assert "diff --git" not in reviewer
+    assert "sympy__sympy-" not in reviewer
+    assert "historical_pr_url" not in reviewer
+    assert "/pull/" not in reviewer
+    assert "Real issue text 1" in reviewer
+    assert '"review_case_id": "CASE-001"' in reviewer
+    internal = json.loads((tmp_path / "INTERNAL_PROVENANCE_NOT_GOLD.json").read_text())
+    assert internal["candidate_cases"][0]["historical_pr_url"].endswith("/pull/1")
+    assert internal["candidate_cases"][0]["instance_id"] == "sympy__sympy-1"
     assert '"link_label": null' in reviewer
     assert '"behavioral_label": null' in reviewer
     assert "pending_source_tree_and_m20_queue" in reviewer
