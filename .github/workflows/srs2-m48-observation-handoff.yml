@@ -1,0 +1,24 @@
+name: SRS Guardian M48 First-Party Evidence Handoff
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m48-observation-handoff-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m48_requests_observation_handoff.py'
+      - 'backend/tests/test_m48_requests_observation_handoff.py'
+      - '.github/workflows/srs2-m48-observation-handoff.yml'
+permissions:
+  contents: read
+jobs:
+  first-party-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'pytest==8.4.2'
+      - name: Test offline handoff with synthetic first-party captures only
+        run: python -m pytest -q backend/tests/test_m48_requests_observation_handoff.py
