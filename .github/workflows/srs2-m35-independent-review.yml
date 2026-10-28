@@ -1,0 +1,100 @@
+name: SRS Guardian M35 Independent Review Handoff
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m35-independent-review-workspace-20261028
+  pull_request:
+    paths:
+      - 'backend/evaluation/m35_independent_review_workspace.py'
+      - 'backend/tests/test_m35_independent_review_workspace.py'
+      - 'docs/research/M35_INDEPENDENT_REVIEW_HANDOFF.md'
+      - '.github/workflows/srs2-m35-independent-review.yml'
+permissions:
+  contents: read
+jobs:
+  blinded-review-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party test dependency
+        run: python -m pip install 'pytest==8.4.2'
+      - name: Test M20, pinned external evidence and M35 reviewer handoff
+        run: |
+          python -m pytest -q \
+            backend/tests/test_m20_annotation_queue.py \
+            backend/tests/test_m28_historical_pagination_regression.py \
+            backend/tests/test_m29_pip_historical_regression.py \
+            backend/tests/test_m30_static_pagination_witness.py \
+            backend/tests/test_m31_two_project_casebook.py \
+            backend/tests/test_m35_independent_review_workspace.py
+      - name: Generate pinned, blinded independent review workspaces
+        run: python -m backend.evaluation.m35_independent_review_workspace --out-dir /tmp/m35
+      - name: Assert reviewer separation and no research scores
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/m35')
+          m=json.loads((root/'review_handoff_manifest.json').read_text())
+          assert len(m['workspaces']) == 4
+          assert m['independent_adjudications'] == 0
+          assert m['external_project_code_executed'] is False
+          assert m['held_out_evaluation'] is False
+          assert all(v is None for v in m['metrics'].values())
+          for item in m['workspaces']:
+              page=(root/item['workspace']).read_text()
+              assert 'Export link JSONL' in page and 'Export behavior JSONL' in page
+              assert 'static_model_before' not in page and 'sampling_provenance' not in page
+              assert '"conformance_label": null' in page and '"link_label": null' in page
+              assert (item['links_pending'],item['behavior_cases_pending']) == (
+                  (4,4) if item['project']=='edc' else (6,6))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m35-edc-reviewer-A-only
+          path: |
+            /tmp/m35/edc/reviewers/workspace_reviewer_A.html
+            /tmp/m35/edc/reviewers/reviewer_A.jsonl
+            /tmp/m35/edc/reviewers/behavior_reviewer_A.jsonl
+            /tmp/m35/edc/reviewers/REVIEW_INSTRUCTIONS.md
+            /tmp/m35/edc/reviewers/source_index.json
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m35-edc-reviewer-B-only
+          path: |
+            /tmp/m35/edc/reviewers/workspace_reviewer_B.html
+            /tmp/m35/edc/reviewers/reviewer_B.jsonl
+            /tmp/m35/edc/reviewers/behavior_reviewer_B.jsonl
+            /tmp/m35/edc/reviewers/REVIEW_INSTRUCTIONS.md
+            /tmp/m35/edc/reviewers/source_index.json
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m35-pip-reviewer-A-only
+          path: |
+            /tmp/m35/pip/reviewers/workspace_reviewer_A.html
+            /tmp/m35/pip/reviewers/reviewer_A.jsonl
+            /tmp/m35/pip/reviewers/behavior_reviewer_A.jsonl
+            /tmp/m35/pip/reviewers/REVIEW_INSTRUCTIONS.md
+            /tmp/m35/pip/reviewers/source_index.json
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m35-pip-reviewer-B-only
+          path: |
+            /tmp/m35/pip/reviewers/workspace_reviewer_B.html
+            /tmp/m35/pip/reviewers/reviewer_B.jsonl
+            /tmp/m35/pip/reviewers/behavior_reviewer_B.jsonl
+            /tmp/m35/pip/reviewers/REVIEW_INSTRUCTIONS.md
+            /tmp/m35/pip/reviewers/source_index.json
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m35-internal-handoff-manifest
+          path: /tmp/m35/review_handoff_manifest.json
+          retention-days: 14
