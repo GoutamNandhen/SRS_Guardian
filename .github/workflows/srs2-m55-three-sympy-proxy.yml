@@ -1,0 +1,57 @@
+name: M55 Three Real SymPy Cases - Frozen Retrieval Proxy (NOT GOLD)
+on:
+  push:
+    branches:
+      - feature/srs-guardian2-m55-three-sympy-retrieval-proxy-20261029
+  pull_request:
+    paths:
+      - 'backend/evaluation/m55_sympy_three_case_proxy.py'
+      - 'backend/evaluation/m54_sympy_frozen_retrieval_review.py'
+      - 'backend/tests/test_m55_sympy_three_case_proxy.py'
+      - '.github/workflows/srs2-m55-three-sympy-proxy.yml'
+permissions:
+  contents: read
+jobs:
+  three-real-issues:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned first-party runner and inert Parquet reader
+        run: python -m pip install 'pytest==8.4.2' 'pyarrow==17.0.0'
+      - name: Offline first-party tests, including unchanged M54
+        run: python -m pytest -q backend/tests/test_m54_sympy_frozen_retrieval_review.py backend/tests/test_m55_sympy_three_case_proxy.py
+      - name: Verify three real source trees and rank unchanged M42
+        run: python -m backend.evaluation.m55_sympy_three_case_proxy --out-dir /tmp/m55_sympy
+      - name: Validate reviewer evidence and no fabricated behavioral scores
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/m55_sympy')
+          data = json.loads((root / 'INTERNAL_DO_NOT_SHARE.json').read_text())
+          assert data['candidate_cases'] == 3
+          assert data['m20_unlabeled_candidates_per_reviewer'] == 15
+          assert data['proxy_is_independent_gold'] is False
+          assert data['independent_link_labels'] == 0
+          assert data['independent_behavioral_labels'] == 0
+          assert data['approved_behavioral_observations'] == 0
+          assert data['independent_adjudications'] == 0
+          assert data['held_out_projects_scored'] == 0
+          assert data['external_code_executed'] is False
+          assert all(data[k] is None for k in ('conformance_accuracy', 'violation_precision', 'violation_recall', 'coverage'))
+          for reviewer in ('A','B'):
+              rows = (root / f'reviewer_{reviewer}.jsonl').read_text().splitlines()
+              assert len(rows) == 15
+              assert all(json.loads(x)['link_label'] is None for x in rows)
+              assert all('historical_patch' not in x for x in rows)
+          print('Three pinned issue-to-code retrievals and M20 packets; NOT behavioral gold')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m55-three-sympy-frozen-retrieval-proxy-NOT-GOLD
+          path: /tmp/m55_sympy/
+          retention-days: 14
