@@ -19,7 +19,7 @@ def fake_source(fragment):
 
 def snapshot(revision, source=None, extra=None):
     files = {
-        "django/core/validators.py": source or fake_source(r"(?:\\S+(?::\\S*)?@)?"),
+        "django/core/validators.py": source or fake_source(r"(?:\S+(?::\S*)?@)?"),
         "django/utils/other.py": b"pass\n",
     }
     files.update(extra or {})
@@ -44,7 +44,7 @@ def test_discovers_symbol_without_source_path_hint():
 
 
 def test_after_property_with_same_automatic_discovery():
-    s = snapshot("after", fake_source(r"(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?"))
+    s = snapshot("after", fake_source(r"(?:[^\s:@/]+(?::[^\s:@/]*)?@)?"))
     result = m61.discover(s, "after")
     assert result["static_result"] == "static_rule_satisfied"
     assert result["candidate_count"] == 1
@@ -53,7 +53,7 @@ def test_after_property_with_same_automatic_discovery():
 def test_absent_or_ambiguous_symbol_abstains():
     s = snapshot("before", b"class Other:\n    pass\n")
     assert m61.discover(s, "before")["static_result"] == "abstain"
-    duplicate = {"django/forms/duplicate.py": fake_source(r"(?:\\S+(?::\\S*)?@)?")}
+    duplicate = {"django/forms/duplicate.py": fake_source(r"(?:\S+(?::\S*)?@)?")}
     s2 = snapshot("before", extra=duplicate)
     result = m61.discover(s2, "before")
     assert result["static_result"] == "abstain"
@@ -66,7 +66,7 @@ def test_unsupported_regex_abstains():
 
 
 def test_inert_source_never_executed():
-    evil = fake_source(r"(?:\\S+(?::\\S*)?@)?") + b'\nraise RuntimeError("DO NOT EXECUTE")\n'
+    evil = fake_source(r"(?:\S+(?::\S*)?@)?") + b'\nraise RuntimeError("DO NOT EXECUTE")\n'
     assert m61.discover(snapshot("before", evil), "before")["static_result"] == "static_rule_violated"
 
 
@@ -90,8 +90,8 @@ def test_build_is_explicitly_not_independent_gold():
     def fetch(commit):
         rev = next(key for key, info in m60.REVISIONS.items()
                    if info["commit"] == commit)
-        fragment = (r"(?:\\S+(?::\\S*)?@)?" if rev == "before"
-                    else r"(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?")
+        fragment = (r"(?:\S+(?::\S*)?@)?" if rev == "before"
+                    else r"(?:[^\s:@/]+(?::[^\s:@/]*)?@)?")
         return snapshot(rev, fake_source(fragment))
 
     result = m61.build(fetch)
